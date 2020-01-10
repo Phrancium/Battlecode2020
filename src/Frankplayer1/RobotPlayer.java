@@ -2,6 +2,7 @@ package Frankplayer1;
 import battlecode.common.*;
 
 import javax.naming.MalformedLinkException;
+import java.util.HashMap;
 import java.util.Map;
 
 public strictfp class RobotPlayer {
@@ -17,6 +18,7 @@ public strictfp class RobotPlayer {
         Direction.WEST,
         Direction.NORTHWEST
     };
+    static Map<Direction, Integer> dIndex = new HashMap<Direction, Integer>();
     static RobotType[] spawnedByMiner = {RobotType.REFINERY, RobotType.VAPORATOR, RobotType.DESIGN_SCHOOL,
             RobotType.FULFILLMENT_CENTER, RobotType.NET_GUN};
 
@@ -39,6 +41,14 @@ public strictfp class RobotPlayer {
         lastT = directions[3];
         destination = null;
 
+        dIndex.put(Direction.NORTH, 1);
+        dIndex.put(Direction.NORTHEAST, 2);
+        dIndex.put(Direction.EAST, 3);
+        dIndex.put(Direction.SOUTHEAST, 4);
+        dIndex.put(Direction.SOUTH, 5);
+        dIndex.put(Direction.SOUTHWEST, 6);
+        dIndex.put(Direction.WEST, 7);
+        dIndex.put(Direction.NORTHWEST, 8);
 
         System.out.println("I'm a " + rc.getType() + " and I just got created!");
         while (true) {
@@ -269,109 +279,32 @@ public strictfp class RobotPlayer {
      */
 
     static void moveTo(MapLocation at, MapLocation to) throws GameActionException{
-        int xDiff = at.x - to.x;
-        int yDiff = at.y - to.y;
+        Direction goal = at.directionTo(to);
+        int start = dIndex.get(goal);
         destination = to;
-        if (Math.abs(xDiff) > Math.abs(yDiff)) {
-            if (xDiff > 0) {
-                if (yDiff > 0) {
-                    if (tryMove(Direction.SOUTHWEST)) {
-                    }else if(tryMove(Direction.WEST)){}
-                    else if(tryMove(Direction.SOUTH)){}
-                    else if(tryMove(Direction.SOUTHEAST)){}
-                    else if(tryMove(Direction.NORTHWEST)){}
-                    else if(tryMove(Direction.NORTH)){}
-                    else if(tryMove(Direction.EAST)){}
+        if(tryMove(goal)){
+        }else{
+            switch (start){
+                case 1:
+                    if(tryMove(directions[8])){}else if (tryMove(directions[2])){}else if (tryMove(directions[7])){}else if (tryMove(directions[3])){}else if (tryMove(directions[6])){}else if (tryMove(directions[4])){}
+                case 2:
+                    if(tryMove(directions[1])){}else if (tryMove(directions[3])){}else if (tryMove(directions[8])){}else if (tryMove(directions[4])){}else if (tryMove(directions[7])){}else if (tryMove(directions[5])){}
+                case 3:
+                    if(tryMove(directions[2])){}else if (tryMove(directions[4])){}else if (tryMove(directions[1])){}else if (tryMove(directions[5])){}else if (tryMove(directions[8])){}else if (tryMove(directions[6])){}
+                case 4:
+                    if(tryMove(directions[3])){}else if (tryMove(directions[5])){}else if (tryMove(directions[2])){}else if (tryMove(directions[6])){}else if (tryMove(directions[1])){}else if (tryMove(directions[7])){}
+                case 5:
+                    if(tryMove(directions[4])){}else if (tryMove(directions[6])){}else if (tryMove(directions[3])){}else if (tryMove(directions[7])){}else if (tryMove(directions[2])){}else if (tryMove(directions[8])){}
+                case 6:
+                    if(tryMove(directions[5])){}else if (tryMove(directions[7])){}else if (tryMove(directions[4])){}else if (tryMove(directions[8])){}else if (tryMove(directions[3])){}else if (tryMove(directions[1])){}
+                case 7:
+                    if(tryMove(directions[6])){}else if (tryMove(directions[8])){}else if (tryMove(directions[5])){}else if (tryMove(directions[1])){}else if (tryMove(directions[4])){}else if (tryMove(directions[2])){}
+                case 8:
+                    if(tryMove(directions[7])){}else if (tryMove(directions[1])){}else if (tryMove(directions[6])){}else if (tryMove(directions[2])){}else if (tryMove(directions[5])){}else if (tryMove(directions[3])){}
+            }
 
-                } else if (yDiff < 0) {
-                    if (tryMove(Direction.NORTHWEST)) {
-                    }else if(tryMove(Direction.WEST)){}
-                    else if(tryMove(Direction.NORTH)){}
-                    else if(tryMove(Direction.SOUTHWEST)){}
-                    else if(tryMove(Direction.NORTHEAST)){}
-                    else if(tryMove(Direction.SOUTH)){}
-                    else if(tryMove(Direction.EAST)){}
-                } else {
-                    if(tryMove(Direction.WEST)){
-                    }else if(tryMove(Direction.NORTHWEST)){}
-                    else if(tryMove(Direction.SOUTHWEST)){}
-                    else if(tryMove(Direction.SOUTH)){}
-                    else if(tryMove(Direction.NORTH)){}
-                }
-            } else {
-                if (yDiff > 0) {
-                    if (tryMove(Direction.SOUTHEAST)) {
-                    }else if(tryMove(Direction.EAST)){}
-                    else if(tryMove(Direction.SOUTH)){}
-                    else if(tryMove(Direction.NORTHEAST)){}
-                    else if(tryMove(Direction.SOUTHWEST)){}
-                    else if(tryMove(Direction.SOUTH)){}
-                    else if(tryMove(Direction.EAST)){}
-                } else if (yDiff < 0) {
-                    if (tryMove(Direction.NORTHEAST)) {
-                    }else if(tryMove(Direction.EAST)){}
-                    else if(tryMove(Direction.NORTH)){}
-                    else if(tryMove(Direction.SOUTHEAST)){}
-                    else if(tryMove(Direction.NORTHWEST)){}
-                    else if(tryMove(Direction.SOUTH)){}
-                    else if(tryMove(Direction.WEST)){}
-                } else {
-                    if(tryMove(Direction.EAST)){
-                    }else if(tryMove(Direction.NORTHEAST)){}
-                    else if(tryMove(Direction.SOUTHEAST)){}
-                    else if(tryMove(Direction.SOUTH)){}
-                    else if(tryMove(Direction.NORTH)){}
-                }
-            }
-        }else {
-            if (yDiff > 0) {
-                if (xDiff > 0) {
-                    if (tryMove(Direction.SOUTHWEST)) {
-                    }else if(tryMove(Direction.WEST)){}
-                    else if(tryMove(Direction.SOUTH)){}
-                    else if(tryMove(Direction.SOUTHEAST)){}
-                    else if(tryMove(Direction.NORTHWEST)){}
-                    else if(tryMove(Direction.NORTH)){}
-                    else if(tryMove(Direction.EAST)){}
-                } else if (xDiff < 0) {
-                    if (tryMove(Direction.SOUTHEAST)) {
-                    }else if(tryMove(Direction.EAST)){}
-                    else if(tryMove(Direction.SOUTH)){}
-                    else if(tryMove(Direction.NORTHEAST)){}
-                    else if(tryMove(Direction.SOUTHWEST)){}
-                    else if(tryMove(Direction.SOUTH)){}
-                    else if(tryMove(Direction.EAST)){}
-                } else {
-                    if(tryMove(Direction.SOUTH)){}else if(tryMove(Direction.SOUTHEAST)){}
-                    else if(tryMove(Direction.SOUTHWEST)){}
-                    else if(tryMove(Direction.EAST)){}
-                    else if(tryMove(Direction.WEST)){}
-                }
-            } else {
-                if (xDiff > 0) {
-                    if (tryMove(Direction.NORTHWEST)){
-                    }else if(tryMove(Direction.WEST)){}
-                    else if(tryMove(Direction.NORTH)){}
-                    else if(tryMove(Direction.SOUTHWEST)){}
-                    else if(tryMove(Direction.NORTHEAST)){}
-                    else if(tryMove(Direction.SOUTH)){}
-                    else if(tryMove(Direction.EAST)){}
-                } else if (xDiff < 0) {
-                    if (tryMove(Direction.NORTHEAST)) {
-                    }else if(tryMove(Direction.EAST)){}
-                    else if(tryMove(Direction.NORTH)){}
-                    else if(tryMove(Direction.SOUTHEAST)){}
-                    else if(tryMove(Direction.NORTHWEST)){}
-                    else if(tryMove(Direction.SOUTH)){}
-                    else if(tryMove(Direction.WEST)){}
-                } else {
-                    if(tryMove(Direction.NORTH)){}else if(tryMove(Direction.NORTHWEST)){}
-                    else if(tryMove(Direction.NORTHEAST)){}
-                    else if(tryMove(Direction.EAST)){}
-                    else if(tryMove(Direction.WEST)){}
-                }
-            }
         }
+
     }
     /**
      * Attempts to build a given robot in a given direction.
