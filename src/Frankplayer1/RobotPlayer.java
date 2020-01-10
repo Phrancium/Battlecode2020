@@ -41,14 +41,14 @@ public strictfp class RobotPlayer {
         lastT = directions[3];
         destination = null;
 
-        dIndex.put(Direction.NORTH, 1);
-        dIndex.put(Direction.NORTHEAST, 2);
-        dIndex.put(Direction.EAST, 3);
-        dIndex.put(Direction.SOUTHEAST, 4);
-        dIndex.put(Direction.SOUTH, 5);
-        dIndex.put(Direction.SOUTHWEST, 6);
-        dIndex.put(Direction.WEST, 7);
-        dIndex.put(Direction.NORTHWEST, 8);
+//        dIndex.put(Direction.NORTH, 1);
+//        dIndex.put(Direction.NORTHEAST, 2);
+//        dIndex.put(Direction.EAST, 3);
+//        dIndex.put(Direction.SOUTHEAST, 4);
+//        dIndex.put(Direction.SOUTH, 5);
+//        dIndex.put(Direction.SOUTHWEST, 6);
+//        dIndex.put(Direction.WEST, 7);
+//        dIndex.put(Direction.NORTHWEST, 8);
 
         System.out.println("I'm a " + rc.getType() + " and I just got created!");
         while (true) {
@@ -281,8 +281,8 @@ public strictfp class RobotPlayer {
     static void moveTo(MapLocation at, MapLocation to) throws GameActionException {
         int xDiff = at.x - to.x;
         int yDiff = at.y - to.y;
-        Direction goal = at.directionTo(to);
-        int start = dIndex.get(goal);
+//        Direction goal = at.directionTo(to);
+//        int start = dIndex.get(goal);
         destination = to;
         if (Math.abs(xDiff) > Math.abs(yDiff)) {
             if (xDiff > 0) {
