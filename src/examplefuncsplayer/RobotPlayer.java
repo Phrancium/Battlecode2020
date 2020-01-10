@@ -18,7 +18,8 @@ public strictfp class RobotPlayer {
             RobotType.FULFILLMENT_CENTER, RobotType.NET_GUN};
 
     static int turnCount;
-
+    static int baseX;
+    static int baseY;
     /**
      * run() is the method that is called when a robot is instantiated in the Battlecode world.
      * If this method returns, the robot dies!
@@ -63,7 +64,7 @@ public strictfp class RobotPlayer {
     }
 
     static void runHQ() throws GameActionException {
-        for (int i = 0; i < 15; i++)
+        if (rc.getRoundNum() < 15)
             tryBuild(RobotType.MINER, Direction.SOUTH);
     }
 
