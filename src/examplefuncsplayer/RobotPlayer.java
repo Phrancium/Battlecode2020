@@ -253,6 +253,26 @@ public strictfp class RobotPlayer {
     	return location;
     }
     
+    static MapLocation getLocation(int code) throws GameActionException {
+    	/* Code to be placed in array[2]
+    	 * 1 : HQ
+    	 * 2 : Soup
+    	 * 3 : Enemy HQ
+    	*/ 
+    	MapLocation location = null;
+    	for(int k = rc.getRoundNum(); k > rc.getRoundNum()-100; k--) {
+    		Transaction[] block = rc.getBlock(k);
+    		for(int i = 0; i < 7; i++) {
+    			int[] message = block[i].getMessage();
+    			if(message[1] == 1231241 && message[2] == code) {
+    				location = new MapLocation(message[3], message[4]);
+    				return location;
+    			}
+    		}
+    	}
+    	return location;
+    }
+    
     static void tryBlockchain() throws GameActionException {
         if (turnCount < 3) {
             int[] message = new int[7];
