@@ -63,8 +63,19 @@ public strictfp class RobotPlayer {
     }
 
     static void runHQ() throws GameActionException {
+<<<<<<< Updated upstream
         for (Direction dir : directions)
             tryBuild(RobotType.MINER, dir);
+=======
+        if (rc.getRoundNum() < 15) 
+            tryBuild(RobotType.MINER, Direction.SOUTH);
+        if (rc.getRoundNum() == 1)
+        	postLocation(1, rc.getLocation().x, rc.getLocation().y);
+        if(rc.getRoundNum() == 2) {
+        	if(getHQLocation().x == 100)
+        		postLocation(10, rc.getLocation().x, rc.getLocation().y);
+        }
+>>>>>>> Stashed changes
     }
 
     static void runMiner() throws GameActionException {
@@ -217,7 +228,42 @@ public strictfp class RobotPlayer {
         } else return false;
     }
 
-
+    static void postLocation(int code, int x, int y) throws GameActionException {
+    	/* Code to be placed in array[2]
+    	 * 1 : HQ
+    	 * 2 : Soup
+    	 * 3 : Enemy HQ
+    	*/ 
+    	int[] message = new int[7];
+        message[1] = 1231241;
+    	message[2] = 1;
+        message[3] = x;
+        message[4] = y;
+        if (rc.canSubmitTransaction(message, 1))
+        	rc.submitTransaction(message, 1);
+    }
+    
+    static MapLocation getHQLocation() throws GameActionException {
+    	Transaction[] block = rc.getBlock(1);
+    	MapLocation location = new MapLocation(100, 0);
+    	for(int i = 0; i < 7; i++) {
+    		int[] message = block[i].getMessage();
+    		if(message[1] == 1231241 && message[2] == 1) {
+    			location = new MapLocation(message[3], message[4]);
+    			return location;
+    		}
+    	}
+    	block = rc.getBlock(2);
+    	for(int i = 0; i < 7; i++) {
+    		int[] message = block[i].getMessage();
+    		if(message[1] == 1231241 && message[2] == 1) {
+    			location = new MapLocation(message[3], message[4]);
+    			return location;
+    		}
+    	}
+    	return location;
+    }
+    
     static void tryBlockchain() throws GameActionException {
         if (turnCount < 3) {
             int[] message = new int[7];
