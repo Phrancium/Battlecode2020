@@ -76,6 +76,11 @@ public strictfp class RobotPlayer {
 
     static void runMiner() throws GameActionException {
         MapLocation curr = rc.getLocation();
+        if(canMine() && rc.getSoupCarrying() < 98) {
+            mineSoup();
+        }else if(rc.getSoupCarrying() > 98){
+            goHome(curr);
+        }
         if(!(destination == null)){
             if(destination.x == curr.x && destination.y == curr.y){
                 destination = null;
@@ -85,6 +90,39 @@ public strictfp class RobotPlayer {
         }else {
             findSoup(curr);
         }
+    }
+
+    /**robot mines soup **/
+    static boolean canMine() throws GameActionException{
+        for (Direction l : directions){
+            if (rc.canMineSoup(l)){
+                return true;
+            }
+        }
+        return false;
+    }
+
+    static void mineSoup() throws GameActionException{
+        for (Direction l : directions) {
+            if (rc.canMineSoup(l)) {
+                rc.mineSoup(l);
+            }
+        }
+    }
+    /**
+     * Scouting method run at beginning to find soup
+     *
+     * @throws GameActionException
+     */
+    static void goHome(MapLocation m) throws GameActionException {
+        Direction d = randomDirection();
+        for (Direction l : directions) {
+            if (rc.canDepositSoup(l)) {
+                System.out.println("I deposited soup");
+                rc.depositSoup(l, rc.getSoupCarrying());
+            }
+        }
+        tryMove(d);
     }
 
     static void runRefinery() throws GameActionException {
@@ -214,7 +252,7 @@ public strictfp class RobotPlayer {
                 MapLocation check = new MapLocation(selfX + x, selfY + y);
                 if (rc.canSenseLocation(check)){
                     if(rc.senseSoup(check) > 0){
-                        moveTo(m, check);
+                        moveTo(m, new MapLocation(check.x-1, check.y));
                         //upload location of soup to blockchain?
                     }
                 }
