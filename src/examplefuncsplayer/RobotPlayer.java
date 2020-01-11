@@ -65,6 +65,7 @@ public strictfp class RobotPlayer {
     static void runHQ() throws GameActionException {
         if (rc.getRoundNum() < 15) 
             tryBuild(RobotType.MINER, Direction.SOUTH);
+        //post the HQ location to blockchain
         if (rc.getRoundNum() == 1)
         	postLocation(1, rc.getLocation().x, rc.getLocation().y, 2);
         if(rc.getRoundNum() == 2) {
@@ -239,6 +240,7 @@ public strictfp class RobotPlayer {
     }
     
     static MapLocation getHQLocation() throws GameActionException {
+    	//returns the location of HQ
     	MapLocation location = null;
     	for(int k = 1; k < rc.getRoundNum(); k++) {
     		Transaction[] block = rc.getBlock(k);
@@ -274,7 +276,8 @@ public strictfp class RobotPlayer {
     }
     
     static void tryBlockchain() throws GameActionException {
-        if (turnCount < 3) {
+        //delete
+    	if (turnCount < 3) {
             int[] message = new int[7];
             for (int i = 0; i < 7; i++) {
                 message[i] = 123;
