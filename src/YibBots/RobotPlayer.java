@@ -1,7 +1,8 @@
 package YibBots;
 import battlecode.common.*;
+import java.util.*;
 
-public strictfp class YibBotLandscaper {
+public strictfp class RobotPlayer {
     static RobotController rc;
 
     static Direction[] directions = {
@@ -19,6 +20,10 @@ public strictfp class YibBotLandscaper {
 
     static int turnCount;
 
+    static HashMap<Integer, Direction> directionHashMap = new HashMap<Integer, Direction>();
+
+    static MapLocation initialLoc;
+
     /**
      * run() is the method that is called when a robot is instantiated in the Battlecode world.
      * If this method returns, the robot dies!
@@ -28,18 +33,26 @@ public strictfp class YibBotLandscaper {
 
         // This is the RobotController object. You use it to perform actions from this robot,
         // and to get information on its current status.
-        YibBotLandscaper.rc = rc;
+        RobotPlayer.rc = rc;
 
         turnCount = 0;
 
-        System.out.println("I'm a " + rc.getType() + " and I just got created!");
+        initialLoc = rc.getLocation();
+
+        //fill up directionHashMap 1:Direction.NORTH, etc
+        for (int i = 0; i < directions.length; i++){
+            directionHashMap.put(i+1, directions[i]);
+        }
+        //System.out.println(directionHashMap);
+
+        //System.out.println("I'm a " + rc.getType() + " and I just got created!");
         while (true) {
             turnCount += 1;
             // Try/catch blocks stop unhandled exceptions, which cause your robot to explode
             try {
                 // Here, we've separated the controls into a different method for each RobotType.
                 // You can add the missing ones or rewrite this into your own control structure.
-                System.out.println("I'm a " + rc.getType() + "! Location " + rc.getLocation());
+                //System.out.println("I'm a " + rc.getType() + "! Location " + rc.getLocation());
                 switch (rc.getType()) {
                     case HQ:                 runHQ();                break;
                     case MINER:              runMiner();             break;
@@ -68,19 +81,77 @@ public strictfp class YibBotLandscaper {
     }
 
     static void runMiner() throws GameActionException {
-        tryBlockchain();
-        tryMove(randomDirection());
-        if (tryMove(randomDirection()))
-            System.out.println("I moved!");
-        // tryBuild(randomSpawnedByMiner(), randomDirection());
-        for (Direction dir : directions)
-            tryBuild(RobotType.FULFILLMENT_CENTER, dir);
-        for (Direction dir : directions)
-            if (tryRefine(dir))
-                System.out.println("I refined soup! " + rc.getTeamSoup());
-        for (Direction dir : directions)
-            if (tryMine(dir))
-                System.out.println("I mined soup! " + rc.getSoupCarrying());
+        MapLocation curr = rc.getLocation();
+        //right now findSoup() goes to the left of soupmine
+        //MINE SOUP
+        if (rc.canMineSoup(Direction.EAST) && rc.getSoupCarrying() < 98){
+            tryMine(Direction.EAST);
+            System.out.println("MINING SOUP");
+        }
+        //MOVE BACK TO HQ (todo: implement refineries)
+        else if (rc.getSoupCarrying() > 90 && !curr.equals(initialLoc)){
+            moveTo(initialLoc);
+            System.out.println("MOVING BACK TO HQ");
+        }
+        //DEPOSIT SOUP
+        else if(curr.equals(initialLoc)){
+            for (Direction dir : directions){
+                if(rc.canDepositSoup(dir)){
+                    rc.depositSoup(dir, rc.getSoupCarrying());
+                    System.out.println("DEPOSIT SOUP");
+                }
+            }
+        }
+        //FIND SOUP
+        else {
+            findSoup(curr);
+            System.out.println("FIND SOUP");
+        }
+        rc.move(Direction.EAST);
+        // tryBlockchain();
+        // tryMove(randomDirection());
+        // if (tryMove(randomDirection()))
+        //     System.out.println("I moved!");
+        // // tryBuild(randomSpawnedByMiner(), randomDirection());
+        // for (Direction dir : directions)
+        //     tryBuild(RobotType.FULFILLMENT_CENTER, dir);
+        // for (Direction dir : directions)
+        //     if (tryRefine(dir))
+        //         System.out.println("I refined soup! " + rc.getTeamSoup());
+        // for (Direction dir : directions)
+        //     if (tryMine(dir))
+        //         System.out.println("I mined soup! " + rc.getSoupCarrying());
+    }
+
+    /**robot mines soup **/
+    static boolean canMine() throws GameActionException{
+        for (Direction l : directions){
+            if (rc.canMineSoup(l)){
+                return true;
+            }
+        }
+        return false;
+    }
+
+    static void findSoup(MapLocation loc) throws GameActionException{
+        Direction d = randomDirection();
+        int selfX = loc.x;
+        int selfY = loc.y;
+        for(int x = -5; x <6; x++){
+            for (int y = -5; y < 6; y++){
+                MapLocation check = new MapLocation(selfX + x, selfY + y);
+                if (rc.canSenseLocation(check)){
+                    if(rc.senseSoup(check) > 0){
+                        //plusOrMinusOne makes Miner stop either left or right of soup
+                        //double rando = Math.random();
+                        //int plusOrMinusOne = (int)Math.signum(rando - 0.5);
+                        moveTo(new MapLocation(check.x - 1, check.y));
+                        //upload location of soup to blockchain?
+                    }
+                }
+            }
+        }
+        tryMove(d);
     }
 
     static void runRefinery() throws GameActionException {
@@ -91,8 +162,10 @@ public strictfp class YibBotLandscaper {
 
     }
 
+    //Keeps building em Landscapers
     static void runDesignSchool() throws GameActionException {
-
+        for (Direction dir : directions)
+            tryBuild(RobotType.LANDSCAPER, dir);
     }
 
     static void runFulfillmentCenter() throws GameActionException {
@@ -190,6 +263,20 @@ public strictfp class YibBotLandscaper {
             rc.move(dir);
             return true;
         } else return false;
+    }
+
+    static void moveTo(MapLocation dest) throws GameActionException{
+        //Find general direction of destination
+        MapLocation loc = rc.getLocation();
+        Direction moveDirection = loc.directionTo(dest);
+
+        //See if general direction is valid
+        if(tryMove(moveDirection)){
+
+        }
+        else{
+            tryMove();
+        }
     }
 
     /**
