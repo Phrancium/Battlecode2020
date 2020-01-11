@@ -20,9 +20,11 @@ public strictfp class RobotPlayer {
 
     static int turnCount;
 
-    static HashMap<Integer, Direction> directionHashMap = new HashMap<Integer, Direction>();
+    static HashMap<Integer, Direction> dirHash = new HashMap<Integer, Direction>();
 
     static MapLocation initialLoc;
+
+    static boolean moveOnce = false;
 
     /**
      * run() is the method that is called when a robot is instantiated in the Battlecode world.
@@ -38,12 +40,13 @@ public strictfp class RobotPlayer {
         turnCount = 0;
 
         initialLoc = rc.getLocation();
+        System.out.println("INITIAL LOCATION IS: " + initialLoc);
 
-        //fill up directionHashMap 1:Direction.NORTH, etc
+        //fill up dirHash 1:Direction.NORTH, etc
         for (int i = 0; i < directions.length; i++){
-            directionHashMap.put(i+1, directions[i]);
+            dirHash.put(i+1, directions[i]);
         }
-        //System.out.println(directionHashMap);
+        //System.out.println(dirHash);
 
         //System.out.println("I'm a " + rc.getType() + " and I just got created!");
         while (true) {
@@ -76,38 +79,49 @@ public strictfp class RobotPlayer {
     }
 
     static void runHQ() throws GameActionException {
-        for (Direction dir : directions)
-            tryBuild(RobotType.MINER, dir);
+        //if (rc.getRobotCount() < 5) {
+            for (Direction dir : directions)
+                tryBuild(RobotType.MINER, dir);
+        //}
     }
 
     static void runMiner() throws GameActionException {
         MapLocation curr = rc.getLocation();
-        //right now findSoup() goes to the left of soupmine
         //MINE SOUP
-        if (rc.canMineSoup(Direction.EAST) && rc.getSoupCarrying() < 98){
-            tryMine(Direction.EAST);
+        if (rc.canMineSoup(Direction.EAST) && rc.getSoupCarrying() < 100){
             System.out.println("MINING SOUP");
+            tryMine(Direction.EAST);
         }
         //MOVE BACK TO HQ (todo: implement refineries)
-        else if (rc.getSoupCarrying() > 90 && !curr.equals(initialLoc)){
-            moveTo(initialLoc);
+        else if (rc.getSoupCarrying() > 95 && !curr.equals(initialLoc)){
             System.out.println("MOVING BACK TO HQ");
+            moveTo(initialLoc);
+
         }
         //DEPOSIT SOUP
-        else if(curr.equals(initialLoc)){
+        else if(curr.equals(initialLoc) && rc.getSoupCarrying() > 0){
             for (Direction dir : directions){
                 if(rc.canDepositSoup(dir)){
-                    rc.depositSoup(dir, rc.getSoupCarrying());
                     System.out.println("DEPOSIT SOUP");
+                    rc.depositSoup(dir, rc.getSoupCarrying());
+
                 }
             }
         }
         //FIND SOUP
         else {
-            findSoup(curr);
             System.out.println("FIND SOUP");
+            findSoup(curr);
         }
-        rc.move(Direction.EAST);
+        //NOTE: figure out why I have to "release" them for a bit before they start actually moving
+        // if (!moveOnce) {
+        //     rc.move(Direction.SOUTH);
+        //     rc.move(Direction.SOUTH);
+        //     rc.move(Direction.WEST);
+        //     rc.move(Direction.WEST);
+        //     moveOnce = true;
+        // }
+
         // tryBlockchain();
         // tryMove(randomDirection());
         // if (tryMove(randomDirection()))
@@ -259,10 +273,18 @@ public strictfp class RobotPlayer {
      */
     static boolean tryMove(Direction dir) throws GameActionException {
         // System.out.println("I am trying to move " + dir + "; " + rc.isReady() + " " + rc.getCooldownTurns() + " " + rc.canMove(dir));
-        if (rc.isReady() && rc.canMove(dir)) {
+        MapLocation curr= rc.getLocation();
+        MapLocation isFlooded = curr.add(dir);
+        if (rc.isReady() && rc.canMove(dir) && !rc.senseFlooding(isFlooded)) {
             rc.move(dir);
             return true;
         } else return false;
+        //todo: add a case for it to move in the opposite direction when it senses flooding next to it
+        //note: according to the hashmap, +4 positions from any one position leads to the OPPOSITE POSITION.
+        //ig 1: NORTH, 5: SOUTH
+        //of course, it'll have to loop around somehow
+
+
     }
 
     static void moveTo(MapLocation dest) throws GameActionException{
@@ -275,7 +297,7 @@ public strictfp class RobotPlayer {
 
         }
         else{
-            tryMove();
+            tryMove(randomDirection());
         }
     }
 
