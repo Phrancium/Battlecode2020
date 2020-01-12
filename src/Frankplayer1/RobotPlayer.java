@@ -135,6 +135,8 @@ public strictfp class RobotPlayer {
         tryMove(d);
     }
 
+    static void findEnemyHQ(){}
+
     static void runRefinery() throws GameActionException {
         // System.out.println("Pollution: " + rc.sensePollution(rc.getLocation()));
     }
