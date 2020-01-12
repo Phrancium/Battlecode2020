@@ -89,6 +89,11 @@ public strictfp class RobotPlayer {
 
     static void runMiner() throws GameActionException {
         MapLocation curr = rc.getLocation();
+        //build design school
+        if (rc.getRobotCount() == 4) {
+        	for (Direction dir : directions)
+        		tryBuild(RobotType.DESIGN_SCHOOL,dir);
+        }
         //MINE SOUP
         if (rc.canMineSoup(Direction.EAST) && rc.getSoupCarrying() < 100){
             System.out.println("MINING SOUP");
@@ -347,7 +352,7 @@ public strictfp class RobotPlayer {
     	*/ 
     	int[] message = new int[7];
         message[1] = 1231241;
-    	message[2] = 1;
+    	message[2] = code;
         message[3] = x;
         message[4] = y;
         if (rc.canSubmitTransaction(message, cost))
