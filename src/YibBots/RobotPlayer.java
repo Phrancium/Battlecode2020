@@ -80,8 +80,9 @@ public strictfp class RobotPlayer {
 
     static void runHQ() throws GameActionException {
         //if (rc.getRobotCount() < 5) {
-            for (Direction dir : directions)
-                tryBuild(RobotType.MINER, dir);
+    	if (rc.getRoundNum() < 15) 
+            tryBuild(RobotType.MINER, Direction.SOUTH);
+    	updateEnemyHQLocation();
         //}
     }
 
@@ -345,15 +346,87 @@ public strictfp class RobotPlayer {
     }
 
 
-    static void tryBlockchain() throws GameActionException {
-        if (turnCount < 3) {
-            int[] message = new int[7];
-            for (int i = 0; i < 7; i++) {
-                message[i] = 123;
-            }
-            if (rc.canSubmitTransaction(message, 10))
-                rc.submitTransaction(message, 10);
-        }
-        // System.out.println(rc.getRoundMessages(turnCount-1));
+    static void postLocation(int code, int x, int y, int cost) throws GameActionException {
+    	/* Code to be placed in array[2]
+    	 * 1 : HQ
+    	 * 2 : Soup
+    	 * 3 : Enemy HQ
+    	*/ 
+    	int[] message = new int[7];
+        message[1] = 1231241;
+    	message[2] = 1;
+        message[3] = x;
+        message[4] = y;
+        if (rc.canSubmitTransaction(message, cost))
+        	rc.submitTransaction(message, cost);
+    }
+    
+    static MapLocation getHQLocation() throws GameActionException {
+    	//returns the location of HQ
+    	MapLocation location = null;
+    	for(int k = 1; k < rc.getRoundNum(); k++) {
+    		Transaction[] block = rc.getBlock(k);
+    		for(int i = 0; i < 7; i++) {
+    			int[] message = block[i].getMessage();
+    			if(message[1] == 1231241 && message[2] == 1) {
+    				location = new MapLocation(message[3], message[4]);
+    				return location;
+    			}
+    		}
+    	}
+    	return location;
+    }
+    
+    static MapLocation getSoupLocation() throws GameActionException {
+    	/* Code to be placed in array[2]
+    	 * 1 : HQ
+    	 * 2 : Soup
+    	 * 3 : Enemy HQ
+    	*/ 
+    	MapLocation location = null;
+    	for(int k = 1; k < 60; k++) {
+    		Transaction[] block = rc.getBlock(k);
+    		for(int i = 0; i < 7; i++) {
+    			int[] message = block[i].getMessage();
+    			if(message[1] == 1231241 && message[2] == 2) {
+    				location = new MapLocation(message[3], message[4]);
+    				return location;
+    			}
+    		}
+    	}
+    	return location;
+    }
+    
+    static MapLocation getEnemyHQLocation() throws GameActionException {
+    	//returns the enemy HQ location as a MapLocation
+    	MapLocation location = null;
+    	for(int k = rc.getRoundNum(); k > rc.getRoundNum()-60; k--) {
+    		if(k > 0) {
+    			Transaction[] block = rc.getBlock(k);
+    			for(int i = 0; i < 7; i++) {
+    				int[] message = block[i].getMessage();
+    				if(message[1] == 1231241 && message[2] == 3) {
+    					location = new MapLocation(message[3], message[4]);
+    					return location;
+    				}
+    			}
+    		}
+    	}
+    	return location;
+    }
+    
+    static void updateEnemyHQLocation() throws GameActionException {
+    	//looks for enemy hq location in block chain and moves it to a more recent round
+    	for(int k = rc.getRoundNum()-60; k > rc.getRoundNum()-100; k--) {
+    		if(k > 0) {
+    			Transaction[] block = rc.getBlock(k);
+    			for(int i = 0; i < 7; i++) {
+    				int[] message = block[i].getMessage();
+    				if(message[1] == 1231241 && message[2] == 3) {
+    					postLocation(3, message[3], message[4], 2);
+    				}
+    			}
+    		}
+    	}
     }
 }
