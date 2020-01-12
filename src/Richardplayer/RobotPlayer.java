@@ -1,4 +1,4 @@
-package examplefuncsplayer;
+package Richardplayer;
 import battlecode.common.*;
 
 public strictfp class RobotPlayer {
@@ -72,6 +72,7 @@ public strictfp class RobotPlayer {
         	if(getHQLocation() == null)
         		postLocation(10, rc.getLocation().x, rc.getLocation().y, 5);
         }
+        updateEnemyHQLocation();
     }
 
     static void runMiner() throws GameActionException {
