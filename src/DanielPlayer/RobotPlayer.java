@@ -100,7 +100,8 @@ public strictfp class RobotPlayer {
                 if (rc.canDepositSoup(dir)) {
                     System.out.println("DEPOSIT SOUP");
                     rc.depositSoup(dir, rc.getSoupCarrying());
-
+                    if(rc.getRobotCount() < 4)
+                        rc.buildRobot(RobotType.DESIGN_SCHOOL, Direction.CENTER);
                 }
             }
         }
@@ -152,16 +153,22 @@ public strictfp class RobotPlayer {
         MapLocation HQ = getHQLocation();
         MapLocation current = rc.getLocation();
         //alternate moving with picking up dirt
-        while(current.distanceSquaredTo(HQ)>1) {
-            current = rc.getLocation();
+        if(current.distanceSquaredTo(HQ)>1) {
             if (rc.getDirtCarrying() < RobotType.LANDSCAPER.dirtLimit && rc.canDigDirt(Direction.CENTER))
                 rc.digDirt(Direction.CENTER);
             moveTo(HQ);
         }
         //if HQ is within range
-        while(rc.getDirtCarrying() > 0) {
+        else if(rc.getDirtCarrying() > 0) {
             Direction dir = current.directionTo(HQ);
             rc.depositDirt(dir);
+        }
+        else {
+            for(Direction dir : directions){
+                if(rc.canDigDirt(dir)) {
+                    rc.digDirt(dir);
+                }
+            }
         }
     }
 
