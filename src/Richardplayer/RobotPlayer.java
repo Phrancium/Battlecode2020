@@ -1,8 +1,5 @@
-package FrankYibin;
+package Richardplayer;
 import battlecode.common.*;
-
-import java.util.HashMap;
-import java.util.Map;
 
 public strictfp class RobotPlayer {
     static RobotController rc;
@@ -17,13 +14,10 @@ public strictfp class RobotPlayer {
         Direction.WEST,
         Direction.NORTHWEST
     };
-    static Map<Direction, Integer> dIndex = new HashMap<Direction, Integer>();
     static RobotType[] spawnedByMiner = {RobotType.REFINERY, RobotType.VAPORATOR, RobotType.DESIGN_SCHOOL,
             RobotType.FULFILLMENT_CENTER, RobotType.NET_GUN};
 
     static int turnCount;
-    static Direction lastT;
-    static MapLocation destination;
 
     /**
      * run() is the method that is called when a robot is instantiated in the Battlecode world.
@@ -37,17 +31,6 @@ public strictfp class RobotPlayer {
         RobotPlayer.rc = rc;
 
         turnCount = 0;
-        lastT = directions[3];
-        destination = null;
-
-        dIndex.put(Direction.NORTH, 1);
-        dIndex.put(Direction.NORTHEAST, 2);
-        dIndex.put(Direction.EAST, 3);
-        dIndex.put(Direction.SOUTHEAST, 4);
-        dIndex.put(Direction.SOUTH, 5);
-        dIndex.put(Direction.SOUTHWEST, 6);
-        dIndex.put(Direction.WEST, 7);
-        dIndex.put(Direction.NORTHWEST, 8);
 
         System.out.println("I'm a " + rc.getType() + " and I just got created!");
         while (true) {
@@ -56,6 +39,7 @@ public strictfp class RobotPlayer {
             try {
                 // Here, we've separated the controls into a different method for each RobotType.
                 // You can add the missing ones or rewrite this into your own control structure.
+                System.out.println("I'm a " + rc.getType() + "! Location " + rc.getLocation());
                 switch (rc.getType()) {
                     case HQ:                 runHQ();                break;
                     case MINER:              runMiner();             break;
@@ -79,62 +63,32 @@ public strictfp class RobotPlayer {
     }
 
     static void runHQ() throws GameActionException {
-        for (Direction dir : directions)
-            tryBuild(RobotType.MINER, dir);
+        if (rc.getRoundNum() < 15) 
+            tryBuild(RobotType.MINER, Direction.SOUTH);
+        //post the HQ location to blockchain
+        if (rc.getRoundNum() == 1)
+        	postLocation(1, rc.getLocation().x, rc.getLocation().y, 2);
+        if(rc.getRoundNum() == 2) {
+        	if(getHQLocation() == null)
+        		postLocation(10, rc.getLocation().x, rc.getLocation().y, 5);
+        }
+        updateEnemyHQLocation();
     }
 
     static void runMiner() throws GameActionException {
-        MapLocation curr = rc.getLocation();
-        if(canMine() && rc.getSoupCarrying() < 98) {
-            mineSoup();
-        }else if(rc.getSoupCarrying() > 98){
-            goHome(curr);
-        }
-        if(!(destination == null)){
-            if(destination.x == curr.x && destination.y == curr.y){
-                destination = null;
-            }else{
-                moveTo(curr, destination);
-            }
-        }else {
-            findSoup(curr);
-        }
-        //Testing for Landscaper: try
+        tryBlockchain();
+        tryMove(randomDirection());
+        if (tryMove(randomDirection()))
+            System.out.println("I moved!");
+        // tryBuild(randomSpawnedByMiner(), randomDirection());
         for (Direction dir : directions)
-            tryBuild(RobotType.DESIGN_SCHOOL, dir);
-    }
-
-    /**robot mines soup **/
-    static boolean canMine() throws GameActionException{
-        for (Direction l : directions){
-            if (rc.canMineSoup(l)){
-                return true;
-            }
-        }
-        return false;
-    }
-
-    static void mineSoup() throws GameActionException{
-        for (Direction l : directions) {
-            if (rc.canMineSoup(l)) {
-                rc.mineSoup(l);
-            }
-        }
-    }
-    /**
-     * Scouting method run at beginning to find soup
-     *
-     * @throws GameActionException
-     */
-    static void goHome(MapLocation m) throws GameActionException {
-        Direction d = randomDirection();
-        for (Direction l : directions) {
-            if (rc.canDepositSoup(l)) {
-                System.out.println("I deposited soup");
-                rc.depositSoup(l, rc.getSoupCarrying());
-            }
-        }
-        tryMove(d);
+            tryBuild(RobotType.FULFILLMENT_CENTER, dir);
+        for (Direction dir : directions)
+            if (tryRefine(dir))
+                System.out.println("I refined soup! " + rc.getTeamSoup());
+        for (Direction dir : directions)
+            if (tryMine(dir))
+                System.out.println("I mined soup! " + rc.getSoupCarrying());
     }
 
     static void runRefinery() throws GameActionException {
@@ -145,10 +99,8 @@ public strictfp class RobotPlayer {
 
     }
 
-    //Keeps building em Landscapers
     static void runDesignSchool() throws GameActionException {
-        for (Direction dir : directions)
-            tryBuild(RobotType.LANDSCAPER, dir);
+
     }
 
     static void runFulfillmentCenter() throws GameActionException {
@@ -157,25 +109,7 @@ public strictfp class RobotPlayer {
     }
 
     static void runLandscaper() throws GameActionException {
-        //tryBlockchain();
-        if(tryMove(randomDirection())){
-            System.out.println("I, Landscaper, moved randomly");
-        }
-        for (Direction dir : directions){
-            if (rc.canDigDirt(dir)){
-                rc.digDirt(dir);
-                System.out.println("I, Landscaper, dug");
-            }
-        }
-        System.out.println("I, Landscaper, am carrying " + rc.getDirtCarrying() + " dirt");
-        if(rc.getDirtCarrying() > 10){
-            for (Direction dir : directions){
-                if (rc.canDepositDirt(dir)){
-                    rc.depositDirt(dir);
-                    System.out.println("I, Landscaper, deposited dirt");
-                }
-            }
-        }
+
     }
 
     static void runDeliveryDrone() throws GameActionException {
@@ -244,90 +178,10 @@ public strictfp class RobotPlayer {
         // System.out.println("I am trying to move " + dir + "; " + rc.isReady() + " " + rc.getCooldownTurns() + " " + rc.canMove(dir));
         if (rc.isReady() && rc.canMove(dir)) {
             rc.move(dir);
-            lastT = oppositeD(dir);
             return true;
         } else return false;
     }
 
-    static Direction oppositeD(Direction d){
-        switch (d) {
-            case NORTH:
-                return Direction.SOUTH;
-            case NORTHEAST:
-                return Direction.SOUTHWEST;
-            case EAST:
-                return Direction.WEST;
-            case SOUTHEAST:
-                return Direction.NORTHWEST;
-            case SOUTH:
-                return Direction.NORTH;
-            case SOUTHWEST:
-                return Direction.NORTHEAST;
-            case WEST:
-                return Direction.EAST;
-            case NORTHWEST:
-                return Direction.SOUTHEAST;
-        }
-        return null;
-    }
-    /**
-     * Scouting method run at beginning to find soup
-     *
-     * @throws GameActionException
-     */
-    static void findSoup(MapLocation m) throws GameActionException {
-        Direction d = randomDirection();
-        int selfX = m.x;
-        int selfY = m.y;
-        for(int x = -6; x <7; x++){
-            for (int y = -6; y < 7; y++){
-                MapLocation check = new MapLocation(selfX + x, selfY + y);
-                if (rc.canSenseLocation(check)){
-                    if(rc.senseSoup(check) > 0){
-                        moveTo(m, new MapLocation(check.x-1, check.y));
-                        //upload location of soup to blockchain?
-                    }
-                }
-            }
-        }
-        tryMove(d);
-    }
-    /**
-     * move towards a certain MapLocation
-     *
-     * @param at robot's current location
-     * @param to where robot wants to move to
-     * @throws GameActionException
-     */
-
-    static void moveTo(MapLocation at, MapLocation to) throws GameActionException{
-        Direction goal = at.directionTo(to);
-        int start = dIndex.get(goal);
-        destination = to;
-        if(tryMove(goal)){
-        }else{
-            switch (start){
-                case 1:
-                    if(tryMove(directions[8])){}else if (tryMove(directions[2])){}else if (tryMove(directions[7])){}else if (tryMove(directions[3])){}else if (tryMove(directions[6])){}else if (tryMove(directions[4])){}
-                case 2:
-                    if(tryMove(directions[1])){}else if (tryMove(directions[3])){}else if (tryMove(directions[8])){}else if (tryMove(directions[4])){}else if (tryMove(directions[7])){}else if (tryMove(directions[5])){}
-                case 3:
-                    if(tryMove(directions[2])){}else if (tryMove(directions[4])){}else if (tryMove(directions[1])){}else if (tryMove(directions[5])){}else if (tryMove(directions[8])){}else if (tryMove(directions[6])){}
-                case 4:
-                    if(tryMove(directions[3])){}else if (tryMove(directions[5])){}else if (tryMove(directions[2])){}else if (tryMove(directions[6])){}else if (tryMove(directions[1])){}else if (tryMove(directions[7])){}
-                case 5:
-                    if(tryMove(directions[4])){}else if (tryMove(directions[6])){}else if (tryMove(directions[3])){}else if (tryMove(directions[7])){}else if (tryMove(directions[2])){}else if (tryMove(directions[8])){}
-                case 6:
-                    if(tryMove(directions[5])){}else if (tryMove(directions[7])){}else if (tryMove(directions[4])){}else if (tryMove(directions[8])){}else if (tryMove(directions[3])){}else if (tryMove(directions[1])){}
-                case 7:
-                    if(tryMove(directions[6])){}else if (tryMove(directions[8])){}else if (tryMove(directions[5])){}else if (tryMove(directions[1])){}else if (tryMove(directions[4])){}else if (tryMove(directions[2])){}
-                case 8:
-                    if(tryMove(directions[7])){}else if (tryMove(directions[1])){}else if (tryMove(directions[6])){}else if (tryMove(directions[2])){}else if (tryMove(directions[5])){}else if (tryMove(directions[3])){}
-            }
-
-        }
-
-    }
     /**
      * Attempts to build a given robot in a given direction.
      *
@@ -371,9 +225,93 @@ public strictfp class RobotPlayer {
         } else return false;
     }
 
-
+    static void postLocation(int code, int x, int y, int cost) throws GameActionException {
+    	/* Code to be placed in array[2]
+    	 * 1 : HQ
+    	 * 2 : Soup
+    	 * 3 : Enemy HQ
+    	*/ 
+    	int[] message = new int[7];
+        message[1] = 1231241;
+    	message[2] = 1;
+        message[3] = x;
+        message[4] = y;
+        if (rc.canSubmitTransaction(message, cost))
+        	rc.submitTransaction(message, cost);
+    }
+    
+    static MapLocation getHQLocation() throws GameActionException {
+    	//returns the location of HQ
+    	MapLocation location = null;
+    	for(int k = 1; k < rc.getRoundNum(); k++) {
+    		Transaction[] block = rc.getBlock(k);
+    		for(int i = 0; i < 7; i++) {
+    			int[] message = block[i].getMessage();
+    			if(message[1] == 1231241 && message[2] == 1) {
+    				location = new MapLocation(message[3], message[4]);
+    				return location;
+    			}
+    		}
+    	}
+    	return location;
+    }
+    
+    static MapLocation getSoupLocation() throws GameActionException {
+    	/* Code to be placed in array[2]
+    	 * 1 : HQ
+    	 * 2 : Soup
+    	 * 3 : Enemy HQ
+    	*/ 
+    	MapLocation location = null;
+    	for(int k = 1; k < 60; k++) {
+    		Transaction[] block = rc.getBlock(k);
+    		for(int i = 0; i < 7; i++) {
+    			int[] message = block[i].getMessage();
+    			if(message[1] == 1231241 && message[2] == 2) {
+    				location = new MapLocation(message[3], message[4]);
+    				return location;
+    			}
+    		}
+    	}
+    	return location;
+    }
+    
+    static MapLocation getEnemyHQLocation() throws GameActionException {
+    	//returns the enemy HQ location as a MapLocation
+    	MapLocation location = null;
+    	for(int k = rc.getRoundNum(); k > rc.getRoundNum()-60; k--) {
+    		if(k > 0) {
+    			Transaction[] block = rc.getBlock(k);
+    			for(int i = 0; i < 7; i++) {
+    				int[] message = block[i].getMessage();
+    				if(message[1] == 1231241 && message[2] == 3) {
+    					location = new MapLocation(message[3], message[4]);
+    					return location;
+    				}
+    			}
+    		}
+    	}
+    	return location;
+    }
+    
+    static void updateEnemyHQLocation() throws GameActionException {
+    	//looks for enemy hq location in block chain and moves it to a more recent round
+    	for(int k = rc.getRoundNum()-60; k > rc.getRoundNum()-100; k--) {
+    		if(k > 0) {
+    			Transaction[] block = rc.getBlock(k);
+    			for(int i = 0; i < 7; i++) {
+    				int[] message = block[i].getMessage();
+    				if(message[1] == 1231241 && message[2] == 3) {
+    					postLocation(3, message[3], message[4], 2);
+    				}
+    			}
+    		}
+    	}
+    }
+    
     static void tryBlockchain() throws GameActionException {
-        if (turnCount < 3) {
+        //delete
+    	if (turnCount < 3) {
             int[] message = new int[7];
             for (int i = 0; i < 7; i++) {
                 message[i] = 123;
