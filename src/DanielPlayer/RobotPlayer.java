@@ -152,6 +152,8 @@ public strictfp class RobotPlayer {
 
     static void runLandscaper() throws GameActionException {
         MapLocation HQ = getHQLocation();
+        if(HQ == null)
+            tryMove(randomDirection());
         MapLocation current = rc.getLocation();
         //alternate moving with picking up dirt
         if(current.distanceSquaredTo(HQ)>1) {
