@@ -141,7 +141,8 @@ public strictfp class RobotPlayer {
     }
 
     static void runDesignSchool() throws GameActionException {
-
+        if(rc.canBuildRobot(RobotType.LANDSCAPER, Direction.NORTH))
+            rc.buildRobot(RobotType.LANDSCAPER, Direction.NORTH);
     }
 
     static void runFulfillmentCenter() throws GameActionException {
