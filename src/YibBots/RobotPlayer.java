@@ -81,7 +81,8 @@ public strictfp class RobotPlayer {
     static void runHQ() throws GameActionException {
         //if (rc.getRobotCount() < 5) {
     	if (rc.getRoundNum() < 15) 
-            tryBuild(RobotType.MINER, Direction.SOUTH);
+    		for (Direction dir : directions)
+    			tryBuild(RobotType.MINER, dir);
     	updateEnemyHQLocation();
         //}
     }
