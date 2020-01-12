@@ -81,13 +81,19 @@ public strictfp class RobotPlayer {
     static void runHQ() throws GameActionException {
         //if (rc.getRobotCount() < 5) {
     	if (rc.getRoundNum() < 15) 
-            tryBuild(RobotType.MINER, Direction.SOUTH);
+    		for (Direction dir : directions)
+    			tryBuild(RobotType.MINER, dir);
     	updateEnemyHQLocation();
         //}
     }
 
     static void runMiner() throws GameActionException {
         MapLocation curr = rc.getLocation();
+        //build design school
+        if (rc.getRobotCount() == 4) {
+        	for (Direction dir : directions)
+        		tryBuild(RobotType.DESIGN_SCHOOL,dir);
+        }
         //MINE SOUP
         if (rc.canMineSoup(Direction.EAST) && rc.getSoupCarrying() < 100){
             System.out.println("MINING SOUP");
