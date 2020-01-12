@@ -290,6 +290,10 @@ public strictfp class RobotPlayer {
         }
         else{
             tryMove(randomDirection());
+
+            //attempt to move around obstacles
+
+
         }
     }
 
