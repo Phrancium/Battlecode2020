@@ -70,7 +70,7 @@ public strictfp class RobotPlayer {
 
     static void runHQ() throws GameActionException {
         if (rc.getRoundNum() < 15)
-            tryBuild(RobotType.MINER, Direction.SOUTH);
+            tryBuild(RobotType.MINER, randomDirection());
         //post the HQ location to blockchain
         if (rc.getRoundNum() == 1)
             postLocation(1, rc.getLocation().x, rc.getLocation().y, 2);
