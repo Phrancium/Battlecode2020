@@ -282,7 +282,7 @@ public strictfp class RobotPlayer {
         //todo: add a case for it to move in the opposite direction when it senses flooding next to it
         //note: according to the hashmap, +4 positions from any one position leads to the OPPOSITE POSITION.
         //ig 1: NORTH, 5: SOUTH
-        //of course, it'll have to loop around somehow
+        //of course, it'll have to loop around somehow.
 
 
     }
