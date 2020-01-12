@@ -187,25 +187,31 @@ public strictfp class RobotPlayer {
     }
 
     static void runLandscaper() throws GameActionException {
-        //tryBlockchain();
-        if(tryMove(randomDirection())){
-            System.out.println("I, Landscaper, moved randomly");
+        MapLocation HQ = getHQLocation();
+        if(HQ == null)
+            tryMove(randomDirection());
+        MapLocation current = rc.getLocation();
+        //alternate moving with picking up dirt
+        if(current.distanceSquaredTo(HQ)>1) {
+            if(turnCount % 2 == 0)
+                if (rc.getDirtCarrying() < RobotType.LANDSCAPER.dirtLimit && rc.canDigDirt(Direction.CENTER))
+                    rc.digDirt(Direction.CENTER);
+                else
+                    moveTo(HQ);
         }
-        for (Direction dir : directions){
-            if (rc.canDigDirt(dir)){
-                rc.digDirt(dir);
-                System.out.println("I, Landscaper, dug");
-            }
+        //if HQ is within range
+        else if(rc.getDirtCarrying() > 0) {
+            Direction dir = current.directionTo(HQ);
+            rc.depositDirt(dir);
         }
-        System.out.println("I, Landscaper, am carrying " + rc.getDirtCarrying() + " dirt");
-        if(rc.getDirtCarrying() > 10){
-            for (Direction dir : directions){
-                if (rc.canDepositDirt(dir)){
-                    rc.depositDirt(dir);
-                    System.out.println("I, Landscaper, deposited dirt");
+        else {
+            for(Direction dir : directions){
+                if(rc.canDigDirt(dir)) {
+                    rc.digDirt(dir);
                 }
             }
         }
+
     }
 
     static void runDeliveryDrone() throws GameActionException {
