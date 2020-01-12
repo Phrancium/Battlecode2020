@@ -24,6 +24,8 @@ public strictfp class RobotPlayer {
 
     static MapLocation initialLoc;
 
+    static Direction path;
+
     static boolean moveOnce = false;
 
     /**
@@ -38,6 +40,8 @@ public strictfp class RobotPlayer {
         RobotPlayer.rc = rc;
 
         turnCount = 0;
+
+        path = Direction.CENTER;
 
         initialLoc = rc.getLocation();
         System.out.println("INITIAL LOCATION IS: " + initialLoc);
@@ -298,10 +302,28 @@ public strictfp class RobotPlayer {
         Direction moveDirection = loc.directionTo(dest);
 
         //See if general direction is valid
-        if(tryMove(moveDirection)){
-
-        }
-        else{
+        if(rc.canMove(moveDirection)){
+            path = moveDirection.opposite();
+            tryMove(moveDirection);
+        }else if(rc.canMove(moveDirection.rotateLeft()) && moveDirection.rotateLeft() != path){
+            path = moveDirection.rotateLeft().opposite();
+            tryMove(moveDirection.rotateLeft());
+        }else if(rc.canMove(moveDirection.rotateRight()) && moveDirection.rotateRight() != path) {
+            path = moveDirection.rotateRight().opposite();
+            tryMove(moveDirection.rotateRight());
+        }else if(rc.canMove(moveDirection.rotateLeft().rotateLeft()) && moveDirection.rotateLeft().rotateLeft() != path) {
+            path = moveDirection.rotateLeft().rotateLeft().opposite();
+            tryMove(moveDirection.rotateLeft().rotateLeft());
+        }else if(rc.canMove(moveDirection.rotateRight().rotateRight()) && moveDirection.rotateRight().rotateRight() != path) {
+            path = moveDirection.rotateRight().rotateRight().opposite();
+            tryMove(moveDirection.rotateRight().rotateRight());
+        }else if(rc.canMove(moveDirection.rotateLeft().rotateLeft().rotateLeft()) && moveDirection.rotateLeft().rotateLeft().rotateLeft() != path) {
+            path = moveDirection.rotateLeft().rotateLeft().rotateLeft().opposite();
+            tryMove(moveDirection.rotateLeft().rotateLeft().rotateLeft());
+        }else if(rc.canMove(moveDirection.rotateRight().rotateRight().rotateRight()) && moveDirection.rotateRight().rotateRight().rotateRight() != path) {
+            path = moveDirection.rotateRight().rotateRight().rotateRight().opposite();
+            tryMove(moveDirection.rotateRight().rotateRight().rotateRight());
+        } else{
             tryMove(randomDirection());
         }
     }
@@ -458,17 +480,20 @@ public strictfp class RobotPlayer {
         tryMove(d);
     }
 
-
+    //scouting route to find enemy HQ
     static void findEnemyHQ(MapLocation at) throws GameActionException{
         MapLocation home = getHQLocation();
         int hqX = home.x;
         int hqY = home.y;
         int mapW = rc.getMapWidth();
         int mapH = rc.getMapHeight();
+        //straight across
         MapLocation dest1 = new MapLocation(hqX, mapH-hqY);
+        //straight down and straight across
         MapLocation dest2 = new MapLocation(mapW-hqX, mapH-hqY);
 
         RobotInfo[] rob = rc.senseNearbyRobots();
+        //scan for enemy HQ
         for(RobotInfo d : rob){
             if(d.getType().name() == "HQ"){
                 postLocation(2, d.location.x, d.location.y, 1);
