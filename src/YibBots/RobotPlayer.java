@@ -114,15 +114,7 @@ public strictfp class RobotPlayer {
             System.out.println("FIND SOUP");
             findSoup(curr);
         }
-        //NOTE: figure out why I have to "release" them for a bit before they start actually moving
-        // if (!moveOnce) {
-        //     rc.move(Direction.SOUTH);
-        //     rc.move(Direction.SOUTH);
-        //     rc.move(Direction.WEST);
-        //     rc.move(Direction.WEST);
-        //     moveOnce = true;
-        // }
-
+        
         // tryBlockchain();
         // tryMove(randomDirection());
         // if (tryMove(randomDirection()))
@@ -283,7 +275,7 @@ public strictfp class RobotPlayer {
         //todo: add a case for it to move in the opposite direction when it senses flooding next to it
         //note: according to the hashmap, +4 positions from any one position leads to the OPPOSITE POSITION.
         //ig 1: NORTH, 5: SOUTH
-        //of course, it'll have to loop around somehow
+        //of course, it'll have to loop around somehow.
 
 
     }
