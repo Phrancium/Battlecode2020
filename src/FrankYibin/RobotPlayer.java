@@ -1,7 +1,6 @@
-package Frankplayer1;
+package FrankYibin;
 import battlecode.common.*;
 
-import javax.naming.MalformedLinkException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -40,7 +39,15 @@ public strictfp class RobotPlayer {
         turnCount = 0;
         lastT = directions[3];
         destination = null;
-        
+
+        dIndex.put(Direction.NORTH, 1);
+        dIndex.put(Direction.NORTHEAST, 2);
+        dIndex.put(Direction.EAST, 3);
+        dIndex.put(Direction.SOUTHEAST, 4);
+        dIndex.put(Direction.SOUTH, 5);
+        dIndex.put(Direction.SOUTHWEST, 6);
+        dIndex.put(Direction.WEST, 7);
+        dIndex.put(Direction.NORTHWEST, 8);
 
         System.out.println("I'm a " + rc.getType() + " and I just got created!");
         while (true) {
@@ -92,6 +99,9 @@ public strictfp class RobotPlayer {
         }else {
             findSoup(curr);
         }
+        //Testing for Landscaper: try
+        for (Direction dir : directions)
+            tryBuild(RobotType.DESIGN_SCHOOL, dir);
     }
 
     /**robot mines soup **/
@@ -127,10 +137,6 @@ public strictfp class RobotPlayer {
         tryMove(d);
     }
 
-
-    static void findEnemyHQ(){}
-
-
     static void runRefinery() throws GameActionException {
         // System.out.println("Pollution: " + rc.sensePollution(rc.getLocation()));
     }
@@ -139,8 +145,10 @@ public strictfp class RobotPlayer {
 
     }
 
+    //Keeps building em Landscapers
     static void runDesignSchool() throws GameActionException {
-
+        for (Direction dir : directions)
+            tryBuild(RobotType.LANDSCAPER, dir);
     }
 
     static void runFulfillmentCenter() throws GameActionException {
@@ -149,7 +157,25 @@ public strictfp class RobotPlayer {
     }
 
     static void runLandscaper() throws GameActionException {
-
+        //tryBlockchain();
+        if(tryMove(randomDirection())){
+            System.out.println("I, Landscaper, moved randomly");
+        }
+        for (Direction dir : directions){
+            if (rc.canDigDirt(dir)){
+                rc.digDirt(dir);
+                System.out.println("I, Landscaper, dug");
+            }
+        }
+        System.out.println("I, Landscaper, am carrying " + rc.getDirtCarrying() + " dirt");
+        if(rc.getDirtCarrying() > 10){
+            for (Direction dir : directions){
+                if (rc.canDepositDirt(dir)){
+                    rc.depositDirt(dir);
+                    System.out.println("I, Landscaper, deposited dirt");
+                }
+            }
+        }
     }
 
     static void runDeliveryDrone() throws GameActionException {
@@ -274,127 +300,34 @@ public strictfp class RobotPlayer {
      * @throws GameActionException
      */
 
-    static void moveTo(MapLocation at, MapLocation to) throws GameActionException {
-        int xDiff = at.x - to.x;
-        int yDiff = at.y - to.y;
-//        Direction goal = at.directionTo(to);
-//        int start = dIndex.get(goal);
+    static void moveTo(MapLocation at, MapLocation to) throws GameActionException{
+        Direction goal = at.directionTo(to);
+        int start = dIndex.get(goal);
         destination = to;
-        if (Math.abs(xDiff) > Math.abs(yDiff)) {
-            if (xDiff > 0) {
-                if (yDiff > 0) {
-                    if (tryMove(Direction.SOUTHWEST)) {
-                    } else if (tryMove(Direction.WEST)) {
-                    } else if (tryMove(Direction.SOUTH)) {
-                    } else if (tryMove(Direction.SOUTHEAST)) {
-                    } else if (tryMove(Direction.NORTHWEST)) {
-                    } else if (tryMove(Direction.NORTH)) {
-                    } else if (tryMove(Direction.EAST)) {
-                    }
+        if(tryMove(goal)){
+        }else{
+            switch (start){
+                case 1:
+                    if(tryMove(directions[8])){}else if (tryMove(directions[2])){}else if (tryMove(directions[7])){}else if (tryMove(directions[3])){}else if (tryMove(directions[6])){}else if (tryMove(directions[4])){}
+                case 2:
+                    if(tryMove(directions[1])){}else if (tryMove(directions[3])){}else if (tryMove(directions[8])){}else if (tryMove(directions[4])){}else if (tryMove(directions[7])){}else if (tryMove(directions[5])){}
+                case 3:
+                    if(tryMove(directions[2])){}else if (tryMove(directions[4])){}else if (tryMove(directions[1])){}else if (tryMove(directions[5])){}else if (tryMove(directions[8])){}else if (tryMove(directions[6])){}
+                case 4:
+                    if(tryMove(directions[3])){}else if (tryMove(directions[5])){}else if (tryMove(directions[2])){}else if (tryMove(directions[6])){}else if (tryMove(directions[1])){}else if (tryMove(directions[7])){}
+                case 5:
+                    if(tryMove(directions[4])){}else if (tryMove(directions[6])){}else if (tryMove(directions[3])){}else if (tryMove(directions[7])){}else if (tryMove(directions[2])){}else if (tryMove(directions[8])){}
+                case 6:
+                    if(tryMove(directions[5])){}else if (tryMove(directions[7])){}else if (tryMove(directions[4])){}else if (tryMove(directions[8])){}else if (tryMove(directions[3])){}else if (tryMove(directions[1])){}
+                case 7:
+                    if(tryMove(directions[6])){}else if (tryMove(directions[8])){}else if (tryMove(directions[5])){}else if (tryMove(directions[1])){}else if (tryMove(directions[4])){}else if (tryMove(directions[2])){}
+                case 8:
+                    if(tryMove(directions[7])){}else if (tryMove(directions[1])){}else if (tryMove(directions[6])){}else if (tryMove(directions[2])){}else if (tryMove(directions[5])){}else if (tryMove(directions[3])){}
+            }
 
-                } else if (yDiff < 0) {
-                    if (tryMove(Direction.NORTHWEST)) {
-                    } else if (tryMove(Direction.WEST)) {
-                    } else if (tryMove(Direction.NORTH)) {
-                    } else if (tryMove(Direction.SOUTHWEST)) {
-                    } else if (tryMove(Direction.NORTHEAST)) {
-                    } else if (tryMove(Direction.SOUTH)) {
-                    } else if (tryMove(Direction.EAST)) {
-                    }
-                } else {
-                    if (tryMove(Direction.WEST)) {
-                    } else if (tryMove(Direction.NORTHWEST)) {
-                    } else if (tryMove(Direction.SOUTHWEST)) {
-                    } else if (tryMove(Direction.SOUTH)) {
-                    } else if (tryMove(Direction.NORTH)) {
-                    }
-                }
-            } else {
-                if (yDiff > 0) {
-                    if (tryMove(Direction.SOUTHEAST)) {
-                    } else if (tryMove(Direction.EAST)) {
-                    } else if (tryMove(Direction.SOUTH)) {
-                    } else if (tryMove(Direction.NORTHEAST)) {
-                    } else if (tryMove(Direction.SOUTHWEST)) {
-                    } else if (tryMove(Direction.SOUTH)) {
-                    } else if (tryMove(Direction.EAST)) {
-                    }
-                } else if (yDiff < 0) {
-                    if (tryMove(Direction.NORTHEAST)) {
-                    } else if (tryMove(Direction.EAST)) {
-                    } else if (tryMove(Direction.NORTH)) {
-                    } else if (tryMove(Direction.SOUTHEAST)) {
-                    } else if (tryMove(Direction.NORTHWEST)) {
-                    } else if (tryMove(Direction.SOUTH)) {
-                    } else if (tryMove(Direction.WEST)) {
-                    }
-                } else {
-                    if (tryMove(Direction.EAST)) {
-                    } else if (tryMove(Direction.NORTHEAST)) {
-                    } else if (tryMove(Direction.SOUTHEAST)) {
-                    } else if (tryMove(Direction.SOUTH)) {
-                    } else if (tryMove(Direction.NORTH)) {
-                    }
-                }
-            }
-        } else {
-            if (yDiff > 0) {
-                if (xDiff > 0) {
-                    if (tryMove(Direction.SOUTHWEST)) {
-                    } else if (tryMove(Direction.WEST)) {
-                    } else if (tryMove(Direction.SOUTH)) {
-                    } else if (tryMove(Direction.SOUTHEAST)) {
-                    } else if (tryMove(Direction.NORTHWEST)) {
-                    } else if (tryMove(Direction.NORTH)) {
-                    } else if (tryMove(Direction.EAST)) {
-                    }
-                } else if (xDiff < 0) {
-                    if (tryMove(Direction.SOUTHEAST)) {
-                    } else if (tryMove(Direction.EAST)) {
-                    } else if (tryMove(Direction.SOUTH)) {
-                    } else if (tryMove(Direction.NORTHEAST)) {
-                    } else if (tryMove(Direction.SOUTHWEST)) {
-                    } else if (tryMove(Direction.SOUTH)) {
-                    } else if (tryMove(Direction.EAST)) {
-                    }
-                } else {
-                    if (tryMove(Direction.SOUTH)) {
-                    } else if (tryMove(Direction.SOUTHEAST)) {
-                    } else if (tryMove(Direction.SOUTHWEST)) {
-                    } else if (tryMove(Direction.EAST)) {
-                    } else if (tryMove(Direction.WEST)) {
-                    }
-                }
-            } else {
-                if (xDiff > 0) {
-                    if (tryMove(Direction.NORTHWEST)) {
-                    } else if (tryMove(Direction.WEST)) {
-                    } else if (tryMove(Direction.NORTH)) {
-                    } else if (tryMove(Direction.SOUTHWEST)) {
-                    } else if (tryMove(Direction.NORTHEAST)) {
-                    } else if (tryMove(Direction.SOUTH)) {
-                    } else if (tryMove(Direction.EAST)) {
-                    }
-                } else if (xDiff < 0) {
-                    if (tryMove(Direction.NORTHEAST)) {
-                    } else if (tryMove(Direction.EAST)) {
-                    } else if (tryMove(Direction.NORTH)) {
-                    } else if (tryMove(Direction.SOUTHEAST)) {
-                    } else if (tryMove(Direction.NORTHWEST)) {
-                    } else if (tryMove(Direction.SOUTH)) {
-                    } else if (tryMove(Direction.WEST)) {
-                    }
-                } else {
-                    if (tryMove(Direction.NORTH)) {
-                    } else if (tryMove(Direction.NORTHWEST)) {
-                    } else if (tryMove(Direction.NORTHEAST)) {
-                    } else if (tryMove(Direction.EAST)) {
-                    } else if (tryMove(Direction.WEST)) {
-                    }
-                }
-            }
         }
-        }
+
+    }
     /**
      * Attempts to build a given robot in a given direction.
      *
