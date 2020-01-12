@@ -134,8 +134,10 @@ public strictfp class RobotPlayer {
             moveTo(HQ);
         }
         //if HQ is within range
-        Direction dir = current.directionTo(HQ);
-        rc.depositDirt(dir);
+        while(rc.getDirtCarrying() > 0) {
+            Direction dir = current.directionTo(HQ);
+            rc.depositDirt(dir);
+        }
     }
 
     static void moveTo(MapLocation dest) throws GameActionException{
