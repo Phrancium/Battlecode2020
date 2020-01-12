@@ -346,7 +346,7 @@ public strictfp class RobotPlayer {
     	*/ 
     	int[] message = new int[7];
         message[1] = 1231241;
-    	message[2] = 1;
+    	message[2] = code;
         message[3] = x;
         message[4] = y;
         if (rc.canSubmitTransaction(message, cost))
@@ -420,5 +420,52 @@ public strictfp class RobotPlayer {
     			}
     		}
     	}
+    }
+    /**robot mines soup **/
+
+    static void mineSoup() throws GameActionException{
+        for (Direction l : directions) {
+            if (rc.canMineSoup(l)) {
+                rc.mineSoup(l);
+            }
+        }
+    }
+    /**
+     * Scouting method run at beginning to find soup
+     *
+     * @throws GameActionException
+     */
+    static void goHome(MapLocation m) throws GameActionException {
+        Direction d = randomDirection();
+        for (Direction l : directions) {
+            if (rc.canDepositSoup(l)) {
+                System.out.println("I deposited soup");
+                rc.depositSoup(l, rc.getSoupCarrying());
+            }
+        }
+        tryMove(d);
+    }
+
+
+    static void findEnemyHQ(MapLocation at) throws GameActionException{
+        MapLocation home = getHQLocation();
+        int hqX = home.x;
+        int hqY = home.y;
+        int mapW = rc.getMapWidth();
+        int mapH = rc.getMapHeight();
+        MapLocation dest1 = new MapLocation(hqX, mapH-hqY);
+        MapLocation dest2 = new MapLocation(mapW-hqX, mapH-hqY);
+
+        RobotInfo[] rob = rc.senseNearbyRobots();
+        for(RobotInfo d : rob){
+            if(d.getType().name() == "HQ"){
+                postLocation(2, d.location.x, d.location.y, 1);
+            }
+        }
+        if(at.x < dest1.x){
+            moveTo(dest1);
+        }else{
+            moveTo(dest2);
+        }
     }
 }
