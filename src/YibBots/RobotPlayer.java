@@ -151,8 +151,8 @@ public strictfp class RobotPlayer {
     }
 
     static void findSoup(MapLocation loc) throws GameActionException{
-        Direction d = randomDirection();
-        int selfX = loc.x;
+    	Direction d = randomDirection();
+    	int selfX = loc.x;
         int selfY = loc.y;
         for(int x = -5; x <6; x++){
             for (int y = -5; y < 6; y++){
@@ -163,6 +163,7 @@ public strictfp class RobotPlayer {
                         //double rando = Math.random();
                         //int plusOrMinusOne = (int)Math.signum(rando - 0.5);
                         moveTo(new MapLocation(check.x - 1, check.y));
+                        break;
                         //upload location of soup to blockchain?
                     }
                 }
@@ -191,17 +192,18 @@ public strictfp class RobotPlayer {
     }
 
     static void runLandscaper() throws GameActionException {
-        MapLocation HQ = getHQLocation();
+        MapLocation HQ = getEnemyHQLocation();
         if(HQ == null)
             tryMove(randomDirection());
         MapLocation current = rc.getLocation();
         //alternate moving with picking up dirt
         if(current.distanceSquaredTo(HQ)>1) {
-            if(turnCount % 2 == 0)
+            if(turnCount % 2 == 0) {
                 if (rc.getDirtCarrying() < RobotType.LANDSCAPER.dirtLimit && rc.canDigDirt(Direction.CENTER))
                     rc.digDirt(Direction.CENTER);
-                else
-                    moveTo(HQ);
+            }
+            else
+                moveTo(HQ);
         }
         //if HQ is within range
         else if(rc.getDirtCarrying() > 0) {
@@ -404,19 +406,17 @@ public strictfp class RobotPlayer {
     }
     
     static MapLocation getSoupLocation() throws GameActionException {
-    	/* Code to be placed in array[2]
-    	 * 1 : HQ
-    	 * 2 : Soup
-    	 * 3 : Enemy HQ
-    	*/ 
+    	//does not currently work
     	MapLocation location = null;
-    	for(int k = 1; k < 60; k++) {
-    		Transaction[] block = rc.getBlock(k);
-    		for(int i = 0; i < 7; i++) {
-    			int[] message = block[i].getMessage();
-    			if(message[1] == 1231241 && message[2] == 2) {
-    				location = new MapLocation(message[3], message[4]);
-    				return location;
+    	for(int k = rc.getRoundNum(); k > rc.getRoundNum()-30; k--) {
+    		if(k > 0) {
+    			Transaction[] block = rc.getBlock(k);
+    			for(int i = 0; i < 7; i++) {
+    				int[] message = block[i].getMessage();
+    				if(message[1] == 1231241 && message[2] == 2) {
+    					location = new MapLocation(message[3], message[4]);
+    					return location;
+    				}
     			}
     		}
     	}
