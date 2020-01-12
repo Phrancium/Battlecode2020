@@ -18,7 +18,7 @@ public strictfp class RobotPlayer {
             RobotType.FULFILLMENT_CENTER, RobotType.NET_GUN};
 
     static int turnCount;
-    static int baseX;
+    static MapLocation baseX;
     static int baseY;
     /**
      * run() is the method that is called when a robot is instantiated in the Battlecode world.
@@ -66,10 +66,32 @@ public strictfp class RobotPlayer {
     static void runHQ() throws GameActionException {
         if (rc.getRoundNum() < 15)
             tryBuild(RobotType.MINER, Direction.SOUTH);
+        //post the HQ location to blockchain
+        if (rc.getRoundNum() == 1)
+            postLocation(1, rc.getLocation().x, rc.getLocation().y, 2);
+        if(rc.getRoundNum() == 2) {
+            if(getHQLocation() == null)
+                postLocation(10, rc.getLocation().x, rc.getLocation().y, 5);
+        }
+    }
+    static void postLocation(int code, int x, int y, int cost) throws GameActionException {
+        /* Code to be placed in array[2]
+         * 1 : HQ
+         * 2 : Soup
+         * 3 : Enemy HQ
+         */
+        int[] message = new int[7];
+        message[1] = 1231241;
+        message[2] = 1;
+        message[3] = x;
+        message[4] = y;
+        if (rc.canSubmitTransaction(message, cost))
+            rc.submitTransaction(message, cost);
     }
 
     static void runMiner() throws GameActionException {
         tryBlockchain();
+        baseX = rc.getLocation();
         tryMove(randomDirection());
         if (tryMove(randomDirection()))
             System.out.println("I moved!");
@@ -102,9 +124,48 @@ public strictfp class RobotPlayer {
     }
 
     static void runLandscaper() throws GameActionException {
-
+        MapLocation HQ = getHQLocation();
+        MapLocation current = rc.getLocation();
+        //alternate moving with picking up dirt
+        while(current.distanceSquaredTo(HQ)>1) {
+            current = rc.getLocation();
+            if (rc.getDirtCarrying() < RobotType.LANDSCAPER.dirtLimit && rc.canDigDirt(Direction.CENTER))
+                rc.digDirt(Direction.CENTER);
+            moveTo(HQ);
+        }
+        //if HQ is within range
+        Direction dir = current.directionTo(HQ);
+        rc.depositDirt(dir);
     }
 
+    static void moveTo(MapLocation dest) throws GameActionException{
+        //Find general direction of destination
+        MapLocation loc = rc.getLocation();
+        Direction moveDirection = loc.directionTo(dest);
+
+        //See if general direction is valid
+        if(tryMove(moveDirection)){
+
+        }
+        else{
+            tryMove(randomDirection());
+        }
+    }
+    static MapLocation getHQLocation() throws GameActionException {
+        //returns the location of HQ
+        MapLocation location = null;
+        for(int k = 1; k < rc.getRoundNum(); k++) {
+            Transaction[] block = rc.getBlock(k);
+            for(int i = 0; i < 7; i++) {
+                int[] message = block[i].getMessage();
+                if(message[1] == 1231241 && message[2] == 1) {
+                    location = new MapLocation(message[3], message[4]);
+                    return location;
+                }
+            }
+        }
+        return location;
+    }
     static void runDeliveryDrone() throws GameActionException {
         Team enemy = rc.getTeam().opponent();
         if (!rc.isCurrentlyHoldingUnit()) {
