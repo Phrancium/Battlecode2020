@@ -40,9 +40,8 @@ public strictfp class RobotPlayer {
         turnCount = 0;
         lastT = directions[3];
         destination = null;
-        
 
-        System.out.println("I'm a " + rc.getType() + " and I just got created!");
+
         while (true) {
             turnCount += 1;
             // Try/catch blocks stop unhandled exceptions, which cause your robot to explode
@@ -128,7 +127,26 @@ public strictfp class RobotPlayer {
     }
 
 
-    static void findEnemyHQ(){}
+    static void findEnemyHQ(MapLocation at) throws GameActionException{
+        int hqX = 0;
+        int hqY = 0;
+        int mapW = rc.getMapWidth();
+        int mapH = rc.getMapHeight();
+        MapLocation dest1 = new MapLocation(hqX, mapH-hqY);
+        MapLocation dest2 = new MapLocation(mapW-hqX, mapH-hqY);
+
+        RobotInfo[] rob = rc.senseNearbyRobots();
+        for(RobotInfo d : rob){
+            if(d.getType().name() == "HQ"){
+
+            }
+        }
+        if(at.x < dest1.x){
+            moveTo(at, dest1);
+        }else{
+            moveTo(at, dest2);
+        }
+    }
 
 
     static void runRefinery() throws GameActionException {
