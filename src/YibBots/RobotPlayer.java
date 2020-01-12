@@ -113,15 +113,7 @@ public strictfp class RobotPlayer {
             System.out.println("FIND SOUP");
             findSoup(curr);
         }
-        //NOTE: figure out why I have to "release" them for a bit before they start actually moving
-        // if (!moveOnce) {
-        //     rc.move(Direction.SOUTH);
-        //     rc.move(Direction.SOUTH);
-        //     rc.move(Direction.WEST);
-        //     rc.move(Direction.WEST);
-        //     moveOnce = true;
-        // }
-
+        
         // tryBlockchain();
         // tryMove(randomDirection());
         // if (tryMove(randomDirection()))
