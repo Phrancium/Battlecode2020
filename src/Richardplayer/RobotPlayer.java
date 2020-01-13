@@ -1,4 +1,4 @@
-package YibBots;
+package Richardplayer;
 import battlecode.common.*;
 
 import java.awt.*;
@@ -33,6 +33,8 @@ public strictfp class RobotPlayer {
     static String task;
 
     static boolean moveOnce = false;
+    
+    static final int robotNumber = rc.getRobotCount()-1;
 
     /**
      * run() is the method that is called when a robot is instantiated in the Battlecode world.
@@ -111,7 +113,34 @@ public strictfp class RobotPlayer {
     }
 
     static void runMiner() throws GameActionException {
-        MapLocation curr = rc.getLocation();
+    	if(robotNumber == 1 && rc.getRobotCount() == 4) {
+    		if (rc.getSoupCarrying() > 95){
+                for (Direction dir : directions){
+                    if(rc.canDepositSoup(dir)){
+                        rc.depositSoup(dir, rc.getSoupCarrying());
+
+                    }
+                }
+                moveTo(initialLoc);
+    		}
+    		MapLocation HQ = getEnemyHQLocation();
+            if(HQ == null)
+                findEnemyHQ(rc.getLocation());
+            MapLocation current = rc.getLocation();
+            //alternate moving with picking up dirt
+            if(current.distanceSquaredTo(HQ)>20) {
+                zergRush(HQ);
+            }
+            else {
+            	for (Direction dir : directions)
+            		tryBuild(RobotType.DESIGN_SCHOOL,dir);
+            }
+            if(rc.getRobotCount() == 10) {
+            	for (Direction dir : directions)
+            		tryBuild(RobotType.NET_GUN,dir);
+            }
+    	}	
+    	MapLocation curr = rc.getLocation();
         scanForSoup(curr);
         souploc = getSoupLocation();
         //build design school
@@ -302,7 +331,7 @@ public strictfp class RobotPlayer {
     }
 
     static void runNetGun() throws GameActionException {
-
+    	
     }
 
     /**
@@ -517,7 +546,7 @@ public strictfp class RobotPlayer {
     
     static void updateEnemyHQLocation() throws GameActionException {
     	//looks for enemy hq location in block chain and moves it to a more recent round
-    	for(int k = rc.getRoundNum()-100; k < rc.getRoundNum()-60; k++) {
+    	for(int k = rc.getRoundNum()-61; k < rc.getRoundNum()-59; k++) {
     		if(k > 0) {
     			Transaction[] block = rc.getBlock(k);
     			if(block.length != 0) {	
