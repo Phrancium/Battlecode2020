@@ -221,7 +221,6 @@ public strictfp class RobotPlayer {
         else if(rc.getDirtCarrying() > 0) {
             Direction dir = current.directionTo(HQ);
             rc.depositDirt(dir);
-            System.out.println("DUMPING");
         }
         else {
             if(rc.canDigDirt(current.directionTo(HQ).opposite())) {
