@@ -572,10 +572,18 @@ public strictfp class RobotPlayer {
                 postLocation(3, d.location.x, d.location.y, 1);
             }
         }
-        if(at.x < dest1.x - 2){
-            zergRush(dest1);
+        if(hqX < mapW/2) {
+            if (at.x < dest1.x - 2) {
+                zergRush(dest1);
+            } else {
+                zergRush(dest2);
+            }
         }else{
-            zergRush(dest2);
+            if (at.x > dest1.x + 2) {
+                zergRush(dest1);
+            } else {
+                zergRush(dest2);
+            }
         }
     }
 }
