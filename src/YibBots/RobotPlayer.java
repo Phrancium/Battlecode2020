@@ -236,12 +236,6 @@ public strictfp class RobotPlayer {
         MapLocation loc = rc.getLocation();
         Direction moveDirection = loc.directionTo(dest);
 
-        //see if there's a body of water in our way
-        checkFlood:
-        if(rc.senseFlooding(loc.add(moveDirection))){
-
-        }
-
         //See if general direction is valid
         if(rc.canMove(moveDirection)){
             path = moveDirection.opposite();
@@ -264,6 +258,8 @@ public strictfp class RobotPlayer {
         }else if(rc.canMove(moveDirection.rotateRight().rotateRight().rotateRight()) && moveDirection.rotateRight().rotateRight().rotateRight() != path) {
             path = moveDirection.rotateRight().rotateRight().rotateRight().opposite();
             tryMove(moveDirection.rotateRight().rotateRight().rotateRight());
+        } else{
+            tryMove(randomDirection());
         }
     }
 
