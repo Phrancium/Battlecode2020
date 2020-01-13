@@ -236,7 +236,7 @@ public strictfp class RobotPlayer {
         Direction moveDirection = loc.directionTo(dest);
 
         //dig through barriers
-        if(rc.senseElevation(rc.adjacentLocation(moveDirection)) > 3 && rc.senseElevation(rc.adjacentLocation(moveDirection.rotateLeft())) > 3 && rc.senseElevation(rc.adjacentLocation(moveDirection.rotateRight())) > 3){
+        if(rc.senseElevation(rc.adjacentLocation(moveDirection)) > 3 && rc.senseElevation(rc.adjacentLocation(moveDirection.rotateLeft())) - rc.senseElevation(loc) > 3 && rc.senseElevation(rc.adjacentLocation(moveDirection.rotateRight())) - rc.senseElevation(loc) > 3){
             if(rc.getDirtCarrying() == 25){
                 rc.depositDirt(moveDirection.rotateLeft().rotateLeft());
             }
