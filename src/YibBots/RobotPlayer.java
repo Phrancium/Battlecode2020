@@ -105,8 +105,7 @@ public strictfp class RobotPlayer {
         souploc = getSoupLocation();
         //build design school
         if (rc.getRobotCount() == 4) {
-        	for (Direction dir : directions)
-        		tryBuild(RobotType.DESIGN_SCHOOL,dir);
+        	buildDesignSchool(curr);
         }
         //MINE SOUP
         if (souploc != null && rc.getSoupCarrying() < 100){
@@ -187,6 +186,17 @@ public strictfp class RobotPlayer {
                     }
                 }
             }
+        }
+    }
+
+    static void buildDesignSchool(MapLocation loc) throws GameActionException{
+        MapLocation hq = getHQLocation();
+        int num = rc.getMapWidth();
+        if(loc.x < num/2 - 4) {
+            moveTo(new MapLocation(num/2 - 4, hq.y));
+        }else {
+            for (Direction dir : directions)
+                tryBuild(RobotType.DESIGN_SCHOOL, dir);
         }
     }
 
