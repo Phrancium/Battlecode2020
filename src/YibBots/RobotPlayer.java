@@ -461,7 +461,7 @@ public strictfp class RobotPlayer {
     static MapLocation getEnemyHQLocation() throws GameActionException {
     	//returns the enemy HQ location as a MapLocation
     	MapLocation location = null;
-    	for(int k = rc.getRoundNum()-1; k > rc.getRoundNum()-60; k--) {
+    	for(int k = rc.getRoundNum()-60; k < rc.getRoundNum()-1; k++) {
     		if(k > 0) {
     			Transaction[] block = rc.getBlock(k);
     			if(block.length != 0) {	
@@ -481,7 +481,7 @@ public strictfp class RobotPlayer {
     
     static void updateEnemyHQLocation() throws GameActionException {
     	//looks for enemy hq location in block chain and moves it to a more recent round
-    	for(int k = rc.getRoundNum()-60; k > rc.getRoundNum()-100; k--) {
+    	for(int k = rc.getRoundNum()-100; k < rc.getRoundNum()-60; k++) {
     		if(k > 0) {
     			Transaction[] block = rc.getBlock(k);
     			if(block.length != 0) {	
