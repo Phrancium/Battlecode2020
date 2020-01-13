@@ -517,9 +517,13 @@ public strictfp class RobotPlayer {
         int mapW = rc.getMapWidth();
         int mapH = rc.getMapHeight();
         //straight across
-        MapLocation dest1 = new MapLocation(hqX, mapH-hqY);
+        MapLocation dest1 = new MapLocation(mapW - hqX, hqY);
         //straight down and straight across
         MapLocation dest2 = new MapLocation(mapW-hqX, mapH-hqY);
+
+        if(at.x == dest2.x && at.y==dest2.y){
+            postLocation(3, hqX, mapH - hqY, 1);
+        }
 
         RobotInfo[] rob = rc.senseNearbyRobots();
         //scan for enemy HQ
@@ -528,7 +532,7 @@ public strictfp class RobotPlayer {
                 postLocation(3, d.location.x, d.location.y, 1);
             }
         }
-        if(at.x < dest1.x){
+        if(at.x < dest1.x - 2){
             moveTo(dest1);
         }else{
             moveTo(dest2);
