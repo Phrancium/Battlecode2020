@@ -236,7 +236,7 @@ public strictfp class RobotPlayer {
         MapLocation loc = rc.getLocation();
         Direction moveDirection = loc.directionTo(dest);
 
-        if(rc.senseElevation(loc.add(moveDirection)) > 3 && rc.senseElevation(loc.add(moveDirection.rotateLeft())) > 3 && rc.senseElevation(loc.add(moveDirection.rotateRight())) > 3){
+        if(rc.senseElevation(rc.adjacentLocation(moveDirection)) > 3 && rc.senseElevation(rc.adjacentLocation(moveDirection.rotateLeft())) > 3 && rc.senseElevation(rc.adjacentLocation(moveDirection.rotateRight())) > 3){
             rc.digDirt(moveDirection);
         }
 
@@ -564,9 +564,9 @@ public strictfp class RobotPlayer {
             }
         }
         if(at.x < dest1.x - 2){
-            moveTo(dest1);
+            zergRush(dest1);
         }else{
-            moveTo(dest2);
+            zergRush(dest2);
         }
     }
 }
