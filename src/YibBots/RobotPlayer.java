@@ -24,6 +24,10 @@ public strictfp class RobotPlayer {
 
     static MapLocation initialLoc;
 
+    static Direction path;
+
+    static String task;
+
     static boolean moveOnce = false;
 
     /**
@@ -39,6 +43,10 @@ public strictfp class RobotPlayer {
 
         turnCount = 0;
 
+        path = Direction.CENTER;
+
+        task = "idle";
+        
         initialLoc = rc.getLocation();
         System.out.println("INITIAL LOCATION IS: " + initialLoc);
 
