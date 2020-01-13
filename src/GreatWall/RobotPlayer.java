@@ -251,8 +251,18 @@ public strictfp class RobotPlayer {
                 findEnemyHQ(rc.getLocation());
             MapLocation current = rc.getLocation();
             //move to enemy HQ
-            if (current.distanceSquaredTo(HQ) > 2) {
+            if (current.distanceSquaredTo(HQ) > 8) {
                 zergRush(HQ);
+            }else if(current.distanceSquaredTo(HQ) > 2){
+                if(isEnemyHQFull(HQ)){
+                    if(rc.getDirtCarrying() == 25){
+                        rc.depositDirt(current.directionTo(HQ).opposite());
+                    }else{
+                        rc.digDirt(current.directionTo(HQ));
+                    }
+                }else{
+                    zergRush(HQ);
+                }
             }
             //if HQ is within range
             else if (rc.getDirtCarrying() > 0) {
@@ -260,7 +270,7 @@ public strictfp class RobotPlayer {
                 rc.depositDirt(dir);
             } else {
                 if (rc.canDigDirt(current.directionTo(HQ).opposite())) {
-                    rc.digDirt(current.directionTo(HQ).opposite());
+                    rc.digDirt(current.directionTo(HQ).rotateRight());
                 }
             }
         }else{
@@ -319,6 +329,30 @@ public strictfp class RobotPlayer {
             case EAST: rc.depositDirt(Direction.SOUTH);break;
         }
 
+    }
+
+    static boolean isEnemyHQFull(MapLocation en) throws GameActionException{
+        MapLocation curr = rc.getLocation();
+        if(!rc.isLocationOccupied(en)){
+            return false;
+        }else if(!rc.isLocationOccupied(en.add(Direction.NORTH))){
+            return false;
+        }else if(!rc.isLocationOccupied(en.add(Direction.NORTHEAST))){
+            return false;
+        }else if(!rc.isLocationOccupied(en.add(Direction.NORTHWEST))){
+            return false;
+        }else if(!rc.isLocationOccupied(en.add(Direction.SOUTH))){
+            return false;
+        }else if(!rc.isLocationOccupied(en.add(Direction.SOUTHEAST))){
+            return false;
+        }else if(!rc.isLocationOccupied(en.add(Direction.SOUTHWEST))){
+            return false;
+        }else if(!rc.isLocationOccupied(en.add(Direction.WEST))){
+            return false;
+        }else if(!rc.isLocationOccupied(en.add(Direction.EAST))){
+            return false;
+        }
+        return true;
     }
 
     static void runDeliveryDrone() throws GameActionException {
