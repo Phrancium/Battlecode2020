@@ -218,13 +218,8 @@ public strictfp class RobotPlayer {
             findEnemyHQ(rc.getLocation());
         MapLocation current = rc.getLocation();
         //alternate moving with picking up dirt
-        if(current.distanceSquaredTo(HQ)>1) {
-            if(turnCount % 2 == 0) {
-                if (rc.getDirtCarrying() < RobotType.LANDSCAPER.dirtLimit && rc.canDigDirt(Direction.CENTER))
-                    rc.digDirt(Direction.CENTER);
-            }
-            else
-                moveTo(HQ);
+        if(current.distanceSquaredTo(HQ)>1.8) {
+            moveTo(HQ);
         }
         //if HQ is within range
         else if(rc.getDirtCarrying() > 0) {
