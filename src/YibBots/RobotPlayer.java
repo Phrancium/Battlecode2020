@@ -214,7 +214,7 @@ public strictfp class RobotPlayer {
             findEnemyHQ(rc.getLocation());
         MapLocation current = rc.getLocation();
         //alternate moving with picking up dirt
-        if(current.distanceSquaredTo(HQ)>1.8) {
+        if(current.distanceSquaredTo(HQ)>2) {
             zergRush(HQ);
         }
         //if HQ is within range
