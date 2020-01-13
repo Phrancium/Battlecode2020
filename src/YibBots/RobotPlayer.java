@@ -196,7 +196,7 @@ public strictfp class RobotPlayer {
     static void runLandscaper() throws GameActionException {
         MapLocation HQ = getEnemyHQLocation();
         if(HQ == null)
-            tryMove(randomDirection());
+            findEnemyHQ(rc.getLocation());
         MapLocation current = rc.getLocation();
         //alternate moving with picking up dirt
         if(current.distanceSquaredTo(HQ)>1) {
@@ -451,4 +451,29 @@ public strictfp class RobotPlayer {
     		}
     	}
     }
+    static void findEnemyHQ(MapLocation at) throws GameActionException{
+        MapLocation home = getHQLocation();
+        int hqX = home.x;
+        int hqY = home.y;
+        int mapW = rc.getMapWidth();
+        int mapH = rc.getMapHeight();
+        //straight across
+        MapLocation dest1 = new MapLocation(hqX, mapH-hqY);
+        //straight down and straight across
+        MapLocation dest2 = new MapLocation(mapW-hqX, mapH-hqY);
+
+        RobotInfo[] rob = rc.senseNearbyRobots();
+        //scan for enemy HQ
+        for(RobotInfo d : rob){
+            if(d.getType().name() == "HQ"){
+                postLocation(2, d.location.x, d.location.y, 1);
+            }
+        }
+        if(at.x < dest1.x){
+            moveTo(dest1);
+        }else{
+            moveTo(dest2);
+        }
+    }
 }
+
