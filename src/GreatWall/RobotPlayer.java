@@ -56,7 +56,7 @@ public strictfp class RobotPlayer {
         path = Direction.CENTER;
 
         if(rc.getType() == RobotType.LANDSCAPER){
-            if(rc.getRoundNum() < 100){
+            if(rc.getRoundNum() < 150 && rc.getRobotCount() < 9){
                 task = "zerg";
             }else{
                 task = "wall";
@@ -294,16 +294,20 @@ public strictfp class RobotPlayer {
     static void buildWall() throws GameActionException{
         MapLocation home = getHQLocation();
         MapLocation at = rc.getLocation();
+        Direction dir = at.directionTo(home);
         if(at.distanceSquaredTo(home) > 2){
             moveTo(home);
-        }if(rc.senseNearbyRobots(home, 2, rc.getTeam()).length == 8){
+        }
+        else if(rc.canDigDirt(dir) == true) {
+        		rc.digDirt(dir);
+        }
+        //if(rc.senseNearbyRobots(home, 2, rc.getTeam()).length == 8){
             if(rc.getDirtCarrying() > 0){
-                brick(at, home);
+            	rc.depositDirt(Direction.CENTER);
             }else{
-                Direction dir = at.directionTo(home);
                 rc.digDirt(dir.opposite());
             }
-        }
+        //}
     }
 
     static void brick(MapLocation at, MapLocation home) throws GameActionException{
@@ -482,7 +486,7 @@ public strictfp class RobotPlayer {
     	 * 3 : Enemy HQ
     	*/ 
     	int[] message = new int[7];
-        message[1] = 1231241;
+        message[1] = 123121;
     	message[2] = code;
         message[3] = x;
         message[4] = y;
@@ -498,7 +502,7 @@ public strictfp class RobotPlayer {
 			if(block.length != 0) {	
 				for(int i = 0; i < block.length; i++) {
     				int[] message = block[i].getMessage();
-    				if(message[1] == 1231241 && message[2] == 1) {
+    				if(message[1] == 123121 && message[2] == 1) {
     					location = new MapLocation(message[3], message[4]);
     					return location;
     				}
@@ -517,7 +521,7 @@ public strictfp class RobotPlayer {
     			if(block.length != 0) {
     				for(int i = 0; i < block.length; i++) {
     					int[] message = block[i].getMessage();
-    					if(message[1] == 1231241 && message[2] == 2) {
+    					if(message[1] == 123121 && message[2] == 2) {
     						location = new MapLocation(message[3], message[4]);
     						System.out.println(location);
     						return location;
@@ -540,7 +544,7 @@ public strictfp class RobotPlayer {
     			if(block.length != 0) {	
     				for(int i = 0; i < block.length; i++) {
     					int[] message = block[i].getMessage();
-    					if(message[1] == 1231241 && message[2] == 3) {
+    					if(message[1] == 123121 && message[2] == 3) {
     						location = new MapLocation(message[3], message[4]);
     						System.out.println(location);
     						return location;
@@ -554,13 +558,13 @@ public strictfp class RobotPlayer {
     
     static void updateEnemyHQLocation() throws GameActionException {
     	//looks for enemy hq location in block chain and moves it to a more recent round
-    	for(int k = rc.getRoundNum()-100; k < rc.getRoundNum()-60; k++) {
+    	for(int k = rc.getRoundNum()-61; k < rc.getRoundNum()-59; k++) {
     		if(k > 0) {
     			Transaction[] block = rc.getBlock(k);
     			if(block.length != 0) {	
     				for(int i = 0; i < block.length; i++) {
     					int[] message = block[i].getMessage();
-    					if(message[1] == 1231241 && message[2] == 3) {
+    					if(message[1] == 123121 && message[2] == 3) {
     						postLocation(3, message[3], message[4], 2);
     					}	
     				}
