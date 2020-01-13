@@ -302,8 +302,14 @@ public strictfp class RobotPlayer {
     }
 
     static void runNetGun() throws GameActionException {
-
+        RobotInfo[] r = rc.senseNearbyRobots();
+        for(RobotInfo s : r){
+            if(s.getTeam() != rc.getTeam() && rc.canShootUnit(s.getID())){
+                rc.shootUnit(s.getID());
+            }
+        }
     }
+
 
     /**
      * Returns a random Direction.
