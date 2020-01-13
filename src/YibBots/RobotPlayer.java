@@ -219,7 +219,7 @@ public strictfp class RobotPlayer {
         MapLocation current = rc.getLocation();
         //alternate moving with picking up dirt
         if(current.distanceSquaredTo(HQ)>1.8) {
-            moveTo(HQ);
+            zergRush(HQ);
         }
         //if HQ is within range
         else if(rc.getDirtCarrying() > 0) {
@@ -234,6 +234,42 @@ public strictfp class RobotPlayer {
             }
         }
 
+    }
+
+    static void zergRush(MapLocation dest) throws GameActionException{
+        //Find general direction of destination
+        MapLocation loc = rc.getLocation();
+        Direction moveDirection = loc.directionTo(dest);
+
+        //see if there's a body of water in our way
+        checkFlood:
+        if(rc.senseFlooding(loc.add(moveDirection))){
+
+        }
+
+        //See if general direction is valid
+        if(rc.canMove(moveDirection)){
+            path = moveDirection.opposite();
+            tryMove(moveDirection);
+        }else if(rc.canMove(moveDirection.rotateLeft()) && moveDirection.rotateLeft() != path){
+            path = moveDirection.rotateLeft().opposite();
+            tryMove(moveDirection.rotateLeft());
+        }else if(rc.canMove(moveDirection.rotateRight()) && moveDirection.rotateRight() != path) {
+            path = moveDirection.rotateRight().opposite();
+            tryMove(moveDirection.rotateRight());
+        }else if(rc.canMove(moveDirection.rotateLeft().rotateLeft()) && moveDirection.rotateLeft().rotateLeft() != path) {
+            path = moveDirection.rotateLeft().rotateLeft().opposite();
+            tryMove(moveDirection.rotateLeft().rotateLeft());
+        }else if(rc.canMove(moveDirection.rotateRight().rotateRight()) && moveDirection.rotateRight().rotateRight() != path) {
+            path = moveDirection.rotateRight().rotateRight().opposite();
+            tryMove(moveDirection.rotateRight().rotateRight());
+        }else if(rc.canMove(moveDirection.rotateLeft().rotateLeft().rotateLeft()) && moveDirection.rotateLeft().rotateLeft().rotateLeft() != path) {
+            path = moveDirection.rotateLeft().rotateLeft().rotateLeft().opposite();
+            tryMove(moveDirection.rotateLeft().rotateLeft().rotateLeft());
+        }else if(rc.canMove(moveDirection.rotateRight().rotateRight().rotateRight()) && moveDirection.rotateRight().rotateRight().rotateRight() != path) {
+            path = moveDirection.rotateRight().rotateRight().rotateRight().opposite();
+            tryMove(moveDirection.rotateRight().rotateRight().rotateRight());
+        }
     }
 
     static void runDeliveryDrone() throws GameActionException {
