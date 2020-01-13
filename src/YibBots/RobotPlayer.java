@@ -113,24 +113,20 @@ public strictfp class RobotPlayer {
         }
         //MINE SOUP
         if (souploc != null && rc.getSoupCarrying() < 100){
-            System.out.println("MINING SOUP");
             mineSoup();
         }
         //MOVE BACK TO HQ AND DEPOSIT SOUP (todo: implement refineries)
         else if (rc.getSoupCarrying() > 95){
             for (Direction dir : directions){
                 if(rc.canDepositSoup(dir)){
-                    System.out.println("DEPOSIT SOUP");
                     rc.depositSoup(dir, rc.getSoupCarrying());
 
                 }
             }
-            System.out.println("MOVING BACK TO HQ");
             moveTo(initialLoc);
         }
         //FIND SOUP
         else {
-            System.out.println("FIND SOUP");
             findSoup(curr);
         }
         
@@ -225,12 +221,11 @@ public strictfp class RobotPlayer {
         else if(rc.getDirtCarrying() > 0) {
             Direction dir = current.directionTo(HQ);
             rc.depositDirt(dir);
+            System.out.println("DUMPING");
         }
         else {
-            for(Direction dir : directions){
-                if(rc.canDigDirt(dir)) {
-                    rc.digDirt(dir);
-                }
+            if(rc.canDigDirt(current.directionTo(HQ).opposite())) {
+                rc.digDirt(current.directionTo(HQ).opposite());
             }
         }
 
