@@ -235,6 +235,7 @@ public strictfp class RobotPlayer {
         MapLocation loc = rc.getLocation();
         Direction moveDirection = loc.directionTo(dest);
 
+        //dig through barriers
         if(rc.senseElevation(rc.adjacentLocation(moveDirection)) > 3 && rc.senseElevation(rc.adjacentLocation(moveDirection.rotateLeft())) > 3 && rc.senseElevation(rc.adjacentLocation(moveDirection.rotateRight())) > 3){
             if(rc.getDirtCarrying() == 25){
                 rc.depositDirt(moveDirection.rotateLeft().rotateLeft());
@@ -242,6 +243,12 @@ public strictfp class RobotPlayer {
             rc.digDirt(moveDirection);
         }
 
+//        if(rc.senseFlooding(rc.adjacentLocation(moveDirection)) && rc.senseFlooding(rc.adjacentLocation(moveDirection.rotateLeft())) && rc.senseFlooding(rc.adjacentLocation(moveDirection.rotateRight())) && rc.senseFlooding(rc.adjacentLocation(moveDirection.rotateRight())) && rc.senseFlooding(rc.adjacentLocation(moveDirection.rotateRight())) && rc.senseFlooding(rc.adjacentLocation(moveDirection.rotateRight())) && rc.senseFlooding(rc.adjacentLocation(moveDirection.rotateRight()))) {
+//            if(rc.getDirtCarrying() > 0){
+//                rc.depositDirt(moveDirection);
+//            }
+//            rc.digDirt(moveDirection.opposite().rotateLeft());
+//        }
         //See if general direction is valid
         if(rc.canMove(moveDirection)){
             path = moveDirection.opposite();
