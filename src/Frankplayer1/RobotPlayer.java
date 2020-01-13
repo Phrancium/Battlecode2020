@@ -41,16 +41,7 @@ public strictfp class RobotPlayer {
         lastT = directions[3];
         destination = null;
 
-        dIndex.put(Direction.NORTH, 1);
-        dIndex.put(Direction.NORTHEAST, 2);
-        dIndex.put(Direction.EAST, 3);
-        dIndex.put(Direction.SOUTHEAST, 4);
-        dIndex.put(Direction.SOUTH, 5);
-        dIndex.put(Direction.SOUTHWEST, 6);
-        dIndex.put(Direction.WEST, 7);
-        dIndex.put(Direction.NORTHWEST, 8);
 
-        System.out.println("I'm a " + rc.getType() + " and I just got created!");
         while (true) {
             turnCount += 1;
             // Try/catch blocks stop unhandled exceptions, which cause your robot to explode
@@ -134,6 +125,29 @@ public strictfp class RobotPlayer {
         }
         tryMove(d);
     }
+
+
+    static void findEnemyHQ(MapLocation at) throws GameActionException{
+        int hqX = 0;
+        int hqY = 0;
+        int mapW = rc.getMapWidth();
+        int mapH = rc.getMapHeight();
+        MapLocation dest1 = new MapLocation(hqX, mapH-hqY);
+        MapLocation dest2 = new MapLocation(mapW-hqX, mapH-hqY);
+
+        RobotInfo[] rob = rc.senseNearbyRobots();
+        for(RobotInfo d : rob){
+            if(d.getType().name() == "HQ"){
+
+            }
+        }
+        if(at.x < dest1.x){
+            moveTo(at, dest1);
+        }else{
+            moveTo(at, dest2);
+        }
+    }
+
 
     static void runRefinery() throws GameActionException {
         // System.out.println("Pollution: " + rc.sensePollution(rc.getLocation()));
@@ -278,34 +292,127 @@ public strictfp class RobotPlayer {
      * @throws GameActionException
      */
 
-    static void moveTo(MapLocation at, MapLocation to) throws GameActionException{
-        Direction goal = at.directionTo(to);
-        int start = dIndex.get(goal);
+    static void moveTo(MapLocation at, MapLocation to) throws GameActionException {
+        int xDiff = at.x - to.x;
+        int yDiff = at.y - to.y;
+//        Direction goal = at.directionTo(to);
+//        int start = dIndex.get(goal);
         destination = to;
-        if(tryMove(goal)){
-        }else{
-            switch (start){
-                case 1:
-                    if(tryMove(directions[8])){}else if (tryMove(directions[2])){}else if (tryMove(directions[7])){}else if (tryMove(directions[3])){}else if (tryMove(directions[6])){}else if (tryMove(directions[4])){}
-                case 2:
-                    if(tryMove(directions[1])){}else if (tryMove(directions[3])){}else if (tryMove(directions[8])){}else if (tryMove(directions[4])){}else if (tryMove(directions[7])){}else if (tryMove(directions[5])){}
-                case 3:
-                    if(tryMove(directions[2])){}else if (tryMove(directions[4])){}else if (tryMove(directions[1])){}else if (tryMove(directions[5])){}else if (tryMove(directions[8])){}else if (tryMove(directions[6])){}
-                case 4:
-                    if(tryMove(directions[3])){}else if (tryMove(directions[5])){}else if (tryMove(directions[2])){}else if (tryMove(directions[6])){}else if (tryMove(directions[1])){}else if (tryMove(directions[7])){}
-                case 5:
-                    if(tryMove(directions[4])){}else if (tryMove(directions[6])){}else if (tryMove(directions[3])){}else if (tryMove(directions[7])){}else if (tryMove(directions[2])){}else if (tryMove(directions[8])){}
-                case 6:
-                    if(tryMove(directions[5])){}else if (tryMove(directions[7])){}else if (tryMove(directions[4])){}else if (tryMove(directions[8])){}else if (tryMove(directions[3])){}else if (tryMove(directions[1])){}
-                case 7:
-                    if(tryMove(directions[6])){}else if (tryMove(directions[8])){}else if (tryMove(directions[5])){}else if (tryMove(directions[1])){}else if (tryMove(directions[4])){}else if (tryMove(directions[2])){}
-                case 8:
-                    if(tryMove(directions[7])){}else if (tryMove(directions[1])){}else if (tryMove(directions[6])){}else if (tryMove(directions[2])){}else if (tryMove(directions[5])){}else if (tryMove(directions[3])){}
+        if (Math.abs(xDiff) > Math.abs(yDiff)) {
+            if (xDiff > 0) {
+                if (yDiff > 0) {
+                    if (tryMove(Direction.SOUTHWEST)) {
+                    } else if (tryMove(Direction.WEST)) {
+                    } else if (tryMove(Direction.SOUTH)) {
+                    } else if (tryMove(Direction.SOUTHEAST)) {
+                    } else if (tryMove(Direction.NORTHWEST)) {
+                    } else if (tryMove(Direction.NORTH)) {
+                    } else if (tryMove(Direction.EAST)) {
+                    }
+
+                } else if (yDiff < 0) {
+                    if (tryMove(Direction.NORTHWEST)) {
+                    } else if (tryMove(Direction.WEST)) {
+                    } else if (tryMove(Direction.NORTH)) {
+                    } else if (tryMove(Direction.SOUTHWEST)) {
+                    } else if (tryMove(Direction.NORTHEAST)) {
+                    } else if (tryMove(Direction.SOUTH)) {
+                    } else if (tryMove(Direction.EAST)) {
+                    }
+                } else {
+                    if (tryMove(Direction.WEST)) {
+                    } else if (tryMove(Direction.NORTHWEST)) {
+                    } else if (tryMove(Direction.SOUTHWEST)) {
+                    } else if (tryMove(Direction.SOUTH)) {
+                    } else if (tryMove(Direction.NORTH)) {
+                    }
+                }
+            } else {
+                if (yDiff > 0) {
+                    if (tryMove(Direction.SOUTHEAST)) {
+                    } else if (tryMove(Direction.EAST)) {
+                    } else if (tryMove(Direction.SOUTH)) {
+                    } else if (tryMove(Direction.NORTHEAST)) {
+                    } else if (tryMove(Direction.SOUTHWEST)) {
+                    } else if (tryMove(Direction.SOUTH)) {
+                    } else if (tryMove(Direction.EAST)) {
+                    }
+                } else if (yDiff < 0) {
+                    if (tryMove(Direction.NORTHEAST)) {
+                    } else if (tryMove(Direction.EAST)) {
+                    } else if (tryMove(Direction.NORTH)) {
+                    } else if (tryMove(Direction.SOUTHEAST)) {
+                    } else if (tryMove(Direction.NORTHWEST)) {
+                    } else if (tryMove(Direction.SOUTH)) {
+                    } else if (tryMove(Direction.WEST)) {
+                    }
+                } else {
+                    if (tryMove(Direction.EAST)) {
+                    } else if (tryMove(Direction.NORTHEAST)) {
+                    } else if (tryMove(Direction.SOUTHEAST)) {
+                    } else if (tryMove(Direction.SOUTH)) {
+                    } else if (tryMove(Direction.NORTH)) {
+                    }
+                }
             }
-
+        } else {
+            if (yDiff > 0) {
+                if (xDiff > 0) {
+                    if (tryMove(Direction.SOUTHWEST)) {
+                    } else if (tryMove(Direction.WEST)) {
+                    } else if (tryMove(Direction.SOUTH)) {
+                    } else if (tryMove(Direction.SOUTHEAST)) {
+                    } else if (tryMove(Direction.NORTHWEST)) {
+                    } else if (tryMove(Direction.NORTH)) {
+                    } else if (tryMove(Direction.EAST)) {
+                    }
+                } else if (xDiff < 0) {
+                    if (tryMove(Direction.SOUTHEAST)) {
+                    } else if (tryMove(Direction.EAST)) {
+                    } else if (tryMove(Direction.SOUTH)) {
+                    } else if (tryMove(Direction.NORTHEAST)) {
+                    } else if (tryMove(Direction.SOUTHWEST)) {
+                    } else if (tryMove(Direction.SOUTH)) {
+                    } else if (tryMove(Direction.EAST)) {
+                    }
+                } else {
+                    if (tryMove(Direction.SOUTH)) {
+                    } else if (tryMove(Direction.SOUTHEAST)) {
+                    } else if (tryMove(Direction.SOUTHWEST)) {
+                    } else if (tryMove(Direction.EAST)) {
+                    } else if (tryMove(Direction.WEST)) {
+                    }
+                }
+            } else {
+                if (xDiff > 0) {
+                    if (tryMove(Direction.NORTHWEST)) {
+                    } else if (tryMove(Direction.WEST)) {
+                    } else if (tryMove(Direction.NORTH)) {
+                    } else if (tryMove(Direction.SOUTHWEST)) {
+                    } else if (tryMove(Direction.NORTHEAST)) {
+                    } else if (tryMove(Direction.SOUTH)) {
+                    } else if (tryMove(Direction.EAST)) {
+                    }
+                } else if (xDiff < 0) {
+                    if (tryMove(Direction.NORTHEAST)) {
+                    } else if (tryMove(Direction.EAST)) {
+                    } else if (tryMove(Direction.NORTH)) {
+                    } else if (tryMove(Direction.SOUTHEAST)) {
+                    } else if (tryMove(Direction.NORTHWEST)) {
+                    } else if (tryMove(Direction.SOUTH)) {
+                    } else if (tryMove(Direction.WEST)) {
+                    }
+                } else {
+                    if (tryMove(Direction.NORTH)) {
+                    } else if (tryMove(Direction.NORTHWEST)) {
+                    } else if (tryMove(Direction.NORTHEAST)) {
+                    } else if (tryMove(Direction.EAST)) {
+                    } else if (tryMove(Direction.WEST)) {
+                    }
+                }
+            }
         }
-
-    }
+        }
     /**
      * Attempts to build a given robot in a given direction.
      *

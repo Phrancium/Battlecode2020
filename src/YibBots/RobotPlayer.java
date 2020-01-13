@@ -24,6 +24,8 @@ public strictfp class RobotPlayer {
 
     static MapLocation initialLoc;
 
+    static MapLocation souploc;
+
     static Direction path;
 
     static String task;
@@ -43,10 +45,12 @@ public strictfp class RobotPlayer {
 
         turnCount = 0;
 
+        souploc = null;
+
         path = Direction.CENTER;
 
         task = "idle";
-        
+
         initialLoc = rc.getLocation();
         System.out.println("INITIAL LOCATION IS: " + initialLoc);
 
@@ -97,24 +101,20 @@ public strictfp class RobotPlayer {
 
     static void runMiner() throws GameActionException {
         MapLocation curr = rc.getLocation();
+        scanForSoup(curr);
+        souploc = getSoupLocation();
         //build design school
         if (rc.getRobotCount() == 4) {
         	for (Direction dir : directions)
         		tryBuild(RobotType.DESIGN_SCHOOL,dir);
         }
         //MINE SOUP
-        if (rc.canMineSoup(Direction.EAST) && rc.getSoupCarrying() < 100){
+        if (souploc != null && rc.getSoupCarrying() < 100){
             System.out.println("MINING SOUP");
-            tryMine(Direction.EAST);
+            mineSoup();
         }
-        //MOVE BACK TO HQ (todo: implement refineries)
-        else if (rc.getSoupCarrying() > 95 && !curr.equals(initialLoc)){
-            System.out.println("MOVING BACK TO HQ");
-            moveTo(initialLoc);
-
-        }
-        //DEPOSIT SOUP
-        else if(curr.equals(initialLoc) && rc.getSoupCarrying() > 0){
+        //MOVE BACK TO HQ AND DEPOSIT SOUP (todo: implement refineries)
+        else if (rc.getSoupCarrying() > 95){
             for (Direction dir : directions){
                 if(rc.canDepositSoup(dir)){
                     System.out.println("DEPOSIT SOUP");
@@ -122,6 +122,8 @@ public strictfp class RobotPlayer {
 
                 }
             }
+            System.out.println("MOVING BACK TO HQ");
+            moveTo(initialLoc);
         }
         //FIND SOUP
         else {
@@ -158,6 +160,16 @@ public strictfp class RobotPlayer {
     	Direction d = randomDirection();
     	int selfX = loc.x;
         int selfY = loc.y;
+        scanForSoup(loc);
+//        if(getSoupLocation() != null)
+//        	moveTo(getSoupLocation());
+//        else
+        	tryMove(d);
+    }
+
+    static void scanForSoup(MapLocation loc) throws GameActionException{
+        int selfX = loc.x;
+        int selfY = loc.y;
         scan:
         for(int x = -5; x <6; x++){
             for (int y = -5; y < 6; y++){
@@ -167,19 +179,15 @@ public strictfp class RobotPlayer {
                         //plusOrMinusOne makes Miner stop either left or right of soup
                         //double rando = Math.random();
                         //int plusOrMinusOne = (int)Math.signum(rando - 0.5);
-                    	if(getSoupLocation() == null)
-                    		postLocation(2, check.x, check.y, 1);
-                    	moveTo(new MapLocation(check.x - 1, check.y));
+                        if(getSoupLocation() == null)
+                            postLocation(2, check.x, check.y, 1);
+//                    	moveTo(new MapLocation(check.x - 1, check.y));
                         break scan;
                         //upload location of soup to blockchain?
                     }
                 }
             }
         }
-        if(getSoupLocation() != null)
-        	moveTo(getSoupLocation());
-        else
-        	tryMove(d);
     }
 
     static void runRefinery() throws GameActionException {
@@ -314,10 +322,28 @@ public strictfp class RobotPlayer {
         Direction moveDirection = loc.directionTo(dest);
 
         //See if general direction is valid
-        if(tryMove(moveDirection)){
-
-        }
-        else{
+        if(rc.canMove(moveDirection)){
+            path = moveDirection.opposite();
+            tryMove(moveDirection);
+        }else if(rc.canMove(moveDirection.rotateLeft()) && moveDirection.rotateLeft() != path){
+            path = moveDirection.rotateLeft().opposite();
+            tryMove(moveDirection.rotateLeft());
+        }else if(rc.canMove(moveDirection.rotateRight()) && moveDirection.rotateRight() != path) {
+            path = moveDirection.rotateRight().opposite();
+            tryMove(moveDirection.rotateRight());
+        }else if(rc.canMove(moveDirection.rotateLeft().rotateLeft()) && moveDirection.rotateLeft().rotateLeft() != path) {
+            path = moveDirection.rotateLeft().rotateLeft().opposite();
+            tryMove(moveDirection.rotateLeft().rotateLeft());
+        }else if(rc.canMove(moveDirection.rotateRight().rotateRight()) && moveDirection.rotateRight().rotateRight() != path) {
+            path = moveDirection.rotateRight().rotateRight().opposite();
+            tryMove(moveDirection.rotateRight().rotateRight());
+        }else if(rc.canMove(moveDirection.rotateLeft().rotateLeft().rotateLeft()) && moveDirection.rotateLeft().rotateLeft().rotateLeft() != path) {
+            path = moveDirection.rotateLeft().rotateLeft().rotateLeft().opposite();
+            tryMove(moveDirection.rotateLeft().rotateLeft().rotateLeft());
+        }else if(rc.canMove(moveDirection.rotateRight().rotateRight().rotateRight()) && moveDirection.rotateRight().rotateRight().rotateRight() != path) {
+            path = moveDirection.rotateRight().rotateRight().rotateRight().opposite();
+            tryMove(moveDirection.rotateRight().rotateRight().rotateRight());
+        } else{
             tryMove(randomDirection());
         }
     }
@@ -402,7 +428,7 @@ public strictfp class RobotPlayer {
     static MapLocation getSoupLocation() throws GameActionException {
     	//does not currently work
     	MapLocation location = null;
-    	for(int k = rc.getRoundNum()-30; k < rc.getRoundNum()-1; k++) {
+    	for(int k = rc.getRoundNum()-20; k < rc.getRoundNum()-1; k++) {
     		if(k > 0) {
     			Transaction[] block = rc.getBlock(k);
     			if(block.length != 0) {
@@ -459,6 +485,33 @@ public strictfp class RobotPlayer {
     		}
     	}
     }
+    /**robot mines soup **/
+
+    static void mineSoup() throws GameActionException{
+        for (Direction l : directions) {
+            if (rc.canMineSoup(l)) {
+                rc.mineSoup(l);
+            }
+        }
+        moveTo(souploc);
+    }
+    /**
+     * Scouting method run at beginning to find soup
+     *
+     * @throws GameActionException
+     */
+    static void goHome(MapLocation m) throws GameActionException {
+        Direction d = randomDirection();
+        for (Direction l : directions) {
+            if (rc.canDepositSoup(l)) {
+                System.out.println("I deposited soup");
+                rc.depositSoup(l, rc.getSoupCarrying());
+            }
+        }
+        tryMove(d);
+    }
+
+    //scouting route to find enemy HQ
     static void findEnemyHQ(MapLocation at) throws GameActionException{
         MapLocation home = getHQLocation();
         int hqX = home.x;
@@ -474,7 +527,7 @@ public strictfp class RobotPlayer {
         //scan for enemy HQ
         for(RobotInfo d : rob){
             if(d.getType().name() == "HQ"){
-                postLocation(2, d.location.x, d.location.y, 1);
+                postLocation(3, d.location.x, d.location.y, 1);
             }
         }
         if(at.x < dest1.x){
