@@ -235,6 +235,10 @@ public strictfp class RobotPlayer {
         MapLocation loc = rc.getLocation();
         Direction moveDirection = loc.directionTo(dest);
 
+        if(rc.senseElevation(loc.add(moveDirection)) > 3 && rc.senseElevation(loc.add(moveDirection.rotateLeft())) > 3 && rc.senseElevation(loc.add(moveDirection.rotateRight())) > 3){
+            rc.digDirt(moveDirection);
+        }
+
         //See if general direction is valid
         if(rc.canMove(moveDirection)){
             path = moveDirection.opposite();
