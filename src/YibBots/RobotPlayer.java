@@ -539,7 +539,7 @@ public strictfp class RobotPlayer {
         RobotInfo[] rob = rc.senseNearbyRobots();
         //scan for enemy HQ
         for(RobotInfo d : rob){
-            if(d.getType().name() == "HQ"){
+            if(d.getType().name() == "HQ" && d.getTeam() != rc.getTeam()){
                 postLocation(3, d.location.x, d.location.y, 1);
             }
         }
