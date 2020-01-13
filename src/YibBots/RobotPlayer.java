@@ -236,6 +236,9 @@ public strictfp class RobotPlayer {
         Direction moveDirection = loc.directionTo(dest);
 
         if(rc.senseElevation(rc.adjacentLocation(moveDirection)) > 3 && rc.senseElevation(rc.adjacentLocation(moveDirection.rotateLeft())) > 3 && rc.senseElevation(rc.adjacentLocation(moveDirection.rotateRight())) > 3){
+            if(rc.getDirtCarrying() == 25){
+                rc.depositDirt(moveDirection.rotateLeft().rotateLeft());
+            }
             rc.digDirt(moveDirection);
         }
 
