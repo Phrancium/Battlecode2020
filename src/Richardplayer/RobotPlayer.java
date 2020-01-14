@@ -58,10 +58,21 @@ public strictfp class RobotPlayer {
         if(rc.getType() == RobotType.LANDSCAPER){
             if(rc.getRoundNum() < 150 && rc.getRobotCount() < 9){
                 task = "zerg";
-            }else{
+            }
+            else{
                 task = "wall";
             }
         }
+        
+        if(rc.getType() == RobotType.MINER){
+            if(rc.getRoundNum() < 150 && rc.getRobotCount() == 4){
+                task = "zerg";
+            }
+            else{
+                task = "mine";
+            }
+        }
+        
 
         initialLoc = rc.getLocation();
         System.out.println("INITIAL LOCATION IS: " + initialLoc);
@@ -120,12 +131,46 @@ public strictfp class RobotPlayer {
                 }
             }
         }
+    	if(rc.getRobotCount() == 9) {
+    		for (Direction dir : directions) {
+                tryBuild(RobotType.MINER, dir);
+    		}
+    	}
     	updateEnemyHQLocation();
         //}
     }
 
     static void runMiner() throws GameActionException {
-        MapLocation curr = rc.getLocation();
+        if(task == "zerg" && rc.getRobotCount() > 7) {
+        	MapLocation HQ = getEnemyHQLocation();
+            if (HQ == null)
+                findEnemyHQ(rc.getLocation());
+            MapLocation current = rc.getLocation();
+            if (current.distanceSquaredTo(HQ) > 12) {
+                moveTo(HQ);
+            }
+            else{
+            	RobotInfo[] rob = rc.senseNearbyRobots();
+                //scan for net gun
+                for(RobotInfo d : rob){
+                    if(d.getType().name() == "NET_GUN" && d.getTeam() == rc.getTeam()){
+                    	task = "return";
+                    	break;
+                    }
+                }
+                for (Direction dir : directions) {
+                    tryBuild(RobotType.NET_GUN, dir);
+                }
+            }
+        }
+        if(task == "return") {
+        	if(rc.getLocation() == initialLoc)
+        		task = "mine";
+        	else
+        		moveTo(initialLoc);
+        }
+        else {
+    	MapLocation curr = rc.getLocation();
         scanForSoup(curr);
         souploc = getSoupLocation();
         //build design school
@@ -156,6 +201,7 @@ public strictfp class RobotPlayer {
         //FIND SOUP
         else {
             findSoup(curr);
+        }
         }
         
         // tryBlockchain();
@@ -251,9 +297,30 @@ public strictfp class RobotPlayer {
                 findEnemyHQ(rc.getLocation());
             MapLocation current = rc.getLocation();
             //move to enemy HQ
+            RobotInfo[] rob = rc.senseNearbyRobots();
+            //scan for enemy buildings
+            for(RobotInfo d : rob){
+                if((d.getType().name() == "DESIGN_SCHOOL" || d.getType().name() == "FULFILLMENT_CENTER")  && d.getTeam() != rc.getTeam()){
+                    postLocation(4, d.location.x, d.location.y, 1);
+                }
+            }
+            MapLocation enemy = getEnemyBuildingLocation();
+            if(enemy != null) {
+            	if (current.distanceSquaredTo(enemy) > 2) {
+                    zergRush(enemy);
+                }
+            	else if(current.distanceSquaredTo(enemy) < 2){
+                        if(rc.getDirtCarrying() > 0){
+                            rc.depositDirt(current.directionTo(enemy));
+                        }
+                        else{
+                            rc.digDirt(current.directionTo(enemy).opposite());
+                        }
+            	}
+            }
             if (current.distanceSquaredTo(HQ) > 8) {
                 zergRush(HQ);
-            }else if(current.distanceSquaredTo(HQ) > 2){
+            }else if(current.distanceSquaredTo(HQ) > 3){
                 if(isEnemyHQFull(HQ)){
                     if(rc.getDirtCarrying() == 25){
                         rc.depositDirt(current.directionTo(HQ).opposite());
@@ -584,6 +651,27 @@ public strictfp class RobotPlayer {
     				for(int i = 0; i < block.length; i++) {
     					int[] message = block[i].getMessage();
     					if(message[1] == 1231215 && message[2] == 3) {
+    						location = new MapLocation(message[3], message[4]);
+    						System.out.println(location);
+    						return location;
+    					}
+    				}
+    			}
+    		}
+    	}
+    	return location;
+    }
+    
+    static MapLocation getEnemyBuildingLocation() throws GameActionException {
+    	//returns the enemy design school or fulfillment center location as a MapLocation
+    	MapLocation location = null;
+    	for(int k = rc.getRoundNum()-1; k > rc.getRoundNum()-20; k--) {
+    		if(k > 0) {
+    			Transaction[] block = rc.getBlock(k);
+    			if(block.length != 0) {	
+    				for(int i = 0; i < block.length; i++) {
+    					int[] message = block[i].getMessage();
+    					if(message[1] == 1231215 && message[2] == 4) {
     						location = new MapLocation(message[3], message[4]);
     						System.out.println(location);
     						return location;
