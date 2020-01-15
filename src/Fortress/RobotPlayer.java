@@ -525,7 +525,7 @@ public strictfp class RobotPlayer {
     	 * 3 : Enemy HQ
     	*/ 
     	int[] message = new int[7];
-        message[1] = 123121;
+        message[1] = 998997;
     	message[2] = code;
         message[3] = x;
         message[4] = y;
@@ -541,7 +541,7 @@ public strictfp class RobotPlayer {
 			if(block.length != 0) {	
 				for(int i = 0; i < block.length; i++) {
     				int[] message = block[i].getMessage();
-    				if(message[1] == 123121 && message[2] == 1) {
+    				if(message[1] == 998997 && message[2] == 1) {
     					location = new MapLocation(message[3], message[4]);
     					return location;
     				}
@@ -560,7 +560,7 @@ public strictfp class RobotPlayer {
     			if(block.length != 0) {
     				for(int i = 0; i < block.length; i++) {
     					int[] message = block[i].getMessage();
-    					if(message[1] == 123121 && message[2] == 2) {
+    					if(message[1] == 998997 && message[2] == 2) {
     						location = new MapLocation(message[3], message[4]);
     						System.out.println(location);
     						return location;
@@ -583,7 +583,7 @@ public strictfp class RobotPlayer {
     			if(block.length != 0) {	
     				for(int i = 0; i < block.length; i++) {
     					int[] message = block[i].getMessage();
-    					if(message[1] == 123121 && message[2] == 3) {
+    					if(message[1] == 998997 && message[2] == 3) {
     						location = new MapLocation(message[3], message[4]);
     						System.out.println(location);
     						return location;
@@ -603,7 +603,7 @@ public strictfp class RobotPlayer {
     			if(block.length != 0) {	
     				for(int i = 0; i < block.length; i++) {
     					int[] message = block[i].getMessage();
-    					if(message[1] == 123121 && message[2] == 3) {
+    					if(message[1] == 998997 && message[2] == 3) {
     						postLocation(3, message[3], message[4], 2);
     					}	
     				}
