@@ -251,19 +251,19 @@ public strictfp class RobotPlayer {
                 findEnemyHQ(rc.getLocation());
             MapLocation current = rc.getLocation();
             //move to enemy HQ
-            if (current.distanceSquaredTo(HQ) > 8) {
+            if (current.distanceSquaredTo(HQ) > 2) {
                 zergRush(HQ);
-            }else if(current.distanceSquaredTo(HQ) > 2){
-                if(isEnemyHQFull(HQ)){
-                    if(rc.getDirtCarrying() == 25){
-                        rc.depositDirt(current.directionTo(HQ).opposite());
-                    }else{
-                        rc.digDirt(current.directionTo(HQ));
-                    }
-                }else{
-                    zergRush(HQ);
-                }
-            }
+            }//else if(current.distanceSquaredTo(HQ) > 2){
+//                if(isEnemyHQFull(HQ)){
+//                    if(rc.getDirtCarrying() == 25){
+//                        rc.depositDirt(current.directionTo(HQ).opposite());
+//                    }else{
+//                        rc.digDirt(current.directionTo(HQ));
+//                    }
+//                }else{
+//                    zergRush(HQ);
+//                }
+//            }
             //if HQ is within range
             else if (rc.getDirtCarrying() > 0) {
                 Direction dir = current.directionTo(HQ);
@@ -308,7 +308,7 @@ public strictfp class RobotPlayer {
         if(at.distanceSquaredTo(home) > 2){
             moveTo(home);
         }
-        else if(rc.canDigDirt(dir) == true) {
+        else if(rc.canDigDirt(dir)) {
         		rc.digDirt(dir);
         }
         //if(rc.senseNearbyRobots(home, 2, rc.getTeam()).length == 8){
@@ -320,20 +320,20 @@ public strictfp class RobotPlayer {
         //}
     }
 
-    static void brick(MapLocation at, MapLocation home) throws GameActionException{
-        Direction dir = at.directionTo(home);
-        switch (dir){
-            case NORTH: rc.depositDirt(Direction.EAST); break;
-            case NORTHEAST: rc.depositDirt(Direction.EAST); break;
-            case NORTHWEST: rc.depositDirt(Direction.NORTH);break;
-            case SOUTH: rc.depositDirt(Direction.WEST);break;
-            case SOUTHEAST: rc.depositDirt(Direction.SOUTH);break;
-            case SOUTHWEST: rc.depositDirt(Direction.WEST);break;
-            case WEST: rc.depositDirt(Direction.NORTH);break;
-            case EAST: rc.depositDirt(Direction.SOUTH);break;
-        }
-
-    }
+//    static void brick(MapLocation at, MapLocation home) throws GameActionException{
+//        Direction dir = at.directionTo(home);
+//        switch (dir){
+//            case NORTH: rc.depositDirt(Direction.EAST); break;
+//            case NORTHEAST: rc.depositDirt(Direction.EAST); break;
+//            case NORTHWEST: rc.depositDirt(Direction.NORTH);break;
+//            case SOUTH: rc.depositDirt(Direction.WEST);break;
+//            case SOUTHEAST: rc.depositDirt(Direction.SOUTH);break;
+//            case SOUTHWEST: rc.depositDirt(Direction.WEST);break;
+//            case WEST: rc.depositDirt(Direction.NORTH);break;
+//            case EAST: rc.depositDirt(Direction.SOUTH);break;
+//        }
+//
+//    }
 
     static boolean isEnemyHQFull(MapLocation en) throws GameActionException{
         MapLocation curr = rc.getLocation();
