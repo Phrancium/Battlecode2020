@@ -10,6 +10,8 @@ TO-DO LIST:
     b) robot shield code
 5. vaporators
 6. make fortress code
+7. extra files in package for class extensions or readable text files?
+8. Deal with cows
 
 
 So after watching the sprint tournament I think it's obvious that rush and simply building a wall isn't gonna work. I do think that we have a
@@ -27,7 +29,7 @@ scapers that venture outside the enemy hq early game, letting us cripple their e
 can be filled with location of our stationary units and buildings, enemy hq, soup locations, and water locations, which allows for much better
 pathing and navigation. Updating the map is the trickiest part, but we can have each robot post their new findings to the blockchain every round
 and call the previous round and update their map. We can also have our hq post the map as a serialized large integer every round but that will be
-tricky.
+tricky. We can maybe store the map in a text file that classes use a scanner to read?
 -Drone Bodyguards: Drones are the only units that can do anything late game but defending against them is hard since having a net gun in the late
 game requires a ton of investment. The only things drones can't destroy tho is other drones, so in order to protect our base late game we need a
 ring of drones circling our base to bodyblock enemy drones and let our landscapers build in peace. This should be easy to implement once we have
@@ -43,3 +45,4 @@ Minor stuff:
 -sometimes miners need landscapers to help them reach soup, we need to code that bc the devs are troll and like putting a lot of soup in unreachable places
 -miners and also use drones to reach soup and then build a refinery
 -some maps don't have a lot of space for us to build or put units, we need to be able to recognize that and adjust our production
+

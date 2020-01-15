@@ -312,12 +312,35 @@ public strictfp class RobotPlayer {
         		rc.digDirt(dir);
         }
         //if(rc.senseNearbyRobots(home, 2, rc.getTeam()).length == 8){
-            if(rc.getDirtCarrying() > 0){
-            	rc.depositDirt(Direction.CENTER);
-            }else{
-                rc.digDirt(dir.opposite());
-            }
+        if(rc.getDirtCarrying() > 0){
+            buildWallHelper(at, home, dir);
+        }else{
+            rc.digDirt(dir.opposite());
+        }
         //}
+    }
+
+    static void buildWallHelper(MapLocation at, MapLocation home, Direction dir) throws GameActionException{
+        Direction[] ar = {Direction.NORTH, Direction.EAST, Direction.SOUTH, Direction.WEST};
+        if(rc.getRoundNum() > 600){
+            for(Direction f : ar){
+                if(rc.onTheMap(home.add(f)) && !rc.isLocationOccupied(home.add(f))){
+                    if(rc.senseElevation(at.add(at.directionTo(home.add(f)))) - rc.senseElevation(at) > 3){
+                        rc.depositDirt(at.directionTo(home.add(f)));
+                    }else if(rc.senseElevation(at.add(at.directionTo(home.add(f)))) - rc.senseElevation(at) < 3){
+                        rc.depositDirt(Direction.CENTER);
+                    }else{
+                        moveTo(home.add(f));
+                    }
+                }
+            }
+            for(Direction f : directions){
+                if(rc.onTheMap(at.add(f)) && at.add(f).isAdjacentTo(home) && rc.senseElevation(at.add(f)) < rc.senseElevation(at)){
+                    rc.depositDirt(f);
+                }
+            }
+        }
+        rc.depositDirt(Direction.CENTER);
     }
 
     static void brick(MapLocation at, MapLocation home) throws GameActionException{
@@ -339,21 +362,21 @@ public strictfp class RobotPlayer {
         MapLocation curr = rc.getLocation();
         if(!rc.isLocationOccupied(en)){
             return false;
-        }else if(!rc.isLocationOccupied(en.add(Direction.NORTH))){
+        }else if(rc.onTheMap(en.add(Direction.NORTH)) && !rc.isLocationOccupied(en.add(Direction.NORTH))){
             return false;
-        }else if(!rc.isLocationOccupied(en.add(Direction.NORTHEAST))){
+        }else if(rc.onTheMap(en.add(Direction.NORTHEAST)) && !rc.isLocationOccupied(en.add(Direction.NORTHEAST))){
             return false;
-        }else if(!rc.isLocationOccupied(en.add(Direction.NORTHWEST))){
+        }else if(rc.onTheMap(en.add(Direction.NORTHWEST)) && !rc.isLocationOccupied(en.add(Direction.NORTHWEST))){
             return false;
-        }else if(!rc.isLocationOccupied(en.add(Direction.SOUTH))){
+        }else if(rc.onTheMap(en.add(Direction.SOUTH)) && !rc.isLocationOccupied(en.add(Direction.SOUTH))){
             return false;
-        }else if(!rc.isLocationOccupied(en.add(Direction.SOUTHEAST))){
+        }else if(rc.onTheMap(en.add(Direction.SOUTHEAST)) && !rc.isLocationOccupied(en.add(Direction.SOUTHEAST))){
             return false;
-        }else if(!rc.isLocationOccupied(en.add(Direction.SOUTHWEST))){
+        }else if(rc.onTheMap(en.add(Direction.SOUTHWEST)) && !rc.isLocationOccupied(en.add(Direction.SOUTHWEST))){
             return false;
-        }else if(!rc.isLocationOccupied(en.add(Direction.WEST))){
+        }else if(rc.onTheMap(en.add(Direction.WEST)) && !rc.isLocationOccupied(en.add(Direction.WEST))){
             return false;
-        }else if(!rc.isLocationOccupied(en.add(Direction.EAST))){
+        }else if(rc.onTheMap(en.add(Direction.EAST)) && !rc.isLocationOccupied(en.add(Direction.EAST))){
             return false;
         }
         return true;
