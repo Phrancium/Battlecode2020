@@ -1,0 +1,45 @@
+TO-DO LIST:
+1. make a map
+2. improve blockchain codes and commands
+    a)send commands to robots through blockchain
+    b)send map updates through blockchain
+    c)(?) send map through blockchain?
+3. more efficient miners
+4. A LOT of drone code
+    a) attack code
+    b) robot shield code
+5. vaporators
+6. make fortress code
+
+
+So after watching the sprint tournament I think it's obvious that rush and simply building a wall isn't gonna work. I do think that we have a
+really good shot at making it to the final tourney tho since we made top 16 and at least 2 teams ahead of us are ineligible and I'm pretty sure
+most of the rest are US based. I've been thinking and overall our bots need to communicate better and determine their roles better. We don't use
+the blockchain much at all compared to other teams and there's a lot that we can do with that. Also drones are busted late game since they're the
+only units that can travel over water and mountains. I'll explain my strategy more in detail in voice but here are a few things I think we should
+be doing:
+
+- Attack with drones early: drones are a lot more efficient for scouting than landscapers or miners and can pick off a lot of miners and land-
+scapers that venture outside the enemy hq early game, letting us cripple their early econ
+    - how to avoid their HQ netgun: Drones don't outrange netguns but miners do. Not sure but I think we can have a scouting drone carry a miner
+       and let the miner do the scouting
+- Communication and maps: I think in order to have an organized base built we need to have a map stored in each robot of the entire map. This map
+can be filled with location of our stationary units and buildings, enemy hq, soup locations, and water locations, which allows for much better
+pathing and navigation. Updating the map is the trickiest part, but we can have each robot post their new findings to the blockchain every round
+and call the previous round and update their map. We can also have our hq post the map as a serialized large integer every round but that will be
+tricky.
+-Drone Bodyguards: Drones are the only units that can do anything late game but defending against them is hard since having a net gun in the late
+game requires a ton of investment. The only things drones can't destroy tho is other drones, so in order to protect our base late game we need a
+ring of drones circling our base to bodyblock enemy drones and let our landscapers build in peace. This should be easy to implement once we have
+the map set up
+- Fortress: You know how in old cities they would have a castle in the middle of a city with giant walls around the city? We need to do that. It's
+not sustainable to fortify a giant base in the late game so we still need to build around our HQ, but we need an  unflooded area to put our fulfillment
+centers, vaporators, landscapers, etc. so we need to have a bigger base with lower walls that can let us build up soup and pump out drones before lets say
+turn 2000, which can then support out main castle HQ after it eventually floods.
+
+Minor stuff:
+-miners need to build refineries next to large soup deposits
+-landscapers need to start walling early, or at least defend from rushes, drones can lift landscapers onto walls if needed later on but that's tricky
+-sometimes miners need landscapers to help them reach soup, we need to code that bc the devs are troll and like putting a lot of soup in unreachable places
+-miners and also use drones to reach soup and then build a refinery
+-some maps don't have a lot of space for us to build or put units, we need to be able to recognize that and adjust our production

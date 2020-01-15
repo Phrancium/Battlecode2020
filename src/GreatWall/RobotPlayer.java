@@ -270,7 +270,7 @@ public strictfp class RobotPlayer {
                 rc.depositDirt(dir);
             } else {
                 if (rc.canDigDirt(current.directionTo(HQ).opposite())) {
-                    rc.digDirt(current.directionTo(HQ).rotateRight());
+                    rc.digDirt(Direction.CENTER);
                 }
             }
         }else{
