@@ -227,7 +227,7 @@ public strictfp class RobotPlayer {
 
     //Keeps building em Landscapers
     static void runDesignSchool() throws GameActionException {
-        if(numBuilt < 12) {
+        if(numBuilt < 11) {
             for (Direction dir : directions)
                 if (tryBuild(RobotType.LANDSCAPER, dir)) {
                     numBuilt++;
@@ -257,7 +257,7 @@ public strictfp class RobotPlayer {
                 if(isEnemyHQFull(HQ)){
                     if(rc.getDirtCarrying() == 25){
                         rc.depositDirt(current.directionTo(HQ).opposite());
-                    }else{
+                    }else{ 
                         rc.digDirt(current.directionTo(HQ));
                     }
                 }else{
