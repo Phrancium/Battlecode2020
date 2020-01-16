@@ -177,7 +177,6 @@ public strictfp class RobotPlayer {
             }else if(tryBuild(RobotType.FULFILLMENT_CENTER,away.rotateRight())){
             }
         }
-*/
         openEyes(curr);
         //MINE SOUP
         if (souploc != null && rc.getSoupCarrying() < 96){
@@ -377,19 +376,7 @@ public strictfp class RobotPlayer {
         MapLocation home = getHQLocation();
         MapLocation at = rc.getLocation();
         Direction dir = at.directionTo(home);
-        if(at.distanceSquaredTo(home) > 2){
-            moveTo(home);
-        }
-        else if(rc.canDigDirt(dir)) {
-            rc.digDirt(dir);
-        }
-        //if(rc.senseNearbyRobots(home, 2, rc.getTeam()).length == 8){
-        if(rc.getDirtCarrying() > 0){
-            rc.depositDirt(Direction.CENTER);
-        }else{
-            rc.digDirt(dir.opposite());
-        }
-        //}
+        
     }
     
     static void buildCastle() throws GameActionException{
