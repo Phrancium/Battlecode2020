@@ -30,7 +30,7 @@ public strictfp class RobotPlayer {
     static Direction path;
     static String task;
     static String droneTask;
-    static int numBuilt;
+    static int robotsBuilt;
     static MapLocation EnemyHQ;
     static boolean moveOnce = false;
 
@@ -55,7 +55,7 @@ public strictfp class RobotPlayer {
         // and to get information on its current status.
         RobotPlayer.rc = rc;
         turnCount = 0;
-        numBuilt = 0;
+        robotsBuilt = 0;
         souploc = null;
         EnemyHQ = null;
         path = Direction.CENTER;
@@ -135,10 +135,10 @@ public strictfp class RobotPlayer {
     	        rc.shootUnit(s.getID());
             }
         }
-    	if (rc.getRoundNum() < 20 && numBuilt < 3) {
+    	if (rc.getRoundNum() < 20 && robotsBuilt < 3) {
             for (Direction dir : directions) {
                 if (tryBuild(RobotType.MINER, dir)) {
-                    numBuilt++;
+                    robotsBuilt++;
                 }
             }
         }
@@ -283,10 +283,10 @@ public strictfp class RobotPlayer {
 
     //Builds Landscapers
     static void runDesignSchool() throws GameActionException {
-        if(numBuilt < 11) {
+        if(robotsBuilt < 11) {
             for (Direction dir : directions)
                 if (tryBuild(RobotType.LANDSCAPER, dir)) {
-                    numBuilt++;
+                    robotsBuilt++;
                 }
         }
     }
@@ -294,12 +294,12 @@ public strictfp class RobotPlayer {
     static void runFulfillmentCenter() throws GameActionException {
         for (Direction dir : directions)
             if (tryBuild(RobotType.DELIVERY_DRONE, dir)) {
-                numBuilt++;
+                robotsBuilt++;
             }
-        if(numBuilt < 20) {
+        if(robotsBuilt < 20) {
             for (Direction dir : directions)
                 if (tryBuild(RobotType.DELIVERY_DRONE, dir)) {
-                    numBuilt++;
+                    robotsBuilt++;
                 }
         }
     }
@@ -411,7 +411,7 @@ public strictfp class RobotPlayer {
             if (!rc.isCurrentlyHoldingUnit()) {
                 RobotInfo[] nearbyRobots = rc.senseNearbyRobots(GameConstants.DELIVERY_DRONE_PICKUP_RADIUS_SQUARED, enemy);
                 //tryMove(Direction.EAST);
-                moveToDrone(getEnemyHQLocation());
+                moveToDrone(getEnemyHQLocationDrone());
                 if (nearbyRobots.length > 0) {
                     Direction rando = randomDirection();
                     RobotInfo targetEnemy = nearbyRobots[0];
@@ -674,6 +674,27 @@ public strictfp class RobotPlayer {
         //returns the enemy HQ location as a MapLocation
         MapLocation location = null;
         for(int k = rc.getRoundNum()-60; k < rc.getRoundNum()-1; k++) {
+            if(k > 0) {
+                Transaction[] block = rc.getBlock(k);
+                if(block.length != 0) {
+                    for(int i = 0; i < block.length; i++) {
+                        int[] message = block[i].getMessage();
+                        if(message[1] == 998997 && message[2] == 3) {
+                            location = new MapLocation(message[3], message[4]);
+                            System.out.println(location);
+                            return location;
+                        }
+                    }
+                }
+            }
+        }
+        return location;
+    }
+
+    static MapLocation getEnemyHQLocationDrone() throws GameActionException {
+        //returns the enemy HQ location as a MapLocation
+        MapLocation location = null;
+        for(int k = 1; k < rc.getRoundNum()-1; k++) {
             if(k > 0) {
                 Transaction[] block = rc.getBlock(k);
                 if(block.length != 0) {
