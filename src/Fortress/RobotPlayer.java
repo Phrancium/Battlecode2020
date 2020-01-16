@@ -21,19 +21,13 @@ public strictfp class RobotPlayer {
             RobotType.FULFILLMENT_CENTER, RobotType.NET_GUN};
 
     static int turnCount;
-
     static HashMap<Integer, Direction> dirHash = new HashMap<Integer, Direction>();
-
     static MapLocation initialLoc;
-
     static MapLocation souploc;
-
     static Direction path;
-
-    static String task;
-
+    static String landscaperTask;
+    static String droneTask;
     static int numBuilt;
-
     static boolean moveOnce = false;
 
 
@@ -48,6 +42,8 @@ public strictfp class RobotPlayer {
 
 
 
+    //__________________________________________________________________________________________________________________
+    //RUN CODE BELOW
     /**
      * run() is the method that is called when a robot is instantiated in the Battlecode world.
      * If this method returns, the robot dies!
@@ -58,20 +54,15 @@ public strictfp class RobotPlayer {
         // This is the RobotController object. You use it to perform actions from this robot,
         // and to get information on its current status.
         RobotPlayer.rc = rc;
-
         turnCount = 0;
-
         numBuilt = 0;
-
         souploc = null;
-
         path = Direction.CENTER;
-
         if(rc.getType() == RobotType.LANDSCAPER){
             if(rc.getRoundNum() < 150 && rc.getRobotCount() < 9){
-                task = "zerg";
+                landscaperTask = "zerg";
             }else{
-                task = "wall";
+                landscaperTask = "wall";
             }
         }
 
@@ -113,7 +104,8 @@ public strictfp class RobotPlayer {
             }
         }
     }
-
+    //__________________________________________________________________________________________________________________
+    //HQ CODE BELOW
     static void runHQ() throws GameActionException {
         //if (rc.getRobotCount() < 5) {
     	if(rc.getRoundNum() == 1) {
@@ -135,7 +127,8 @@ public strictfp class RobotPlayer {
     	updateEnemyHQLocation();
         //}
     }
-
+    //__________________________________________________________________________________________________________________
+    //MINER CODE BELOW
     static void runMiner() throws GameActionException {
         MapLocation curr = rc.getLocation();
         scanForSoup(curr);
@@ -229,6 +222,46 @@ public strictfp class RobotPlayer {
         }
     }
 
+    static void mineSoup() throws GameActionException{
+        for (Direction l : directions) {
+            if (rc.canMineSoup(l)) {
+                rc.mineSoup(l);
+            }
+        }
+        moveTo(souploc);
+    }
+
+    //these are from the provided scaffold...
+    /**
+     * Attempts to mine soup in a given direction.
+     *
+     * @param dir The intended direction of mining
+     * @return true if a move was performed
+     * @throws GameActionException
+     */
+    static boolean tryMine(Direction dir) throws GameActionException {
+        if (rc.isReady() && rc.canMineSoup(dir)) {
+            rc.mineSoup(dir);
+            return true;
+        } else return false;
+    }
+
+    /**
+     * Attempts to refine soup in a given direction.
+     *
+     * @param dir The intended direction of refining
+     * @return true if a move was performed
+     * @throws GameActionException
+     */
+    static boolean tryRefine(Direction dir) throws GameActionException {
+        if (rc.isReady() && rc.canDepositSoup(dir)) {
+            rc.depositSoup(dir, rc.getSoupCarrying());
+            return true;
+        } else return false;
+    }
+    //__________________________________________________________________________________________________________________
+    //BUILDING CODE BELOW (REFINERY(miners), VAPORATOR(soup producer, pollution reducer),
+    //DESIGN SCHOOL(landscapers), FULFILLMENT CENTER(drones)
     static void runRefinery() throws GameActionException {
         // System.out.println("Pollution: " + rc.sensePollution(rc.getLocation()));
     }
@@ -256,8 +289,24 @@ public strictfp class RobotPlayer {
         }
     }
 
+    /**
+     * Attempts to build a given robot in a given direction.
+     *
+     * @param type The type of the robot to build
+     * @param dir The intended direction of movement
+     * @return true if a move was performed
+     * @throws GameActionException
+     */
+    static boolean tryBuild(RobotType type, Direction dir) throws GameActionException {
+        if (rc.isReady() && rc.canBuildRobot(type, dir)) {
+            rc.buildRobot(type, dir);
+            return true;
+        } else return false;
+    }
+    //__________________________________________________________________________________________________________________
+    //LANDSCAPER CODE BELOW
     static void runLandscaper() throws GameActionException {
-        if(task.equals("zerg")) {
+        if(landscaperTask.equals("zerg")) {
             MapLocation HQ = getEnemyHQLocation();
             if (HQ == null)
                 findEnemyHQ(rc.getLocation());
@@ -266,16 +315,16 @@ public strictfp class RobotPlayer {
             if (current.distanceSquaredTo(HQ) > 2) {
                 zergRush(HQ);
             }//else if(current.distanceSquaredTo(HQ) > 2){
-//                if(isEnemyHQFull(HQ)){
-//                    if(rc.getDirtCarrying() == 25){
-//                        rc.depositDirt(current.directionTo(HQ).opposite());
-//                    }else{
-//                        rc.digDirt(current.directionTo(HQ));
-//                    }
-//                }else{
-//                    zergRush(HQ);
-//                }
-//            }
+             //    if(isEnemyHQFull(HQ)){
+             //        if(rc.getDirtCarrying() == 25){
+             //            rc.depositDirt(current.directionTo(HQ).opposite());
+             //        }else{
+             //            rc.digDirt(current.directionTo(HQ));
+             //        }
+             //    }else{
+             //        zergRush(HQ);
+             //    }
+             //}
             //if HQ is within range
             else if (rc.getDirtCarrying() > 0) {
                 Direction dir = current.directionTo(HQ);
@@ -290,29 +339,6 @@ public strictfp class RobotPlayer {
         }
     }
 
-    static void zergRush(MapLocation dest) throws GameActionException{
-        //Find general direction of destination
-        MapLocation loc = rc.getLocation();
-        Direction moveDirection = loc.directionTo(dest);
-
-        //dig through barriers
-        if(rc.senseElevation(rc.adjacentLocation(moveDirection)) > 3 && rc.senseElevation(rc.adjacentLocation(moveDirection.rotateLeft())) - rc.senseElevation(loc) > 3 && rc.senseElevation(rc.adjacentLocation(moveDirection.rotateRight())) - rc.senseElevation(loc) > 3){
-            if(rc.getDirtCarrying() == 25){
-                rc.depositDirt(moveDirection.rotateLeft().rotateLeft());
-            }
-            rc.digDirt(moveDirection);
-        }
-
-//        if(rc.senseFlooding(rc.adjacentLocation(moveDirection)) && rc.senseFlooding(rc.adjacentLocation(moveDirection.rotateLeft())) && rc.senseFlooding(rc.adjacentLocation(moveDirection.rotateRight())) && rc.senseFlooding(rc.adjacentLocation(moveDirection.rotateRight())) && rc.senseFlooding(rc.adjacentLocation(moveDirection.rotateRight())) && rc.senseFlooding(rc.adjacentLocation(moveDirection.rotateRight())) && rc.senseFlooding(rc.adjacentLocation(moveDirection.rotateRight()))) {
-//            if(rc.getDirtCarrying() > 0){
-//                rc.depositDirt(moveDirection);
-//            }
-//            rc.digDirt(moveDirection.opposite().rotateLeft());
-//        }
-        //See if general direction is valid
-        moveTo(dest);
-    }
-
     static void buildWall() throws GameActionException{
         MapLocation home = getHQLocation();
         MapLocation at = rc.getLocation();
@@ -321,31 +347,16 @@ public strictfp class RobotPlayer {
             moveTo(home);
         }
         else if(rc.canDigDirt(dir)) {
-        		rc.digDirt(dir);
+            rc.digDirt(dir);
         }
         //if(rc.senseNearbyRobots(home, 2, rc.getTeam()).length == 8){
-            if(rc.getDirtCarrying() > 0){
-            	rc.depositDirt(Direction.CENTER);
-            }else{
-                rc.digDirt(dir.opposite());
-            }
+        if(rc.getDirtCarrying() > 0){
+            rc.depositDirt(Direction.CENTER);
+        }else{
+            rc.digDirt(dir.opposite());
+        }
         //}
     }
-
-//    static void brick(MapLocation at, MapLocation home) throws GameActionException{
-//        Direction dir = at.directionTo(home);
-//        switch (dir){
-//            case NORTH: rc.depositDirt(Direction.EAST); break;
-//            case NORTHEAST: rc.depositDirt(Direction.EAST); break;
-//            case NORTHWEST: rc.depositDirt(Direction.NORTH);break;
-//            case SOUTH: rc.depositDirt(Direction.WEST);break;
-//            case SOUTHEAST: rc.depositDirt(Direction.SOUTH);break;
-//            case SOUTHWEST: rc.depositDirt(Direction.WEST);break;
-//            case WEST: rc.depositDirt(Direction.NORTH);break;
-//            case EAST: rc.depositDirt(Direction.SOUTH);break;
-//        }
-//
-//    }
 
     static boolean isEnemyHQFull(MapLocation en) throws GameActionException{
         MapLocation curr = rc.getLocation();
@@ -370,24 +381,26 @@ public strictfp class RobotPlayer {
         }
         return true;
     }
-
+    //__________________________________________________________________________________________________________________
+    //DELIVERY DRONE CODE BELOW
     static void runDeliveryDrone() throws GameActionException {
         Team enemy = rc.getTeam().opponent();
         if (!rc.isCurrentlyHoldingUnit()) {
             // See if there are any enemy robots within striking range (distance 1 from lumberjack's radius)
-            RobotInfo[] robots = rc.senseNearbyRobots(GameConstants.DELIVERY_DRONE_PICKUP_RADIUS_SQUARED, enemy);
+            RobotInfo[] nearbyRobots = rc.senseNearbyRobots(GameConstants.DELIVERY_DRONE_PICKUP_RADIUS_SQUARED, enemy);
 
-            if (robots.length > 0) {
+            if (nearbyRobots.length > 0) {
                 // Pick up a first robot within range
-                rc.pickUpUnit(robots[0].getID());
-                System.out.println("I picked up " + robots[0].getID() + "!");
+                rc.pickUpUnit(nearbyRobots[0].getID());
+                System.out.println("I picked up " + nearbyRobots[0].getID() + "!");
             }
         } else {
             // No close robots, so search for robots within sight radius
             tryMove(randomDirection());
         }
     }
-
+    //__________________________________________________________________________________________________________________
+    //NET GUN CODE BELOW
     static void runNetGun() throws GameActionException {
         RobotInfo[] r = rc.senseNearbyRobots();
         for(RobotInfo s : r){
@@ -395,6 +408,30 @@ public strictfp class RobotPlayer {
                 rc.shootUnit(s.getID());
             }
         }
+    }
+    //__________________________________________________________________________________________________________________
+    //MOVEMENT CODE BELOW
+    static void zergRush(MapLocation dest) throws GameActionException{
+        //Find general direction of destination
+        MapLocation loc = rc.getLocation();
+        Direction moveDirection = loc.directionTo(dest);
+
+        //dig through barriers
+        if(rc.senseElevation(rc.adjacentLocation(moveDirection)) > 3 && rc.senseElevation(rc.adjacentLocation(moveDirection.rotateLeft())) - rc.senseElevation(loc) > 3 && rc.senseElevation(rc.adjacentLocation(moveDirection.rotateRight())) - rc.senseElevation(loc) > 3){
+            if(rc.getDirtCarrying() == 25){
+                rc.depositDirt(moveDirection.rotateLeft().rotateLeft());
+            }
+            rc.digDirt(moveDirection);
+        }
+
+//        if(rc.senseFlooding(rc.adjacentLocation(moveDirection)) && rc.senseFlooding(rc.adjacentLocation(moveDirection.rotateLeft())) && rc.senseFlooding(rc.adjacentLocation(moveDirection.rotateRight())) && rc.senseFlooding(rc.adjacentLocation(moveDirection.rotateRight())) && rc.senseFlooding(rc.adjacentLocation(moveDirection.rotateRight())) && rc.senseFlooding(rc.adjacentLocation(moveDirection.rotateRight())) && rc.senseFlooding(rc.adjacentLocation(moveDirection.rotateRight()))) {
+//            if(rc.getDirtCarrying() > 0){
+//                rc.depositDirt(moveDirection);
+//            }
+//            rc.digDirt(moveDirection.opposite().rotateLeft());
+//        }
+        //See if general direction is valid
+        moveTo(dest);
     }
 
     /**
@@ -404,15 +441,6 @@ public strictfp class RobotPlayer {
      */
     static Direction randomDirection() {
         return directions[(int) (Math.random() * directions.length)];
-    }
-
-    /**
-     * Returns a random RobotType spawned by miners.
-     *
-     * @return a random RobotType
-     */
-    static RobotType randomSpawnedByMiner() {
-        return spawnedByMiner[(int) (Math.random() * spawnedByMiner.length)];
     }
 
     static boolean tryMove() throws GameActionException {
@@ -430,7 +458,6 @@ public strictfp class RobotPlayer {
         // else
         //     return tryMove(Direction.NORTH);
     }
-
     /**
      * Attempts to move in a given direction.
      *
@@ -486,158 +513,6 @@ public strictfp class RobotPlayer {
         }
     }
 
-    /**
-     * Attempts to build a given robot in a given direction.
-     *
-     * @param type The type of the robot to build
-     * @param dir The intended direction of movement
-     * @return true if a move was performed
-     * @throws GameActionException
-     */
-    static boolean tryBuild(RobotType type, Direction dir) throws GameActionException {
-        if (rc.isReady() && rc.canBuildRobot(type, dir)) {
-            rc.buildRobot(type, dir);
-            return true;
-        } else return false;
-    }
-
-    /**
-     * Attempts to mine soup in a given direction.
-     *
-     * @param dir The intended direction of mining
-     * @return true if a move was performed
-     * @throws GameActionException
-     */
-    static boolean tryMine(Direction dir) throws GameActionException {
-        if (rc.isReady() && rc.canMineSoup(dir)) {
-            rc.mineSoup(dir);
-            return true;
-        } else return false;
-    }
-
-    /**
-     * Attempts to refine soup in a given direction.
-     *
-     * @param dir The intended direction of refining
-     * @return true if a move was performed
-     * @throws GameActionException
-     */
-    static boolean tryRefine(Direction dir) throws GameActionException {
-        if (rc.isReady() && rc.canDepositSoup(dir)) {
-            rc.depositSoup(dir, rc.getSoupCarrying());
-            return true;
-        } else return false;
-    }
-
-
-    static void postLocation(int code, int x, int y, int cost) throws GameActionException {
-    	/* Code to be placed in array[2]
-    	 * 1 : HQ
-    	 * 2 : Soup
-    	 * 3 : Enemy HQ
-    	*/ 
-    	int[] message = new int[7];
-        message[1] = 998997;
-    	message[2] = code;
-        message[3] = x;
-        message[4] = y;
-        if (rc.canSubmitTransaction(message, cost))
-        	rc.submitTransaction(message, cost);
-    }
-    
-    static MapLocation getHQLocation() throws GameActionException {
-    	//returns the location of HQ
-    	MapLocation location = null;
-    	for(int k = 1; k < rc.getRoundNum()-1; k++) {
-    		Transaction[] block = rc.getBlock(k);
-			if(block.length != 0) {	
-				for(int i = 0; i < block.length; i++) {
-    				int[] message = block[i].getMessage();
-    				if(message[1] == 998997 && message[2] == 1) {
-    					location = new MapLocation(message[3], message[4]);
-    					return location;
-    				}
-    			}
-    		}
-    	}
-    	return location;
-    }
-    
-    static MapLocation getSoupLocation() throws GameActionException {
-    	//does not currently work
-    	MapLocation location = null;
-    	for(int k = rc.getRoundNum()-20; k < rc.getRoundNum()-1; k++) {
-    		if(k > 0) {
-    			Transaction[] block = rc.getBlock(k);
-    			if(block.length != 0) {
-    				for(int i = 0; i < block.length; i++) {
-    					int[] message = block[i].getMessage();
-    					if(message[1] == 998997 && message[2] == 2) {
-    						location = new MapLocation(message[3], message[4]);
-    						System.out.println(location);
-    						return location;
-    					}
-    				}
-    			}
-    		}
-    	}
-    	return location;
-    	
-    }
-    
-    
-    static MapLocation getEnemyHQLocation() throws GameActionException {
-    	//returns the enemy HQ location as a MapLocation
-    	MapLocation location = null;
-    	for(int k = rc.getRoundNum()-60; k < rc.getRoundNum()-1; k++) {
-    		if(k > 0) {
-    			Transaction[] block = rc.getBlock(k);
-    			if(block.length != 0) {	
-    				for(int i = 0; i < block.length; i++) {
-    					int[] message = block[i].getMessage();
-    					if(message[1] == 998997 && message[2] == 3) {
-    						location = new MapLocation(message[3], message[4]);
-    						System.out.println(location);
-    						return location;
-    					}
-    				}
-    			}
-    		}
-    	}
-    	return location;
-    }
-    
-    static void updateEnemyHQLocation() throws GameActionException {
-    	//looks for enemy hq location in block chain and moves it to a more recent round
-    	for(int k = rc.getRoundNum()-61; k < rc.getRoundNum()-59; k++) {
-    		if(k > 0) {
-    			Transaction[] block = rc.getBlock(k);
-    			if(block.length != 0) {	
-    				for(int i = 0; i < block.length; i++) {
-    					int[] message = block[i].getMessage();
-    					if(message[1] == 998997 && message[2] == 3) {
-    						postLocation(3, message[3], message[4], 2);
-    					}	
-    				}
-    			}
-    		}
-    	}
-    }
-    /**robot mines soup **/
-
-    static void mineSoup() throws GameActionException{
-        for (Direction l : directions) {
-            if (rc.canMineSoup(l)) {
-                rc.mineSoup(l);
-            }
-        }
-        moveTo(souploc);
-    }
-    /**
-     * Scouting method run at beginning to find soup
-     *
-     * @throws GameActionException
-     */
     static void goHome(MapLocation m) throws GameActionException {
         Direction d = randomDirection();
         for (Direction l : directions) {
@@ -648,8 +523,101 @@ public strictfp class RobotPlayer {
         }
         tryMove(d);
     }
+    //__________________________________________________________________________________________________________________
+    //BLOCKCHAIN CODE BELOW
+    static void postLocation(int code, int x, int y, int cost) throws GameActionException {
+        /* Code to be placed in array[2]
+         * 1 : HQ
+         * 2 : Soup
+         * 3 : Enemy HQ
+         */
+        int[] message = new int[7];
+        message[1] = 998997;
+        message[2] = code;
+        message[3] = x;
+        message[4] = y;
+        if (rc.canSubmitTransaction(message, cost))
+            rc.submitTransaction(message, cost);
+    }
 
-    //scouting route to find enemy HQ
+    static MapLocation getHQLocation() throws GameActionException {
+        //returns the location of HQ
+        MapLocation location = null;
+        for(int k = 1; k < rc.getRoundNum()-1; k++) {
+            Transaction[] block = rc.getBlock(k);
+            if(block.length != 0) {
+                for(int i = 0; i < block.length; i++) {
+                    int[] message = block[i].getMessage();
+                    if(message[1] == 998997 && message[2] == 1) {
+                        location = new MapLocation(message[3], message[4]);
+                        return location;
+                    }
+                }
+            }
+        }
+        return location;
+    }
+
+    static MapLocation getSoupLocation() throws GameActionException {
+        //does not currently work
+        MapLocation location = null;
+        for(int k = rc.getRoundNum()-20; k < rc.getRoundNum()-1; k++) {
+            if(k > 0) {
+                Transaction[] block = rc.getBlock(k);
+                if(block.length != 0) {
+                    for(int i = 0; i < block.length; i++) {
+                        int[] message = block[i].getMessage();
+                        if(message[1] == 998997 && message[2] == 2) {
+                            location = new MapLocation(message[3], message[4]);
+                            System.out.println(location);
+                            return location;
+                        }
+                    }
+                }
+            }
+        }
+        return location;
+
+    }
+
+    static MapLocation getEnemyHQLocation() throws GameActionException {
+        //returns the enemy HQ location as a MapLocation
+        MapLocation location = null;
+        for(int k = rc.getRoundNum()-60; k < rc.getRoundNum()-1; k++) {
+            if(k > 0) {
+                Transaction[] block = rc.getBlock(k);
+                if(block.length != 0) {
+                    for(int i = 0; i < block.length; i++) {
+                        int[] message = block[i].getMessage();
+                        if(message[1] == 998997 && message[2] == 3) {
+                            location = new MapLocation(message[3], message[4]);
+                            System.out.println(location);
+                            return location;
+                        }
+                    }
+                }
+            }
+        }
+        return location;
+    }
+
+    static void updateEnemyHQLocation() throws GameActionException {
+        //looks for enemy hq location in block chain and moves it to a more recent round
+        for(int k = rc.getRoundNum()-61; k < rc.getRoundNum()-59; k++) {
+            if(k > 0) {
+                Transaction[] block = rc.getBlock(k);
+                if(block.length != 0) {
+                    for(int i = 0; i < block.length; i++) {
+                        int[] message = block[i].getMessage();
+                        if(message[1] == 998997 && message[2] == 3) {
+                            postLocation(3, message[3], message[4], 2);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     static void findEnemyHQ(MapLocation at) throws GameActionException{
         MapLocation home = getHQLocation();
         int hqX = home.x;
@@ -686,5 +654,25 @@ public strictfp class RobotPlayer {
             }
         }
     }
-}
+
+    //__________________________________________________________________________________________________________________
+
+    //    static void brick(MapLocation at, MapLocation home) throws GameActionException{
+    //        Direction dir = at.directionTo(home);
+    //        switch (dir){
+    //            case NORTH: rc.depositDirt(Direction.EAST); break;
+    //            case NORTHEAST: rc.depositDirt(Direction.EAST); break;
+    //            case NORTHWEST: rc.depositDirt(Direction.NORTH);break;
+    //            case SOUTH: rc.depositDirt(Direction.WEST);break;
+    //            case SOUTHEAST: rc.depositDirt(Direction.SOUTH);break;
+    //            case SOUTHWEST: rc.depositDirt(Direction.WEST);break;
+    //            case WEST: rc.depositDirt(Direction.NORTH);break;
+    //            case EAST: rc.depositDirt(Direction.SOUTH);break;
+    //        }
+    //
+    //    }
+
+
+
+    }
 
