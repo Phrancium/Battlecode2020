@@ -321,35 +321,10 @@ public strictfp class RobotPlayer {
     //__________________________________________________________________________________________________________________
     //LANDSCAPER CODE BELOW
     static void runLandscaper() throws GameActionException {
-        if(task.equals("zerg")) {
-            MapLocation HQ = getEnemyHQLocation();
-            if (HQ == null)
-                findEnemyHQ(rc.getLocation());
-            MapLocation current = rc.getLocation();
-            //move to enemy HQ
-            if (current.distanceSquaredTo(HQ) > 2) {
-                zergRush(HQ);
-            }//else if(current.distanceSquaredTo(HQ) > 2){
-             //    if(isEnemyHQFull(HQ)){
-             //        if(rc.getDirtCarrying() == 25){
-             //            rc.depositDirt(current.directionTo(HQ).opposite());
-             //        }else{
-             //            rc.digDirt(current.directionTo(HQ));
-             //        }
-             //    }else{
-             //        zergRush(HQ);
-             //    }
-             //}
-            //if HQ is within range
-            else if (rc.getDirtCarrying() > 0) {
-                Direction dir = current.directionTo(HQ);
-                rc.depositDirt(dir);
-            } else {
-                if (rc.canDigDirt(current.directionTo(HQ).opposite())) {
-                    rc.digDirt(Direction.CENTER);
-                }
-            }
-        }else{
+        if(task.equals("castle")) {
+            buildCastle();
+        }
+        else if(task.equals("wall")){
             buildWall();
         }
     }
