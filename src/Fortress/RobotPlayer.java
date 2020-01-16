@@ -266,7 +266,7 @@ public strictfp class RobotPlayer {
 
     //Builds Landscapers
     static void runDesignSchool() throws GameActionException {
-        if(numBuilt < 12) {
+        if(numBuilt < 11) {
             for (Direction dir : directions)
                 if (tryBuild(RobotType.LANDSCAPER, dir)) {
                     numBuilt++;
@@ -406,6 +406,9 @@ public strictfp class RobotPlayer {
                 }
 
             }
+        } else{
+            tryMove(Direction.EAST);
+            //moveTo(getEnemyHQLocation());
         }
         // if (!rc.isCurrentlyHoldingUnit()) {
         //     // See if there are any enemy robots within striking range (distance 1 from lumberjack's radius)
