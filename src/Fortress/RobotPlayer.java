@@ -364,7 +364,7 @@ public strictfp class RobotPlayer {
     //__________________________________________________________________________________________________________________
     //LANDSCAPER CODE BELOW
     static void runLandscaper() throws GameActionException {
-        if(task.equals("castle")) {
+    	if(task.equals("castle")) {
             buildCastle();
         }
         else if(task.equals("terraform")){
@@ -407,6 +407,9 @@ public strictfp class RobotPlayer {
         			break;
         		}
         	}
+        }
+        else if(rc.canDigDirt(dir) && rc.getDirtCarrying() < 25) {
+        	rc.digDirt(dir);
         }
         else if (at.distanceSquaredTo(home) > 1) {	
         	MapLocation left = at.add(dir.rotateLeft());
