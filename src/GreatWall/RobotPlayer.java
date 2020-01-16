@@ -56,7 +56,9 @@ public strictfp class RobotPlayer {
         path = Direction.CENTER;
 
         if(rc.getType() == RobotType.LANDSCAPER){
+
             if(rc.getRoundNum() < 150){
+
                 task = "zerg";
             }else{
                 task = "wall";
