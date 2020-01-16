@@ -25,7 +25,8 @@ public strictfp class RobotPlayer {
     static MapLocation initialLoc;
     static MapLocation souploc;
     static Direction path;
-    static String task;
+    static String landscaperTask;
+    static String droneTask;
     static int numBuilt;
     static boolean moveOnce = false;
     //__________________________________________________________________________________________________________________
@@ -40,20 +41,15 @@ public strictfp class RobotPlayer {
         // This is the RobotController object. You use it to perform actions from this robot,
         // and to get information on its current status.
         RobotPlayer.rc = rc;
-
         turnCount = 0;
-
         numBuilt = 0;
-
         souploc = null;
-
         path = Direction.CENTER;
-
         if(rc.getType() == RobotType.LANDSCAPER){
             if(rc.getRoundNum() < 150 && rc.getRobotCount() < 9){
-                task = "zerg";
+                landscaperTask = "zerg";
             }else{
-                task = "wall";
+                landscaperTask = "wall";
             }
         }
 
@@ -297,7 +293,7 @@ public strictfp class RobotPlayer {
     //__________________________________________________________________________________________________________________
     //LANDSCAPER CODE BELOW
     static void runLandscaper() throws GameActionException {
-        if(task.equals("zerg")) {
+        if(landscaperTask.equals("zerg")) {
             MapLocation HQ = getEnemyHQLocation();
             if (HQ == null)
                 findEnemyHQ(rc.getLocation());
@@ -306,16 +302,16 @@ public strictfp class RobotPlayer {
             if (current.distanceSquaredTo(HQ) > 2) {
                 zergRush(HQ);
             }//else if(current.distanceSquaredTo(HQ) > 2){
-//                if(isEnemyHQFull(HQ)){
-//                    if(rc.getDirtCarrying() == 25){
-//                        rc.depositDirt(current.directionTo(HQ).opposite());
-//                    }else{
-//                        rc.digDirt(current.directionTo(HQ));
-//                    }
-//                }else{
-//                    zergRush(HQ);
-//                }
-//            }
+             //    if(isEnemyHQFull(HQ)){
+             //        if(rc.getDirtCarrying() == 25){
+             //            rc.depositDirt(current.directionTo(HQ).opposite());
+             //        }else{
+             //            rc.digDirt(current.directionTo(HQ));
+             //        }
+             //    }else{
+             //        zergRush(HQ);
+             //    }
+             //}
             //if HQ is within range
             else if (rc.getDirtCarrying() > 0) {
                 Direction dir = current.directionTo(HQ);
@@ -378,12 +374,12 @@ public strictfp class RobotPlayer {
         Team enemy = rc.getTeam().opponent();
         if (!rc.isCurrentlyHoldingUnit()) {
             // See if there are any enemy robots within striking range (distance 1 from lumberjack's radius)
-            RobotInfo[] robots = rc.senseNearbyRobots(GameConstants.DELIVERY_DRONE_PICKUP_RADIUS_SQUARED, enemy);
+            RobotInfo[] nearbyRobots = rc.senseNearbyRobots(GameConstants.DELIVERY_DRONE_PICKUP_RADIUS_SQUARED, enemy);
 
-            if (robots.length > 0) {
+            if (nearbyRobots.length > 0) {
                 // Pick up a first robot within range
-                rc.pickUpUnit(robots[0].getID());
-                System.out.println("I picked up " + robots[0].getID() + "!");
+                rc.pickUpUnit(nearbyRobots[0].getID());
+                System.out.println("I picked up " + nearbyRobots[0].getID() + "!");
             }
         } else {
             // No close robots, so search for robots within sight radius
