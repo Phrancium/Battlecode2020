@@ -29,7 +29,7 @@ public strictfp class RobotPlayer {
     static String droneTask;
     static int numBuilt;
     static boolean moveOnce = false;
-    
+
     /**MapLocation arrays containing all the relevent MapLocations **/
 
     static MapLocation[] water = {};
@@ -165,19 +165,6 @@ public strictfp class RobotPlayer {
             findSoup(curr);
         }
         
-        // tryBlockchain();
-        // tryMove(randomDirection());
-        // if (tryMove(randomDirection()))
-        //     System.out.println("I moved!");
-        // // tryBuild(randomSpawnedByMiner(), randomDirection());
-        // for (Direction dir : directions)
-        //     tryBuild(RobotType.FULFILLMENT_CENTER, dir);
-        // for (Direction dir : directions)
-        //     if (tryRefine(dir))
-        //         System.out.println("I refined soup! " + rc.getTeamSoup());
-        // for (Direction dir : directions)
-        //     if (tryMine(dir))
-        //         System.out.println("I mined soup! " + rc.getSoupCarrying());
     }
 
     /**robot mines soup **/
@@ -272,7 +259,7 @@ public strictfp class RobotPlayer {
 
     }
 
-    //Keeps building em Landscapers
+    //Builds Landscapers
     static void runDesignSchool() throws GameActionException {
         if(numBuilt < 12) {
             for (Direction dir : directions)
@@ -281,9 +268,9 @@ public strictfp class RobotPlayer {
                 }
         }
     }
-
+    //Builds Drones
     static void runFulfillmentCenter() throws GameActionException {
-        if(numBuilt < 12) {
+        if(numBuilt < 20) {
             for (Direction dir : directions)
                 if (tryBuild(RobotType.DELIVERY_DRONE, dir)) {
                     numBuilt++;
