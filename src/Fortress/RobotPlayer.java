@@ -406,13 +406,11 @@ public strictfp class RobotPlayer {
         }
         if (droneTask.equals("killEnemy")){
             Team enemy = rc.getTeam().opponent();
-            //fuck him up
             if (!rc.isCurrentlyHoldingUnit()) {
                 RobotInfo[] nearbyRobots = rc.senseNearbyRobots(GameConstants.DELIVERY_DRONE_PICKUP_RADIUS_SQUARED, enemy);
-
-                //moveToDrone(x);
+                //tryMove(Direction.EAST);
+                moveToDrone(getEnemyHQLocation());
                 if (nearbyRobots.length > 0) {
-                    //CAN MAKE IT BETTER
                     Direction rando = randomDirection();
                     RobotInfo targetEnemy = nearbyRobots[0];
                     int enemyID = targetEnemy.getID();
