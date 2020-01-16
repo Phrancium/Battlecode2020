@@ -109,7 +109,6 @@ public strictfp class RobotPlayer {
     //__________________________________________________________________________________________________________________
     //HQ CODE BELOW
     static void runHQ() throws GameActionException {
-        //if (rc.getRobotCount() < 5) {
     	if(rc.getRoundNum() == 1) {
     		postLocation(1, rc.getLocation().x, rc.getLocation().y, 2);
     	}
@@ -140,12 +139,19 @@ public strictfp class RobotPlayer {
         	MapLocation loc = getHQLocation();
         	Direction away = curr.directionTo(loc).opposite();
         	if(tryBuild(RobotType.DESIGN_SCHOOL, away)){
-
             }else if(tryBuild(RobotType.DESIGN_SCHOOL,away.rotateLeft())){
             }else if(tryBuild(RobotType.DESIGN_SCHOOL,away.rotateRight())){
-
             }
         }
+        if (rc.getRobotCount() == 13){
+            MapLocation loc = getHQLocation();
+            Direction away = curr.directionTo(loc).opposite();
+            if(tryBuild(RobotType.FULFILLMENT_CENTER, away)){
+            }else if(tryBuild(RobotType.FULFILLMENT_CENTER,away.rotateLeft())){
+            }else if(tryBuild(RobotType.FULFILLMENT_CENTER,away.rotateRight())){
+            }
+        }
+
         //MINE SOUP
         if (souploc != null && rc.getSoupCarrying() < 100){
             mineSoup();
@@ -155,7 +161,6 @@ public strictfp class RobotPlayer {
             for (Direction dir : directions){
                 if(rc.canDepositSoup(dir)){
                     rc.depositSoup(dir, rc.getSoupCarrying());
-
                 }
             }
             moveTo(initialLoc);
@@ -164,7 +169,7 @@ public strictfp class RobotPlayer {
         else {
             findSoup(curr);
         }
-        
+
     }
 
     /**robot mines soup **/
@@ -377,7 +382,6 @@ public strictfp class RobotPlayer {
         //fuck him up
         if(!rc.isCurrentlyHoldingUnit()){
             RobotInfo[] nearbyRobots = rc.senseNearbyRobots(GameConstants.DELIVERY_DRONE_PICKUP_RADIUS_SQUARED, enemy);
-
             if(nearbyRobots.length > 0){
                 //CAN MAKE IT BETTER
                 Direction rando = randomDirection();
