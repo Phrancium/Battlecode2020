@@ -367,12 +367,12 @@ public strictfp class RobotPlayer {
         if(task.equals("castle")) {
             buildCastle();
         }
-        else if(task.equals("wall")){
-            buildWall();
+        else if(task.equals("terraform")){
+            terraform();
         }
     }
 
-    static void buildWall() throws GameActionException{
+    static void terraform() throws GameActionException{
         MapLocation home = getHQLocation();
         MapLocation at = rc.getLocation();
         Direction dir = at.directionTo(home);
