@@ -36,6 +36,18 @@ public strictfp class RobotPlayer {
 
     static boolean moveOnce = false;
 
+
+
+    /**MapLocation arrays containing all the relevent MapLocations **/
+
+    static MapLocation[] water = {};
+    static MapLocation[] soup = {};
+    static MapLocation[] refineries = {};
+    static MapLocation[] oppNet = {};
+
+
+
+
     /**
      * run() is the method that is called when a robot is instantiated in the Battlecode world.
      * If this method returns, the robot dies!
