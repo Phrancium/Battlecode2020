@@ -61,7 +61,6 @@ public strictfp class RobotPlayer {
         // and to get information on its current status.
         RobotPlayer.rc = rc;
         turnCount = 0;
-        robotsBuilt = 0;
         souploc = null;
         EnemyHQ = null;
         path = Direction.CENTER;
@@ -144,9 +143,9 @@ public strictfp class RobotPlayer {
     	        rc.shootUnit(s.getID());
             }
         }
-    	if (rc.getRoundNum() < 20 && robotsBuilt < 3) {
+    	if (rc.getRoundNum() < 20) {
             for (Direction dir : directions) {
-                if (tryBuild(RobotType.MINER, dir)) {
+                if(tryBuild(RobotType.MINER, dir)) {
                     robotsBuilt++;
                 }
             }
@@ -161,9 +160,7 @@ public strictfp class RobotPlayer {
         //scanForSoup(curr);
         //souploc = getSoupLocation();
         //build design school
-
-        /** robot count stuff
-
+        //System.out.println("robots built: "+ robotsBuilt);
         if (true) {
         	MapLocation loc = getHQLocation();
         	Direction away = curr.directionTo(loc).opposite();
@@ -180,7 +177,6 @@ public strictfp class RobotPlayer {
             }else if(tryBuild(RobotType.FULFILLMENT_CENTER,away.rotateRight())){
             }
         }
-*/
         openEyes(curr);
         //MINE SOUP
         if (souploc != null && rc.getSoupCarrying() < 96){
@@ -330,7 +326,7 @@ public strictfp class RobotPlayer {
 
     //Builds Landscapers
     static void runDesignSchool() throws GameActionException {
-        if(robotsBuilt < 11) {
+        if(true) {
             for (Direction dir : directions)
                 if (tryBuild(RobotType.LANDSCAPER, dir)) {
                     robotsBuilt++;
@@ -368,31 +364,19 @@ public strictfp class RobotPlayer {
     //__________________________________________________________________________________________________________________
     //LANDSCAPER CODE BELOW
     static void runLandscaper() throws GameActionException {
-        if(task.equals("castle")) {
+    	if(task.equals("castle")) {
             buildCastle();
         }
-        else if(task.equals("wall")){
-            buildWall();
+        else if(task.equals("terraform")){
+            terraform();
         }
     }
 
-    static void buildWall() throws GameActionException{
+    static void terraform() throws GameActionException{
         MapLocation home = getHQLocation();
         MapLocation at = rc.getLocation();
         Direction dir = at.directionTo(home);
-        if(at.distanceSquaredTo(home) > 2){
-            moveTo(home);
-        }
-        else if(rc.canDigDirt(dir)) {
-            rc.digDirt(dir);
-        }
-        //if(rc.senseNearbyRobots(home, 2, rc.getTeam()).length == 8){
-        if(rc.getDirtCarrying() > 0){
-            rc.depositDirt(Direction.CENTER);
-        }else{
-            rc.digDirt(dir.opposite());
-        }
-        //}
+        
     }
     
     static void buildCastle() throws GameActionException{
@@ -423,6 +407,9 @@ public strictfp class RobotPlayer {
         			break;
         		}
         	}
+        }
+        else if(rc.canDigDirt(dir) && rc.getDirtCarrying() < 25) {
+        	rc.digDirt(dir);
         }
         else if (at.distanceSquaredTo(home) > 1) {	
         	MapLocation left = at.add(dir.rotateLeft());
