@@ -33,6 +33,9 @@ public strictfp class RobotPlayer {
     static int numBuilt;
     static int mapQuadrant;
     static  MapLocation HQ;
+    static MapLocation scoutDest;
+    static MapLocation mapCenter;
+    static ArrayList<MapLocation> scouted = new ArrayList<>();
 
     static int robotsBuilt;
     static boolean moveOnce = false;
@@ -65,6 +68,8 @@ public strictfp class RobotPlayer {
         EnemyHQ = null;
         path = Direction.CENTER;
         HQ = getHQLocation();
+        scoutDest = null;
+        mapCenter = new MapLocation(rc.getMapWidth()/2, rc.getMapHeight()/2);
 
         //landscaper task determiner
         if(rc.getType() == RobotType.LANDSCAPER){
@@ -488,7 +493,10 @@ public strictfp class RobotPlayer {
             scan(loc);
             if(EnemyHQ == null){
                 findEnemyHQ(loc);
+            }else{
+                scout(loc);
             }
+
         }
         if (task.equals("killEnemy")){
             Team enemy = rc.getTeam().opponent();
@@ -537,6 +545,61 @@ public strictfp class RobotPlayer {
         //     // No close robots, so search for robots within sight radius
         //     tryMove(randomDirection());
         // }
+    }
+    static void scout(MapLocation at) throws GameActionException {
+        if(scoutDest ==  null){
+            scoutDest = mapCenter;
+            scouted.add(scoutDest);
+        }
+        if (at.distanceSquaredTo(scoutDest) < 3) {
+            int q = quadrantIn(scoutDest);
+            if(q == 1){
+                MapLocation newDest = new MapLocation( at.x ,rc.getMapHeight() - at.y);
+                if(!scouted.contains(newDest)){
+                    scoutDest = new MapLocation(at.x ,rc.getMapHeight() - at.y - 8);
+                    if(rc.onTheMap(scoutDest)) {
+                        scouted.add(scoutDest);
+                    }else{
+                        scoutDest = mapCenter;
+                        scouted = new ArrayList<>();
+                    }
+                }
+            } else if(q == 2){
+                MapLocation newDest = new MapLocation( rc.getMapWidth() - at.x ,at.y);
+                if(!scouted.contains(newDest)){
+                    scoutDest = new MapLocation(rc.getMapWidth() - at.x - 8 , at.y);
+                    if(rc.onTheMap(scoutDest)) {
+                        scouted.add(scoutDest);
+                    }else{
+                        scoutDest = mapCenter;
+                        scouted = new ArrayList<>();
+                    }
+                }
+            }else if(q == 3){
+                MapLocation newDest = new MapLocation( at.x ,rc.getMapHeight() - at.y);
+                if(!scouted.contains(newDest)){
+                    scoutDest = new MapLocation(at.x ,rc.getMapHeight() - at.y + 8);
+                    if(rc.onTheMap(scoutDest)) {
+                        scouted.add(scoutDest);
+                    }else{
+                        scoutDest = mapCenter;
+                        scouted = new ArrayList<>();
+                    }
+                }
+            }else if(q == 4){
+                MapLocation newDest = new MapLocation( rc.getMapWidth() - at.x ,at.y);
+                if(!scouted.contains(newDest)){
+                    scoutDest = new MapLocation(rc.getMapWidth() - at.x + 8 , at.y);
+                    if(rc.onTheMap(scoutDest)) {
+                        scouted.add(scoutDest);
+                    }else{
+                        scoutDest = mapCenter;
+                        scouted = new ArrayList<>();
+                    }
+                }
+            }
+        }
+        moveToDrone(scoutDest);
     }
     //__________________________________________________________________________________________________________________
     //NET GUN CODE BELOW
