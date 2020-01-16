@@ -25,6 +25,7 @@ public strictfp class RobotPlayer {
     static MapLocation souploc;
     static Direction path;
     static String task;
+    static int schoolsBuilt;
     static boolean moveOnce = false;
     //___________________________________________________________________________________________________________
     //RUN CODE BELOW
@@ -40,6 +41,8 @@ public strictfp class RobotPlayer {
         RobotPlayer.rc = rc;
 
         turnCount = 0;
+
+        schoolsBuilt = 0;
 
         souploc = null;
 
@@ -111,13 +114,16 @@ public strictfp class RobotPlayer {
         scanForSoup(curr);
         souploc = getSoupLocation();
         //build design school
-        if (true) {
+        if (schoolsBuilt < 1 && !scanForDesignSchool()) {
         	for (Direction dir : directions)
-        		tryBuild(RobotType.DESIGN_SCHOOL,dir);
+        	    if(rc.canBuildRobot(RobotType.DESIGN_SCHOOL, dir)) {
+        	        schoolsBuilt += 1;
+                    tryBuild(RobotType.DESIGN_SCHOOL, dir);
+                }
         }
         //build FULFILLMENT CENTER (for drones)
         //arbitrary 6, prob CHANGE later
-        if (true){
+        if (false){
             for (Direction dir : directions)
                 tryBuild(RobotType.FULFILLMENT_CENTER,dir);
         }
@@ -140,6 +146,18 @@ public strictfp class RobotPlayer {
         else {
             findSoup(curr);
         }
+
+    }
+
+    static boolean scanForDesignSchool(){
+        RobotInfo[] r = rc.senseNearbyRobots(rc.getCurrentSensorRadiusSquared(), rc.getTeam());
+
+        for(RobotInfo i : r){
+            if(i.getType() == RobotType.DESIGN_SCHOOL){
+                return true;
+            }
+        }
+        return false;
 
     }
 
