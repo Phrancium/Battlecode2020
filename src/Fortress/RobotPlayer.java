@@ -407,7 +407,7 @@ public strictfp class RobotPlayer {
 
             }
         } else{
-            tryMove(Direction.EAST);
+            //tryMove(Direction.EAST);
             //moveTo(getEnemyHQLocation());
         }
         // if (!rc.isCurrentlyHoldingUnit()) {
