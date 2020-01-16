@@ -344,6 +344,16 @@ public strictfp class RobotPlayer {
         }
         //}
     }
+    
+    static void buildCastle() throws GameActionException{
+    	MapLocation home = getHQLocation();
+        MapLocation at = rc.getLocation();
+        Direction dir = at.directionTo(home);
+        if(at.distanceSquaredTo(home) > 2){
+            moveTo(home);
+        }
+        for dir
+    }
 
     static boolean isEnemyHQFull(MapLocation en) throws GameActionException{
         MapLocation curr = rc.getLocation();
