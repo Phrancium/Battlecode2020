@@ -49,7 +49,8 @@ public strictfp class RobotPlayer {
     static ArrayList<MapLocation> oppNet = new ArrayList<>();
     static ArrayList<MapLocation> offensiveEnemyBuildings = new ArrayList<>();
     static MapLocation EnemyHQ;
-
+    
+    static MapLocation digLoc[];
 
     //__________________________________________________________________________________________________________________
     //RUN CODE BELOW
@@ -73,7 +74,6 @@ public strictfp class RobotPlayer {
 
         //landscaper task determiner
         if(rc.getType() == RobotType.LANDSCAPER){
-
             if(rc.getRoundNum() < 150){
 
                 task = "zerg";
@@ -378,10 +378,32 @@ public strictfp class RobotPlayer {
     }
 
     static void terraform() throws GameActionException{
-        MapLocation home = getHQLocation();
+        MapLocation home = HQ;
         MapLocation at = rc.getLocation();
         Direction dir = at.directionTo(home);
+        RobotInfo scan[] = rc.senseNearbyRobots();
+        for(RobotInfo i : scan) {
+        	if(i.getTeam() != rc.getTeam() && i.getType().isBuilding()) {
+        		bury(i.getLocation(), at);
+        	}
+        }
         
+    }
+    
+    static void bury(MapLocation target, MapLocation at) throws GameActionException{
+    	if(at.distanceSquaredTo(target) > 2) {
+    		moveTo(target);
+    	}
+    	else {
+    		if(rc.getDirtCarrying() > 0)
+                rc.depositDirt(at.directionTo(target));
+    		else if(rc.senseRobotAtLocation(at.add(at.directionTo(target).opposite())) == null && rc.canDigDirt(at.directionTo(target).opposite()))
+                rc.digDirt(at.directionTo(target).opposite());
+    		else if(rc.senseRobotAtLocation(at.add(at.directionTo(target).rotateRight().rotateRight())) == null && rc.canDigDirt(at.directionTo(target).rotateRight().rotateRight()))
+                rc.digDirt(at.directionTo(target).rotateRight().rotateRight());
+    		else 
+                rc.digDirt(at.directionTo(target).rotateLeft().rotateLeft());
+    	}
     }
     
     static void buildCastle() throws GameActionException{
@@ -395,7 +417,7 @@ public strictfp class RobotPlayer {
     	        Direction.SOUTHWEST,
     	        Direction.NORTHWEST
     	    };
-    	MapLocation home = getHQLocation();
+    	MapLocation home = HQ;
         MapLocation at = rc.getLocation();
         Direction dir = at.directionTo(home);
         MapLocation[] build = new MapLocation[8];
@@ -407,7 +429,7 @@ public strictfp class RobotPlayer {
         }
         else if (at.distanceSquaredTo(home) > 2){
         	for(int i = 0; i < 9; i++) {
-        		if(!rc.isLocationOccupied(build[i])) {
+        		if(!rc.isLocationOccupied(build[i]) && rc.onTheMap(build[i])) {
         			moveTo(build[i]);
         			break;
         		}
@@ -419,13 +441,13 @@ public strictfp class RobotPlayer {
         else if (at.distanceSquaredTo(home) > 1) {	
         	MapLocation left = at.add(dir.rotateLeft());
         	MapLocation right = at.add(dir.rotateRight());
-        	if (rc.senseElevation(left) < rc.senseElevation(at)) {
+        	if (rc.senseElevation(left) < rc.senseElevation(at) && rc.onTheMap(left)) {
         		if(rc.getDirtCarrying() > 0)
                     rc.depositDirt(at.directionTo(left));
         		else
                     rc.digDirt(dir.opposite());
         	}
-        	else if(rc.senseElevation(right) < rc.senseElevation(at)) {
+        	else if(rc.senseElevation(right) < rc.senseElevation(at) && rc.onTheMap(right)) {
         		if(rc.getDirtCarrying() > 0)
                     rc.depositDirt(at.directionTo(right));
         		else
@@ -441,13 +463,13 @@ public strictfp class RobotPlayer {
         else if (at.distanceSquaredTo(home) == 1) {	
         	MapLocation left = at.add(dir.rotateLeft().rotateLeft());
         	MapLocation right = at.add(dir.rotateRight().rotateRight());
-        	if (rc.senseElevation(left) < rc.senseElevation(at)) {
+        	if (rc.senseElevation(left) < rc.senseElevation(at) && rc.onTheMap(left)) {
         		if(rc.getDirtCarrying() > 0)
                     rc.depositDirt(at.directionTo(left));
         		else
                     rc.digDirt(dir.opposite());
         	}
-        	else if(rc.senseElevation(right) < rc.senseElevation(at)) {
+        	else if(rc.senseElevation(right) < rc.senseElevation(at) && rc.onTheMap(right)) {
         		if(rc.getDirtCarrying() > 0)
                     rc.depositDirt(at.directionTo(right));
         		else
