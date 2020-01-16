@@ -755,23 +755,5 @@ public strictfp class RobotPlayer {
     }
 
     //__________________________________________________________________________________________________________________
-
-    //    static void brick(MapLocation at, MapLocation home) throws GameActionException{
-    //        Direction dir = at.directionTo(home);
-    //        switch (dir){
-    //            case NORTH: rc.depositDirt(Direction.EAST); break;
-    //            case NORTHEAST: rc.depositDirt(Direction.EAST); break;
-    //            case NORTHWEST: rc.depositDirt(Direction.NORTH);break;
-    //            case SOUTH: rc.depositDirt(Direction.WEST);break;
-    //            case SOUTHEAST: rc.depositDirt(Direction.SOUTH);break;
-    //            case SOUTHWEST: rc.depositDirt(Direction.WEST);break;
-    //            case WEST: rc.depositDirt(Direction.NORTH);break;
-    //            case EAST: rc.depositDirt(Direction.SOUTH);break;
-    //        }
-    //
-    //    }
-
-
-
-    }
+}
 
