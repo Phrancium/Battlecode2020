@@ -29,18 +29,13 @@ public strictfp class RobotPlayer {
     static String droneTask;
     static int numBuilt;
     static boolean moveOnce = false;
-
-
-
+    
     /**MapLocation arrays containing all the relevent MapLocations **/
 
     static MapLocation[] water = {};
     static MapLocation[] soup = {};
     static MapLocation[] refineries = {};
     static MapLocation[] oppNet = {};
-
-
-
 
     //__________________________________________________________________________________________________________________
     //RUN CODE BELOW
