@@ -3,6 +3,7 @@ package Fortress;
 import battlecode.common.*;
 
 import java.util.HashMap;
+import java.util.Map;
 
 public strictfp class RobotPlayer {
     static RobotController rc;
@@ -25,9 +26,10 @@ public strictfp class RobotPlayer {
     static MapLocation initialLoc;
     static MapLocation souploc;
     static Direction path;
-    static String landscaperTask;
+    static String task;
     static String droneTask;
     static int numBuilt;
+    static MapLocation EnemyHQ;
     static boolean moveOnce = false;
 
 
@@ -38,6 +40,7 @@ public strictfp class RobotPlayer {
     static MapLocation[] soup = {};
     static MapLocation[] refineries = {};
     static MapLocation[] oppNet = {};
+    static MapLocation[] offensiveEnemyBuildings = {};
 
 
 
@@ -57,12 +60,24 @@ public strictfp class RobotPlayer {
         turnCount = 0;
         numBuilt = 0;
         souploc = null;
+        EnemyHQ = null;
         path = Direction.CENTER;
+
+        //landscaper task determiner
         if(rc.getType() == RobotType.LANDSCAPER){
             if(rc.getRoundNum() < 150 && rc.getRobotCount() < 9){
-                landscaperTask = "zerg";
+                task = "zerg";
             }else{
-                landscaperTask = "wall";
+                task = "wall";
+            }
+        }
+
+        //drone task determiner
+        if(rc.getType() == RobotType.DELIVERY_DRONE){
+            if(rc.getRoundNum() < 50){
+                task = "scout";
+            }else{
+                task = "defend";
             }
         }
 
@@ -272,21 +287,17 @@ public strictfp class RobotPlayer {
 
     //Keeps building em Landscapers
     static void runDesignSchool() throws GameActionException {
-        if(numBuilt < 12) {
-            for (Direction dir : directions)
-                if (tryBuild(RobotType.LANDSCAPER, dir)) {
-                    numBuilt++;
-                }
-        }
+        for (Direction dir : directions)
+            if (tryBuild(RobotType.LANDSCAPER, dir)) {
+                numBuilt++;
+            }
     }
 
     static void runFulfillmentCenter() throws GameActionException {
-        if(numBuilt < 12) {
-            for (Direction dir : directions)
-                if (tryBuild(RobotType.DELIVERY_DRONE, dir)) {
-                    numBuilt++;
-                }
-        }
+        for (Direction dir : directions)
+            if (tryBuild(RobotType.DELIVERY_DRONE, dir)) {
+                numBuilt++;
+            }
     }
 
     /**
@@ -306,7 +317,7 @@ public strictfp class RobotPlayer {
     //__________________________________________________________________________________________________________________
     //LANDSCAPER CODE BELOW
     static void runLandscaper() throws GameActionException {
-        if(landscaperTask.equals("zerg")) {
+        if(task.equals("zerg")) {
             MapLocation HQ = getEnemyHQLocation();
             if (HQ == null)
                 findEnemyHQ(rc.getLocation());
@@ -384,19 +395,27 @@ public strictfp class RobotPlayer {
     //__________________________________________________________________________________________________________________
     //DELIVERY DRONE CODE BELOW
     static void runDeliveryDrone() throws GameActionException {
-        Team enemy = rc.getTeam().opponent();
-        if (!rc.isCurrentlyHoldingUnit()) {
-            // See if there are any enemy robots within striking range (distance 1 from lumberjack's radius)
-            RobotInfo[] nearbyRobots = rc.senseNearbyRobots(GameConstants.DELIVERY_DRONE_PICKUP_RADIUS_SQUARED, enemy);
-
-            if (nearbyRobots.length > 0) {
-                // Pick up a first robot within range
-                rc.pickUpUnit(nearbyRobots[0].getID());
-                System.out.println("I picked up " + nearbyRobots[0].getID() + "!");
+        if(task.equals("scout")){
+            scan();
+            MapLocation loc = rc.getLocation();
+            if(EnemyHQ == null){
+                findEnemyHQ(loc);
             }
-        } else {
-            // No close robots, so search for robots within sight radius
-            tryMove(randomDirection());
+        }else {
+            Team enemy = rc.getTeam().opponent();
+            if (!rc.isCurrentlyHoldingUnit()) {
+                // See if there are any enemy robots within striking range (distance 1 from lumberjack's radius)
+                RobotInfo[] nearbyRobots = rc.senseNearbyRobots(GameConstants.DELIVERY_DRONE_PICKUP_RADIUS_SQUARED, enemy);
+
+                if (nearbyRobots.length > 0) {
+                    // Pick up a first robot within range
+                    rc.pickUpUnit(nearbyRobots[0].getID());
+                    System.out.println("I picked up " + nearbyRobots[0].getID() + "!");
+                }
+            } else {
+                // No close robots, so search for robots within sight radius
+                tryMove(randomDirection());
+            }
         }
     }
     //__________________________________________________________________________________________________________________
@@ -642,15 +661,58 @@ public strictfp class RobotPlayer {
         }
         if(hqX < mapW/2) {
             if (at.x < dest1.x - 2) {
-                zergRush(dest1);
+                moveToDrone(dest1);
             } else {
-                zergRush(dest2);
+                moveToDrone(dest2);
             }
         }else{
             if (at.x > dest1.x + 2) {
-                zergRush(dest1);
+                moveToDrone(dest1);
             } else {
-                zergRush(dest2);
+                moveToDrone(dest2);
+            }
+        }
+    }
+    static void moveToDrone(MapLocation dest) throws GameActionException{
+        //Find general direction of destination
+        MapLocation loc = rc.getLocation();
+        Direction moveDirection = loc.directionTo(dest);
+
+        Direction[] nonoDirections = {Direction.NORTHEAST, Direction.NORTHWEST, Direction.SOUTHEAST, Direction.SOUTHWEST};
+
+
+        //See if general direction is valid
+        if(rc.canMove(moveDirection)){
+            path = moveDirection.opposite();
+            tryMove(moveDirection);
+        }else if(rc.canMove(moveDirection.rotateLeft()) && moveDirection.rotateLeft() != path){
+            path = moveDirection.rotateLeft().opposite();
+            tryMove(moveDirection.rotateLeft());
+        }else if(rc.canMove(moveDirection.rotateRight()) && moveDirection.rotateRight() != path) {
+            path = moveDirection.rotateRight().opposite();
+            tryMove(moveDirection.rotateRight());
+        }else if(rc.canMove(moveDirection.rotateLeft().rotateLeft()) && moveDirection.rotateLeft().rotateLeft() != path) {
+            path = moveDirection.rotateLeft().rotateLeft().opposite();
+            tryMove(moveDirection.rotateLeft().rotateLeft());
+        }else if(rc.canMove(moveDirection.rotateRight().rotateRight()) && moveDirection.rotateRight().rotateRight() != path) {
+            path = moveDirection.rotateRight().rotateRight().opposite();
+            tryMove(moveDirection.rotateRight().rotateRight());
+        }else if(rc.canMove(moveDirection.rotateLeft().rotateLeft().rotateLeft()) && moveDirection.rotateLeft().rotateLeft().rotateLeft() != path) {
+            path = moveDirection.rotateLeft().rotateLeft().rotateLeft().opposite();
+            tryMove(moveDirection.rotateLeft().rotateLeft().rotateLeft());
+        }else if(rc.canMove(moveDirection.rotateRight().rotateRight().rotateRight()) && moveDirection.rotateRight().rotateRight().rotateRight() != path) {
+            path = moveDirection.rotateRight().rotateRight().rotateRight().opposite();
+            tryMove(moveDirection.rotateRight().rotateRight().rotateRight());
+        } else{
+            tryMove(randomDirection());
+        }
+    }
+
+    static void scan(){
+        RobotInfo[] r = rc.senseNearbyRobots();
+        for(RobotInfo i : r){
+            if(i.getType() == RobotType.NET_GUN){
+                MapLocation netLoc = i.getLocation();
             }
         }
     }
