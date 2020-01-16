@@ -2,6 +2,7 @@ package Fortress;
 
 import battlecode.common.*;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -35,7 +36,7 @@ public strictfp class RobotPlayer {
     /**MapLocation arrays containing all the relevent MapLocations **/
 
     static MapLocation[] water = {};
-    static MapLocation[] soup = {};
+    static ArrayList<MapLocation> soup = new ArrayList<MapLocation>();
     static MapLocation[] refineries = {};
     static MapLocation[] oppNet = {};
     static MapLocation[] offensiveEnemyBuildings = {};
@@ -60,7 +61,7 @@ public strictfp class RobotPlayer {
 
         //landscaper task determiner
         if(rc.getType() == RobotType.LANDSCAPER){
-            if(rc.getRoundNum() < 150 && rc.getRobotCount() < 9){
+            if(rc.getRoundNum() < 150 && true){
                 task = "zerg";
             }else{
                 task = "wall";
@@ -147,10 +148,12 @@ public strictfp class RobotPlayer {
     //MINER CODE BELOW
     static void runMiner() throws GameActionException {
         MapLocation curr = rc.getLocation();
-        scanForSoup(curr);
-        souploc = getSoupLocation();
+        //scanForSoup(curr);
+        //souploc = getSoupLocation();
         //build design school
-        if (rc.getRobotCount() == 4) {
+
+        /** robot count stuff
+        if (true) {
         	MapLocation loc = getHQLocation();
         	Direction away = curr.directionTo(loc).opposite();
         	if(tryBuild(RobotType.DESIGN_SCHOOL, away)){
@@ -158,7 +161,7 @@ public strictfp class RobotPlayer {
             }else if(tryBuild(RobotType.DESIGN_SCHOOL,away.rotateRight())){
             }
         }
-        if (rc.getRobotCount() == 13){
+        if (true){
             MapLocation loc = getHQLocation();
             Direction away = curr.directionTo(loc).opposite();
             if(tryBuild(RobotType.FULFILLMENT_CENTER, away)){
@@ -166,9 +169,10 @@ public strictfp class RobotPlayer {
             }else if(tryBuild(RobotType.FULFILLMENT_CENTER,away.rotateRight())){
             }
         }
-
+*/
+        openEyes(curr);
         //MINE SOUP
-        if (souploc != null && rc.getSoupCarrying() < 100){
+        if (souploc != null && rc.getSoupCarrying() < 96){
             mineSoup();
         }
         //MOVE BACK TO HQ AND DEPOSIT SOUP (todo: implement refineries)
@@ -182,9 +186,41 @@ public strictfp class RobotPlayer {
         }
         //FIND SOUP
         else {
-            findSoup(curr);
+            if (soup.isEmpty()){
+                moveTo(curr.subtract(curr.directionTo(initialLoc)));
+            }
+            else{
+                int dist=10;
+                MapLocation index=null;
+                for (MapLocation l : soup) {
+                    int currdist=curr.distanceSquaredTo(l);
+                    if (currdist<dist) {
+                        index=l;
+                        dist=currdist;
+                    }
+                }
+                souploc=index;
+                moveTo(souploc);
+
+            }
         }
 
+    }
+    static void openEyes(MapLocation loc) throws GameActionException{
+        int selfX = loc.x;
+        int selfY = loc.y;
+        scan:
+        for(int x = -5; x <6; x++){
+            for (int y = -5; y < 6; y++){
+                MapLocation check = new MapLocation(selfX + x, selfY + y);
+                if (rc.canSenseLocation(check)){
+                    if(rc.senseSoup(check) > 5){
+                        soup.add(check);
+                        break scan;
+                    }
+                }
+            }
+        }
     }
 
     /**robot mines soup **/
@@ -197,40 +233,6 @@ public strictfp class RobotPlayer {
         return false;
     }
 
-    static void findSoup(MapLocation loc) throws GameActionException{
-    	Direction d = randomDirection();
-    	int selfX = loc.x;
-        int selfY = loc.y;
-        scanForSoup(loc);
-//        if(getSoupLocation() != null)
-//        	moveTo(getSoupLocation());
-//        else
-        	tryMove(d);
-    }
-
-    static void scanForSoup(MapLocation loc) throws GameActionException{
-        int selfX = loc.x;
-        int selfY = loc.y;
-        scan:
-        for(int x = -5; x <6; x++){
-            for (int y = -5; y < 6; y++){
-                MapLocation check = new MapLocation(selfX + x, selfY + y);
-                if (rc.canSenseLocation(check)){
-                    if(rc.senseSoup(check) > 0){
-                        //plusOrMinusOne makes Miner stop either left or right of soup
-                        //double rando = Math.random();
-                        //int plusOrMinusOne = (int)Math.signum(rando - 0.5);
-                        if(getSoupLocation() == null)
-                            postLocation(2, check.x, check.y, 1);
-//                    	moveTo(new MapLocation(check.x - 1, check.y));
-                        break scan;
-                        //upload location of soup to blockchain?
-                    }
-                }
-            }
-        }
-    }
-
     static void mineSoup() throws GameActionException{
         for (Direction l : directions) {
             if (rc.canMineSoup(l)) {
@@ -239,6 +241,42 @@ public strictfp class RobotPlayer {
         }
         moveTo(souploc);
     }
+    /*
+        static void findSoup(MapLocation loc) throws GameActionException{
+            Direction d = randomDirection();
+            int selfX = loc.x;
+            int selfY = loc.y;
+            scanForSoup(loc);
+    //        if(getSoupLocation() != null)
+    //        	moveTo(getSoupLocation());
+    //        else
+                tryMove(d);
+        }
+    *
+        static void scanForSoup(MapLocation loc) throws GameActionException{
+            int selfX = loc.x;
+            int selfY = loc.y;
+            scan:
+            for(int x = -5; x <6; x++){
+                for (int y = -5; y < 6; y++){
+                    MapLocation check = new MapLocation(selfX + x, selfY + y);
+                    if (rc.canSenseLocation(check)){
+                        if(rc.senseSoup(check) > 0){
+                            //plusOrMinusOne makes Miner stop either left or right of soup
+                            //double rando = Math.random();
+                            //int plusOrMinusOne = (int)Math.signum(rando - 0.5);
+                            if(getSoupLocation() == null)
+                                postLocation(2, check.x, check.y, 1);
+                            //moveTo(new MapLocation(check.x - 1, check.y));
+                            break scan;
+                            //upload location of soup to blockchain?
+                        }
+                    }
+                }
+            }
+        }
+    */
+
 
     //these are from the provided scaffold...
     /**

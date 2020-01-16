@@ -56,7 +56,7 @@ public strictfp class RobotPlayer {
         path = Direction.CENTER;
 
         if(rc.getType() == RobotType.LANDSCAPER){
-            if(rc.getRoundNum() < 150 && rc.getRobotCount() < 9){
+            if(rc.getRoundNum() < 150 && true){
                 task = "zerg";
             }
             else{
@@ -65,7 +65,7 @@ public strictfp class RobotPlayer {
         }
         
         if(rc.getType() == RobotType.MINER){
-            if(rc.getRoundNum() < 150 && rc.getRobotCount() == 4){
+            if(rc.getRoundNum() < 150 && true){
                 task = "zerg";
             }
             else{
@@ -131,7 +131,7 @@ public strictfp class RobotPlayer {
                 }
             }
         }
-    	if(rc.getRobotCount() == 9) {
+    	if(true) {
     		for (Direction dir : directions) {
                 tryBuild(RobotType.MINER, dir);
     		}
@@ -141,7 +141,7 @@ public strictfp class RobotPlayer {
     }
 
     static void runMiner() throws GameActionException {
-        if(task == "zerg" && rc.getRobotCount() > 7) {
+        if(task == "zerg" && true) {
         	MapLocation HQ = getEnemyHQLocation();
             if (HQ == null)
                 findEnemyHQ(rc.getLocation());
@@ -174,7 +174,7 @@ public strictfp class RobotPlayer {
         scanForSoup(curr);
         souploc = getSoupLocation();
         //build design school
-        if (rc.getRobotCount() == 4) {
+        if (true) {
         	MapLocation loc = getHQLocation();
         	Direction away = curr.directionTo(loc).opposite();
         	if(tryBuild(RobotType.DESIGN_SCHOOL, away)){
