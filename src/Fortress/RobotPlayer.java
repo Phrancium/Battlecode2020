@@ -837,17 +837,23 @@ public strictfp class RobotPlayer {
         }
     }
 
-    static void scan(MapLocation at) throws GameActionException{
+    static HashMap<Integer, ArrayList<MapLocation>> scan(MapLocation at) throws GameActionException{
         RobotInfo[] r = rc.senseNearbyRobots(rc.getCurrentSensorRadiusSquared(), rc.getTeam().opponent());
         RobotInfo[] r2d2 = rc.senseNearbyRobots(rc.getCurrentSensorRadiusSquared(), rc.getTeam().opponent());
+        HashMap<Integer, ArrayList<MapLocation>> news = new HashMap<>();
+        for(int i = 2; i < 7; i++){
+            news.put(1, new ArrayList<MapLocation>());
+        }
         int myX = at.x;
         int myY = at.y;
         for(RobotInfo i : r){
             if(i.getType() == RobotType.NET_GUN){
                 oppNet.add(i.getLocation());
+                news.get(5).add(i.getLocation());
             }
             if((i.getType() == RobotType.DESIGN_SCHOOL || i.getType() == RobotType.NET_GUN || i.getType() == RobotType.FULFILLMENT_CENTER || i.getType() == RobotType.REFINERY) && quadrantIn(i.getLocation()) == quadrantIn(HQ)){
                 offensiveEnemyBuildings.add(i.getLocation());
+                news.get(6).add(i.getLocation());
             }
             if(i.getType() == RobotType.HQ){
                 EnemyHQ = i.getLocation();
@@ -856,6 +862,7 @@ public strictfp class RobotPlayer {
         for(RobotInfo i : r2d2){
             if(i.getType() == RobotType.REFINERY){
                 refineries.add(i.getLocation());
+                news.get(4).add(i.getLocation());
             }
         }
 
@@ -866,16 +873,19 @@ public strictfp class RobotPlayer {
                     if (rc.senseFlooding(n) && !senseFloodingAround(n)){
                         if(!water.contains(n)) {
                             water.add(n);
+                            news.get(3).add(n);
                         }
                     }
                     if(rc.senseSoup(n) > 0 && !senseSoupAround(n)){
                         if(!soup.contains(n)){
                             soup.add(n);
+                            news.get(2).add(n);
                         }
                     }
                 }
             }
         }
+        return news;
     }
 
     static boolean senseFloodingAround(MapLocation n) throws GameActionException{
