@@ -52,6 +52,13 @@ public strictfp class RobotPlayer {
                 landscaperTask = "wall";
             }
         }
+        if(rc.getType() == RobotType.DELIVERY_DRONE){
+            droneTask = "cow";
+            //find soup and water?
+            droneTask = "scoutWithMiner";
+            droneTask = "killEnemy";
+            droneTask = "helpMyLandscaper";
+        }
 
         initialLoc = rc.getLocation();
         System.out.println("INITIAL LOCATION IS: " + initialLoc);
@@ -372,19 +379,48 @@ public strictfp class RobotPlayer {
     //DELIVERY DRONE CODE BELOW
     static void runDeliveryDrone() throws GameActionException {
         Team enemy = rc.getTeam().opponent();
-        if (!rc.isCurrentlyHoldingUnit()) {
-            // See if there are any enemy robots within striking range (distance 1 from lumberjack's radius)
+        //fuck him up
+        if(!rc.isCurrentlyHoldingUnit()){
             RobotInfo[] nearbyRobots = rc.senseNearbyRobots(GameConstants.DELIVERY_DRONE_PICKUP_RADIUS_SQUARED, enemy);
 
-            if (nearbyRobots.length > 0) {
-                // Pick up a first robot within range
-                rc.pickUpUnit(nearbyRobots[0].getID());
-                System.out.println("I picked up " + nearbyRobots[0].getID() + "!");
+            if(nearbyRobots.length > 0){
+                //CAN MAKE IT BETTER
+                Direction rando = randomDirection();
+                int enemyID = nearbyRobots[0].getID();
+                RobotInfo targetEnemy = nearbyRobots[0];
+                //may this dont work
+                moveTo(targetEnemy.getLocation().add(rando));
+                if(rc.canPickUpUnit(targetEnemy.getID())){
+                    rc.pickUpUnit(targetEnemy.getID());
+                }
+                for(Direction dir: directions){
+                    MapLocation adj = rc.adjacentLocation(dir);
+                    while(rc.onTheMap(adj)){
+                        if(rc.senseFlooding(adj)){
+                            if(rc.canDropUnit(dir)){
+                                rc.dropUnit(dir);
+                            }
+                        }
+                        tryMove(dir);
+                    }
+
+                }
+
             }
-        } else {
-            // No close robots, so search for robots within sight radius
-            tryMove(randomDirection());
         }
+        // if (!rc.isCurrentlyHoldingUnit()) {
+        //     // See if there are any enemy robots within striking range (distance 1 from lumberjack's radius)
+        //     RobotInfo[] nearbyRobots = rc.senseNearbyRobots(GameConstants.DELIVERY_DRONE_PICKUP_RADIUS_SQUARED, enemy);
+
+        //     if (nearbyRobots.length > 0) {
+        //         // Pick up a first robot within range
+        //         rc.pickUpUnit(nearbyRobots[0].getID());
+        //         System.out.println("I picked up " + nearbyRobots[0].getID() + "!");
+        //     }
+        // } else {
+        //     // No close robots, so search for robots within sight radius
+        //     tryMove(randomDirection());
+        // }
     }
     //__________________________________________________________________________________________________________________
     //NET GUN CODE BELOW
