@@ -56,7 +56,9 @@ public strictfp class RobotPlayer {
         path = Direction.CENTER;
 
         if(rc.getType() == RobotType.LANDSCAPER){
-            if(rc.getRoundNum() < 150 && true){
+
+            if(rc.getRoundNum() < 150){
+
                 task = "zerg";
             }
             else{
@@ -65,7 +67,9 @@ public strictfp class RobotPlayer {
         }
         
         if(rc.getType() == RobotType.MINER){
-            if(rc.getRoundNum() < 150 && true){
+
+            if(rc.getRoundNum() < 150){
+
                 task = "zerg";
             }
             else{
@@ -141,7 +145,9 @@ public strictfp class RobotPlayer {
     }
 
     static void runMiner() throws GameActionException {
-        if(task == "zerg" && true) {
+
+        if(task == "zerg") {
+
         	MapLocation HQ = getEnemyHQLocation();
             if (HQ == null)
                 findEnemyHQ(rc.getLocation());
