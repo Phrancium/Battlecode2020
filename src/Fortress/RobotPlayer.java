@@ -359,13 +359,78 @@ public strictfp class RobotPlayer {
     }
     
     static void buildCastle() throws GameActionException{
+    	Direction[] direction = {
+    	        Direction.NORTH,
+    	        Direction.EAST,
+    	        Direction.SOUTH,
+    	        Direction.WEST,
+    	        Direction.NORTHEAST,
+    	        Direction.SOUTHEAST,
+    	        Direction.SOUTHWEST,
+    	        Direction.NORTHWEST
+    	    };
     	MapLocation home = getHQLocation();
         MapLocation at = rc.getLocation();
         Direction dir = at.directionTo(home);
-        if(at.distanceSquaredTo(home) > 2){
+        MapLocation[] build = new MapLocation[8];
+        for(int i = 0; i < 9; i++) {
+        	build[i] = home.add(direction[i]);
+        }
+        if(at.distanceSquaredTo(home) > 8){
             moveTo(home);
         }
-        for dir
+        else if (at.distanceSquaredTo(home) > 2){
+        	for(int i = 0; i < 9; i++) {
+        		if(!rc.isLocationOccupied(build[i])) {
+        			moveTo(build[i]);
+        			break;
+        		}
+        	}
+        }
+        else if (at.distanceSquaredTo(home) > 1) {	
+        	MapLocation left = at.add(dir.rotateLeft());
+        	MapLocation right = at.add(dir.rotateRight());
+        	if (rc.senseElevation(left) < rc.senseElevation(at)) {
+        		if(rc.getDirtCarrying() > 0)
+                    rc.depositDirt(at.directionTo(left));
+        		else
+                    rc.digDirt(dir.opposite());
+        	}
+        	else if(rc.senseElevation(right) < rc.senseElevation(at)) {
+        		if(rc.getDirtCarrying() > 0)
+                    rc.depositDirt(at.directionTo(right));
+        		else
+                    rc.digDirt(dir.opposite());
+        	}
+        	else {
+        		if(rc.getDirtCarrying() > 0)
+                    rc.depositDirt(Direction.CENTER);
+        		else
+                    rc.digDirt(dir.opposite());
+        	}
+        }
+        else if (at.distanceSquaredTo(home) == 1) {	
+        	MapLocation left = at.add(dir.rotateLeft().rotateLeft());
+        	MapLocation right = at.add(dir.rotateRight().rotateRight());
+        	if (rc.senseElevation(left) < rc.senseElevation(at)) {
+        		if(rc.getDirtCarrying() > 0)
+                    rc.depositDirt(at.directionTo(left));
+        		else
+                    rc.digDirt(dir.opposite());
+        	}
+        	else if(rc.senseElevation(right) < rc.senseElevation(at)) {
+        		if(rc.getDirtCarrying() > 0)
+                    rc.depositDirt(at.directionTo(right));
+        		else
+                    rc.digDirt(dir.opposite());
+        	}
+        	else {
+        		if(rc.getDirtCarrying() > 0)
+                    rc.depositDirt(Direction.CENTER);
+        		else
+                    rc.digDirt(dir.opposite());
+        	}
+        }
     }
 
     static boolean isEnemyHQFull(MapLocation en) throws GameActionException{
