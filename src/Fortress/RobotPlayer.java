@@ -31,7 +31,9 @@ public strictfp class RobotPlayer {
     static String task;
     static String droneTask;
     static int numBuilt;
-    static MapLocation EnemyHQ;
+    static int mapQuadrant;
+    static  MapLocation HQ;
+
     static boolean moveOnce = false;
 
     /**MapLocation arrays containing all the relevent MapLocations **/
@@ -41,6 +43,7 @@ public strictfp class RobotPlayer {
     static ArrayList<MapLocation> refineries = new ArrayList<>();
     static ArrayList<MapLocation> oppNet = new ArrayList<>();
     static ArrayList<MapLocation> offensiveEnemyBuildings = new ArrayList<>();
+    static MapLocation EnemyHQ;
 
     //__________________________________________________________________________________________________________________
     //RUN CODE BELOW
@@ -59,6 +62,7 @@ public strictfp class RobotPlayer {
         souploc = null;
         EnemyHQ = null;
         path = Direction.CENTER;
+        HQ = getHQLocation();
 
         //landscaper task determiner
         if(rc.getType() == RobotType.LANDSCAPER){
@@ -722,24 +726,16 @@ public strictfp class RobotPlayer {
         MapLocation dest2 = new MapLocation(mapW-hqX, mapH-hqY);
 
         if(at.x == dest2.x && at.y==dest2.y){
-            postLocation(3, hqX, mapH - hqY, 1);
-        }
-
-        RobotInfo[] rob = rc.senseNearbyRobots();
-        //scan for enemy HQ
-        for(RobotInfo d : rob){
-            if(d.getType().name() == "HQ" && d.getTeam() != rc.getTeam()){
-                postLocation(3, d.location.x, d.location.y, 1);
-            }
+            EnemyHQ = new MapLocation( hqX, mapH - hqY);
         }
         if(hqX < mapW/2) {
-            if (at.x < dest1.x - 2) {
+            if (at.x < dest1.x - 3) {
                 moveToDrone(dest1);
             } else {
                 moveToDrone(dest2);
             }
         }else{
-            if (at.x > dest1.x + 2) {
+            if (at.x > dest1.x + 3) {
                 moveToDrone(dest1);
             } else {
                 moveToDrone(dest2);
@@ -748,38 +744,81 @@ public strictfp class RobotPlayer {
     }
 
     static void scan(MapLocation at) throws GameActionException{
-        RobotInfo[] r = rc.senseNearbyRobots();
+        RobotInfo[] r = rc.senseNearbyRobots(rc.getCurrentSensorRadiusSquared(), rc.getTeam().opponent());
+        RobotInfo[] r2d2 = rc.senseNearbyRobots(rc.getCurrentSensorRadiusSquared(), rc.getTeam().opponent());
         int myX = at.x;
         int myY = at.y;
         for(RobotInfo i : r){
             if(i.getType() == RobotType.NET_GUN){
                 oppNet.add(i.getLocation());
             }
+            if((i.getType() == RobotType.DESIGN_SCHOOL || i.getType() == RobotType.NET_GUN || i.getType() == RobotType.FULFILLMENT_CENTER || i.getType() == RobotType.REFINERY) && quadrantIn(i.getLocation()) == quadrantIn(HQ)){
+                offensiveEnemyBuildings.add(i.getLocation());
+            }
+            if(i.getType() == RobotType.HQ){
+                EnemyHQ = i.getLocation();
+            }
         }
+        for(RobotInfo i : r2d2){
+            if(i.getType() == RobotType.REFINERY){
+                refineries.add(i.getLocation());
+            }
+        }
+
         for(int x = -4; x < 5; x++){
             for(int y = -4; y < 5; y++){
                 MapLocation n = new MapLocation(myX + x, myY + y);
                 if(rc.onTheMap(n) && rc.canSenseLocation(n)){
                     if (rc.senseFlooding(n) && !senseFloodingAround(n)){
-                        water.add(n);
+                        if(!water.contains(n)) {
+                            water.add(n);
+                        }
                     }
-                    if(rc.senseSoup(n) > 0){
-                        
+                    if(rc.senseSoup(n) > 0 && !senseSoupAround(n)){
+                        if(!soup.contains(n)){
+                            soup.add(n);
+                        }
                     }
                 }
             }
         }
     }
+
     static boolean senseFloodingAround(MapLocation n) throws GameActionException{
         int directionsFlooded = 0;
         for(Direction d : directions){
-            if(!rc.senseFlooding(n.add(d))){
+            if(rc.senseFlooding(n.add(d))){
                 directionsFlooded++;
             }
         }
         return (directionsFlooded > 5);
     }
 
+    static boolean senseSoupAround(MapLocation n) throws GameActionException{
+        int directionsSoup = 0;
+        for(Direction d : directions){
+            if(rc.senseSoup(n.add(d)) > 0){
+                directionsSoup++;
+            }
+        }
+        return (directionsSoup > 5);
+    }
+
+    static int quadrantIn(MapLocation m) throws GameActionException{
+        if(m.x < rc.getMapWidth()/2){
+            if(m.y < rc.getMapHeight()/2){
+                return 3;
+            }else{
+                return 2;
+            }
+        }else{
+            if(m.y < rc.getMapHeight()/2){
+                return 4;
+            }else{
+                return 1;
+            }
+        }
+    }
     //__________________________________________________________________________________________________________________
 }
 
