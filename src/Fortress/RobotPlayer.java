@@ -79,8 +79,8 @@ public strictfp class RobotPlayer {
             droneTask = "cow";
             //find soup and water?
             droneTask = "scoutWithMiner";
-            droneTask = "killEnemy";
             droneTask = "helpMyLandscaper";
+            droneTask = "killEnemy";
         }
 
         initialLoc = rc.getLocation();
@@ -403,40 +403,43 @@ public strictfp class RobotPlayer {
             if(EnemyHQ == null){
                 findEnemyHQ(loc);
             }
-        }else {
+        }
+        if (droneTask.equals("killEnemy")){
             Team enemy = rc.getTeam().opponent();
             //fuck him up
             if (!rc.isCurrentlyHoldingUnit()) {
                 RobotInfo[] nearbyRobots = rc.senseNearbyRobots(GameConstants.DELIVERY_DRONE_PICKUP_RADIUS_SQUARED, enemy);
+
+                //moveToDrone(x);
                 if (nearbyRobots.length > 0) {
                     //CAN MAKE IT BETTER
                     Direction rando = randomDirection();
-                    int enemyID = nearbyRobots[0].getID();
                     RobotInfo targetEnemy = nearbyRobots[0];
+                    int enemyID = targetEnemy.getID();
                     //may this dont work
                     moveTo(targetEnemy.getLocation().add(rando));
                     if (rc.canPickUpUnit(targetEnemy.getID())) {
                         rc.pickUpUnit(targetEnemy.getID());
                     }
-                    for (Direction dir : directions) {
-                        MapLocation adj = rc.adjacentLocation(dir);
-                        while (rc.onTheMap(adj)) {
-                            if (rc.senseFlooding(adj)) {
-                                if (rc.canDropUnit(dir)) {
-                                    rc.dropUnit(dir);
-                                }
+                }
+            }else{
+                for (Direction dir : directions) {
+                    MapLocation adj = rc.adjacentLocation(dir);
+                    while (rc.onTheMap(adj)) {
+                        if (rc.senseFlooding(adj)) {
+                            if (rc.canDropUnit(dir)) {
+                                rc.dropUnit(dir);
                             }
-                            tryMove(dir);
                         }
-
+                        tryMove(dir);
                     }
 
                 }
             }
-        } else{
+        }
             //tryMove(Direction.EAST);
             //moveTo(getEnemyHQLocation());
-        }
+
         // if (!rc.isCurrentlyHoldingUnit()) {
         //     // See if there are any enemy robots within striking range (distance 1 from lumberjack's radius)
         //     RobotInfo[] nearbyRobots = rc.senseNearbyRobots(GameConstants.DELIVERY_DRONE_PICKUP_RADIUS_SQUARED, enemy);
@@ -537,6 +540,41 @@ public strictfp class RobotPlayer {
         //Find general direction of destination
         MapLocation loc = rc.getLocation();
         Direction moveDirection = loc.directionTo(dest);
+
+        //See if general direction is valid
+        if(rc.canMove(moveDirection)){
+            path = moveDirection.opposite();
+            tryMove(moveDirection);
+        }else if(rc.canMove(moveDirection.rotateLeft()) && moveDirection.rotateLeft() != path){
+            path = moveDirection.rotateLeft().opposite();
+            tryMove(moveDirection.rotateLeft());
+        }else if(rc.canMove(moveDirection.rotateRight()) && moveDirection.rotateRight() != path) {
+            path = moveDirection.rotateRight().opposite();
+            tryMove(moveDirection.rotateRight());
+        }else if(rc.canMove(moveDirection.rotateLeft().rotateLeft()) && moveDirection.rotateLeft().rotateLeft() != path) {
+            path = moveDirection.rotateLeft().rotateLeft().opposite();
+            tryMove(moveDirection.rotateLeft().rotateLeft());
+        }else if(rc.canMove(moveDirection.rotateRight().rotateRight()) && moveDirection.rotateRight().rotateRight() != path) {
+            path = moveDirection.rotateRight().rotateRight().opposite();
+            tryMove(moveDirection.rotateRight().rotateRight());
+        }else if(rc.canMove(moveDirection.rotateLeft().rotateLeft().rotateLeft()) && moveDirection.rotateLeft().rotateLeft().rotateLeft() != path) {
+            path = moveDirection.rotateLeft().rotateLeft().rotateLeft().opposite();
+            tryMove(moveDirection.rotateLeft().rotateLeft().rotateLeft());
+        }else if(rc.canMove(moveDirection.rotateRight().rotateRight().rotateRight()) && moveDirection.rotateRight().rotateRight().rotateRight() != path) {
+            path = moveDirection.rotateRight().rotateRight().rotateRight().opposite();
+            tryMove(moveDirection.rotateRight().rotateRight().rotateRight());
+        } else{
+            tryMove(randomDirection());
+        }
+    }
+
+    static void moveToDrone(MapLocation dest) throws GameActionException{
+        //Find general direction of destination
+        MapLocation loc = rc.getLocation();
+        Direction moveDirection = loc.directionTo(dest);
+
+        Direction[] nonoDirections = {Direction.NORTHEAST, Direction.NORTHWEST, Direction.SOUTHEAST, Direction.SOUTHWEST};
+
 
         //See if general direction is valid
         if(rc.canMove(moveDirection)){
@@ -704,40 +742,6 @@ public strictfp class RobotPlayer {
             } else {
                 moveToDrone(dest2);
             }
-        }
-    }
-    static void moveToDrone(MapLocation dest) throws GameActionException{
-        //Find general direction of destination
-        MapLocation loc = rc.getLocation();
-        Direction moveDirection = loc.directionTo(dest);
-
-        Direction[] nonoDirections = {Direction.NORTHEAST, Direction.NORTHWEST, Direction.SOUTHEAST, Direction.SOUTHWEST};
-
-
-        //See if general direction is valid
-        if(rc.canMove(moveDirection)){
-            path = moveDirection.opposite();
-            tryMove(moveDirection);
-        }else if(rc.canMove(moveDirection.rotateLeft()) && moveDirection.rotateLeft() != path){
-            path = moveDirection.rotateLeft().opposite();
-            tryMove(moveDirection.rotateLeft());
-        }else if(rc.canMove(moveDirection.rotateRight()) && moveDirection.rotateRight() != path) {
-            path = moveDirection.rotateRight().opposite();
-            tryMove(moveDirection.rotateRight());
-        }else if(rc.canMove(moveDirection.rotateLeft().rotateLeft()) && moveDirection.rotateLeft().rotateLeft() != path) {
-            path = moveDirection.rotateLeft().rotateLeft().opposite();
-            tryMove(moveDirection.rotateLeft().rotateLeft());
-        }else if(rc.canMove(moveDirection.rotateRight().rotateRight()) && moveDirection.rotateRight().rotateRight() != path) {
-            path = moveDirection.rotateRight().rotateRight().opposite();
-            tryMove(moveDirection.rotateRight().rotateRight());
-        }else if(rc.canMove(moveDirection.rotateLeft().rotateLeft().rotateLeft()) && moveDirection.rotateLeft().rotateLeft().rotateLeft() != path) {
-            path = moveDirection.rotateLeft().rotateLeft().rotateLeft().opposite();
-            tryMove(moveDirection.rotateLeft().rotateLeft().rotateLeft());
-        }else if(rc.canMove(moveDirection.rotateRight().rotateRight().rotateRight()) && moveDirection.rotateRight().rotateRight().rotateRight() != path) {
-            path = moveDirection.rotateRight().rotateRight().rotateRight().opposite();
-            tryMove(moveDirection.rotateRight().rotateRight().rotateRight());
-        } else{
-            tryMove(randomDirection());
         }
     }
 
