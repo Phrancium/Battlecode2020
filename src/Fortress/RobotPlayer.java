@@ -2,6 +2,8 @@ package Fortress;
 
 import battlecode.common.*;
 
+import java.lang.reflect.Array;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -34,11 +36,11 @@ public strictfp class RobotPlayer {
 
     /**MapLocation arrays containing all the relevent MapLocations **/
 
-    static MapLocation[] water = {};
-    static MapLocation[] soup = {};
-    static MapLocation[] refineries = {};
-    static MapLocation[] oppNet = {};
-    static MapLocation[] offensiveEnemyBuildings = {};
+    static ArrayList<MapLocation> water = new ArrayList<>();
+    static ArrayList<MapLocation> soup = new ArrayList<>();
+    static ArrayList<MapLocation> refineries = new ArrayList<>();
+    static ArrayList<MapLocation> oppNet = new ArrayList<>();
+    static ArrayList<MapLocation> offensiveEnemyBuildings = new ArrayList<>();
 
     //__________________________________________________________________________________________________________________
     //RUN CODE BELOW
@@ -60,7 +62,7 @@ public strictfp class RobotPlayer {
 
         //landscaper task determiner
         if(rc.getType() == RobotType.LANDSCAPER){
-            if(rc.getRoundNum() < 150 && rc.getRobotCount() < 9){
+            if(rc.getRoundNum() < 150){
                 task = "zerg";
             }else{
                 task = "wall";
@@ -150,7 +152,7 @@ public strictfp class RobotPlayer {
         scanForSoup(curr);
         souploc = getSoupLocation();
         //build design school
-        if (rc.getRobotCount() == 4) {
+        if (true) {
         	MapLocation loc = getHQLocation();
         	Direction away = curr.directionTo(loc).opposite();
         	if(tryBuild(RobotType.DESIGN_SCHOOL, away)){
@@ -158,7 +160,7 @@ public strictfp class RobotPlayer {
             }else if(tryBuild(RobotType.DESIGN_SCHOOL,away.rotateRight())){
             }
         }
-        if (rc.getRobotCount() == 13){
+        if (true){
             MapLocation loc = getHQLocation();
             Direction away = curr.directionTo(loc).opposite();
             if(tryBuild(RobotType.FULFILLMENT_CENTER, away)){
@@ -396,8 +398,8 @@ public strictfp class RobotPlayer {
     //DELIVERY DRONE CODE BELOW
     static void runDeliveryDrone() throws GameActionException {
         if(task.equals("scout")){
-            scan();
             MapLocation loc = rc.getLocation();
+            scan(loc);
             if(EnemyHQ == null){
                 findEnemyHQ(loc);
             }
@@ -736,13 +738,37 @@ public strictfp class RobotPlayer {
         }
     }
 
-    static void scan(){
+    static void scan(MapLocation at) throws GameActionException{
         RobotInfo[] r = rc.senseNearbyRobots();
+        int myX = at.x;
+        int myY = at.y;
         for(RobotInfo i : r){
             if(i.getType() == RobotType.NET_GUN){
-                MapLocation netLoc = i.getLocation();
+                oppNet.add(i.getLocation());
             }
         }
+        for(int x = -4; x < 5; x++){
+            for(int y = -4; y < 5; y++){
+                MapLocation n = new MapLocation(myX + x, myY + y);
+                if(rc.onTheMap(n) && rc.canSenseLocation(n)){
+                    if (rc.senseFlooding(n) && !senseFloodingAround(n)){
+                        water.add(n);
+                    }
+                    if(rc.senseSoup(n) > 0){
+                        
+                    }
+                }
+            }
+        }
+    }
+    static boolean senseFloodingAround(MapLocation n) throws GameActionException{
+        int directionsFlooded = 0;
+        for(Direction d : directions){
+            if(!rc.senseFlooding(n.add(d))){
+                directionsFlooded++;
+            }
+        }
+        return (directionsFlooded > 5);
     }
 
     //__________________________________________________________________________________________________________________
