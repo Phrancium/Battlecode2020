@@ -177,7 +177,7 @@ public strictfp class RobotPlayer {
             }else if(tryBuild(RobotType.FULFILLMENT_CENTER,away.rotateRight())){
             }
         }
-*/
+
         openEyes(curr);
         //MINE SOUP
         if (souploc != null && rc.getSoupCarrying() < 96){
