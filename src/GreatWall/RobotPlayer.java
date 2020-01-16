@@ -56,7 +56,7 @@ public strictfp class RobotPlayer {
         path = Direction.CENTER;
 
         if(rc.getType() == RobotType.LANDSCAPER){
-            if(rc.getRoundNum() < 150 && rc.getRobotCount() < 9){
+            if(rc.getRoundNum() < 150){
                 task = "zerg";
             }else{
                 task = "wall";
@@ -129,7 +129,7 @@ public strictfp class RobotPlayer {
         scanForSoup(curr);
         souploc = getSoupLocation();
         //build design school
-        if (rc.getRobotCount() == 4) {
+        if (true) {
         	MapLocation loc = getHQLocation();
         	Direction away = curr.directionTo(loc).opposite();
         	if(tryBuild(RobotType.DESIGN_SCHOOL, away)){

@@ -111,13 +111,13 @@ public strictfp class RobotPlayer {
         scanForSoup(curr);
         souploc = getSoupLocation();
         //build design school
-        if (rc.getRobotCount() == 4) {
+        if (true) {
         	for (Direction dir : directions)
         		tryBuild(RobotType.DESIGN_SCHOOL,dir);
         }
         //build FULFILLMENT CENTER (for drones)
         //arbitrary 6, prob CHANGE later
-        if (rc.getRobotCount() == 6){
+        if (true){
             for (Direction dir : directions)
                 tryBuild(RobotType.FULFILLMENT_CENTER,dir);
         }
