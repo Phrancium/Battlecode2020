@@ -670,33 +670,61 @@ public strictfp class RobotPlayer {
         MapLocation loc = rc.getLocation();
         Direction moveDirection = loc.directionTo(dest);
 
-        Direction[] nonoDirections = {Direction.NORTHEAST, Direction.NORTHWEST, Direction.SOUTHEAST, Direction.SOUTHWEST};
 
+        Direction bad = Direction.CENTER;
+        Direction notgood = Direction.CENTER;
+
+        //look for enemy netguns in range
+        for(MapLocation gun : oppNet){
+            if(loc.distanceSquaredTo(gun) < 26){
+                if(Math.abs(gun.x - loc.x) < 5 && Math.abs(gun.x - loc.x) > 2){
+                    if(gun.x - loc.x > 0){
+                        bad = Direction.EAST;
+                    }else{
+                        bad = Direction.WEST;
+                    }
+                }
+                if(Math.abs(gun.y - loc.y) < 5 && Math.abs(gun.y - loc.y) > 2){
+                    if(gun.x - loc.x > 0){
+                        notgood = Direction.NORTH;
+                    }else{
+                        notgood = Direction.SOUTH;
+                    }
+                }
+            }
+        }
+
+
+        Direction[] nonoDirections = {Direction.NORTHEAST, Direction.NORTHWEST, Direction.SOUTHEAST, Direction.SOUTHWEST, bad, notgood, path};
+        ArrayList<Direction> ew = new ArrayList<>();
+        for( Direction d : nonoDirections){
+            ew.add(d);
+        }
 
         //See if general direction is valid
         if(rc.canMove(moveDirection)){
             path = moveDirection.opposite();
             tryMove(moveDirection);
-        }else if(rc.canMove(moveDirection.rotateLeft()) && moveDirection.rotateLeft() != path){
+        }else if(rc.canMove(moveDirection.rotateLeft()) && !ew.contains(moveDirection.rotateLeft())){
             path = moveDirection.rotateLeft().opposite();
             tryMove(moveDirection.rotateLeft());
-        }else if(rc.canMove(moveDirection.rotateRight()) && moveDirection.rotateRight() != path) {
+        }else if(rc.canMove(moveDirection.rotateRight()) && !ew.contains(moveDirection.rotateRight())) {
             path = moveDirection.rotateRight().opposite();
             tryMove(moveDirection.rotateRight());
-        }else if(rc.canMove(moveDirection.rotateLeft().rotateLeft()) && moveDirection.rotateLeft().rotateLeft() != path) {
+        }else if(rc.canMove(moveDirection.rotateLeft().rotateLeft()) && !ew.contains(moveDirection.rotateLeft().rotateLeft())){
             path = moveDirection.rotateLeft().rotateLeft().opposite();
             tryMove(moveDirection.rotateLeft().rotateLeft());
-        }else if(rc.canMove(moveDirection.rotateRight().rotateRight()) && moveDirection.rotateRight().rotateRight() != path) {
+        }else if(rc.canMove(moveDirection.rotateRight().rotateRight()) && !ew.contains(moveDirection.rotateRight().rotateRight())) {
             path = moveDirection.rotateRight().rotateRight().opposite();
             tryMove(moveDirection.rotateRight().rotateRight());
-        }else if(rc.canMove(moveDirection.rotateLeft().rotateLeft().rotateLeft()) && moveDirection.rotateLeft().rotateLeft().rotateLeft() != path) {
+        }else if(rc.canMove(moveDirection.rotateLeft().rotateLeft().rotateLeft()) && !ew.contains(moveDirection.rotateLeft().rotateLeft().rotateLeft())) {
             path = moveDirection.rotateLeft().rotateLeft().rotateLeft().opposite();
             tryMove(moveDirection.rotateLeft().rotateLeft().rotateLeft());
-        }else if(rc.canMove(moveDirection.rotateRight().rotateRight().rotateRight()) && moveDirection.rotateRight().rotateRight().rotateRight() != path) {
+        }else if(rc.canMove(moveDirection.rotateRight().rotateRight().rotateRight()) && !ew.contains(moveDirection.rotateRight().rotateRight().rotateRight())) {
             path = moveDirection.rotateRight().rotateRight().rotateRight().opposite();
             tryMove(moveDirection.rotateRight().rotateRight().rotateRight());
         } else{
-            tryMove(randomDirection());
+            tryMove(moveDirection.opposite());
         }
     }
 
