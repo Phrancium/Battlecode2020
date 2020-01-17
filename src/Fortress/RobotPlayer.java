@@ -677,8 +677,8 @@ public strictfp class RobotPlayer {
         RobotInfo[] r = rc.senseNearbyRobots(rc.getCurrentSensorRadiusSquared(), rc.getTeam().opponent());
         RobotInfo[] r2d2 = rc.senseNearbyRobots(rc.getCurrentSensorRadiusSquared(), rc.getTeam().opponent());
         HashMap<Integer, ArrayList<MapLocation>> news = new HashMap<>();
-        for(int i = 2; i < 7; i++){
-            news.put(1, new ArrayList<MapLocation>());
+        for(int i = 1; i < 6; i++){
+            news.put(i, new ArrayList<MapLocation>());
         }
         int myX = at.x;
         int myY = at.y;
@@ -689,10 +689,11 @@ public strictfp class RobotPlayer {
             }
             if((i.getType() == RobotType.DESIGN_SCHOOL || i.getType() == RobotType.NET_GUN || i.getType() == RobotType.FULFILLMENT_CENTER || i.getType() == RobotType.REFINERY) && quadrantIn(i.getLocation()) == quadrantIn(HQ)){
                 offensiveEnemyBuildings.add(i.getLocation());
-                news.get(6).add(i.getLocation());
+                news.get(3).add(i.getLocation());
             }
             if(i.getType() == RobotType.HQ){
                 EnemyHQ = i.getLocation();
+                news.get(1).add(i.getLocation());
             }
         }
         for(RobotInfo i : r2d2){
@@ -1293,7 +1294,24 @@ public strictfp class RobotPlayer {
                     y*=2;
                     if (ours.get(i*20+j)) y++;
                 }
-                switch ()type;
+                switch (type){
+                    case 1:
+                        EnemyHQ=new MapLocation(x,y);
+                        break;
+                    case 2:
+                        soup.add(new MapLocation(x,y));
+                        break;
+                    case 3:
+                        offensiveEnemyBuildings.add(new MapLocation(x,y));
+                        break;
+                    case 4:
+                        refineries.add(new MapLocation(x,y));
+                        break;
+                    case 5:
+                        oppNet.add(new MapLocation(x,y));
+                        break;
+                }
+
 
             }
         }
