@@ -419,7 +419,7 @@ public strictfp class RobotPlayer {
         		bury(i.getLocation(), at);
         	}
         }
-        if(at.distanceSquaredTo(home) < 45 && at.distanceSquaredTo(home) > 8)
+        //if(at.distanceSquaredTo(home) < 45 && at.distanceSquaredTo(home) > 8)
     }
     
     static void bury(MapLocation target, MapLocation at) throws GameActionException{
@@ -452,15 +452,15 @@ public strictfp class RobotPlayer {
     	MapLocation home = HQ;
         MapLocation at = rc.getLocation();
         Direction dir = at.directionTo(home);
-        MapLocation[] build = new MapLocation[9];
-        for(int i = 0; i < 9; i++) {
+        MapLocation[] build = new MapLocation[8];
+        for(int i = 0; i < 8; i++) {
         	build[i] = home.add(direction[i]);
         }
         if(at.distanceSquaredTo(home) > 8){
             moveTo(home);
         }
         else if (at.distanceSquaredTo(home) > 2){
-        	for(int i = 0; i < 9; i++) {
+        	for(int i = 0; i < 8; i++) {
         		if(!rc.isLocationOccupied(build[i]) && rc.onTheMap(build[i])) {
         			moveTo(build[i]);
         			break;
