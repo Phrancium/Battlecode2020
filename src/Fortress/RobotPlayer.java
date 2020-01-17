@@ -53,7 +53,7 @@ public strictfp class RobotPlayer {
     static ArrayList<MapLocation> offensiveEnemyBuildings = new ArrayList<>();
     static MapLocation EnemyHQ;
     
-    static MapLocation digLoc[];
+    static ArrayList<MapLocation> digLoc = new ArrayList<>();
 
     //__________________________________________________________________________________________________________________
     //RUN CODE BELOW
@@ -409,6 +409,12 @@ public strictfp class RobotPlayer {
             terraform();
         }
     }
+    
+    static void tryDig(Direction dir) throws GameActionException{
+    	if(rc.isReady() && rc.canDigDirt(dir))
+    		rc.digDirt(dir);
+    		
+    }
 
     static void terraform() throws GameActionException{
         MapLocation home = HQ;
@@ -420,7 +426,46 @@ public strictfp class RobotPlayer {
         		bury(i.getLocation(), at);
         	}
         }
-        //if(at.distanceSquaredTo(home) < 45 && at.distanceSquaredTo(home) > 8)
+        if(at.distanceSquaredTo(home) > 8) {
+        	
+        	MapLocation frontRow[] = new MapLocation[9];
+        	frontRow[0] = at;
+        	frontRow[1] = frontRow[0].add(dir.rotateRight().rotateRight());
+        	frontRow[2] = frontRow[0].add(dir.rotateLeft().rotateLeft());
+        	frontRow[3] = frontRow[1].add(dir.rotateRight().rotateRight());
+        	frontRow[4] = frontRow[2].add(dir.rotateLeft().rotateLeft());
+        	frontRow[5] = frontRow[3].add(dir.rotateRight().rotateRight());
+        	frontRow[6] = frontRow[4].add(dir.rotateLeft().rotateLeft());
+        	frontRow[7] = frontRow[5].add(dir.rotateRight().rotateRight());
+        	frontRow[8] = frontRow[6].add(dir.rotateLeft().rotateLeft());
+        	
+        	if(rc.getDirtCarrying() < 25) {
+        		if(rc.isReady() && rc.canDigDirt(dir.opposite())) {
+            		rc.digDirt(dir.opposite());
+            		digLoc.add(at.add(dir.opposite()));
+        		}
+        	}
+        	
+        	if(rc.getDirtCarrying() == 25) {
+        		for(int i = 1; i < 9; i++) {
+        			if(rc.canSenseLocation(frontRow[i]) && !digLoc.contains(frontRow[i])) {
+        				if(rc.senseElevation(frontRow[i]) < rc.senseElevation(frontRow[0]) && rc.senseRobotAtLocation(frontRow[i]) == null) {
+        					if(at.distanceSquaredTo(frontRow[i]) > 2) {
+        						moveTo(frontRow[i]);
+        					}
+        					else if(rc.canDepositDirt(at.directionTo(frontRow[i]))){
+        						rc.depositDirt(at.directionTo(frontRow[i]));
+        					}
+        				}
+        			}
+        		}
+        		if(rc.isReady()) {
+        			tryMove(dir.opposite());
+        			tryMove(dir.opposite().rotateLeft());
+        			tryMove(dir.opposite().rotateRight());
+        		}
+        	}
+        }
     }
     
     static void bury(MapLocation target, MapLocation at) throws GameActionException{
