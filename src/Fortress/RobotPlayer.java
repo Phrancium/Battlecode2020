@@ -167,6 +167,9 @@ public strictfp class RobotPlayer {
         //souploc = getSoupLocation();
         //build design school
         //System.out.println("robots built: "+ robotsBuilt);
+        //System.out.println("SCHOOLS BUILT: " + schoolsBuilt);
+
+        //NOTE: schoolsBuilt is saved per miner, meaning each miner will want to make its own design school
         if (schoolsBuilt < 1 && !scanForDesignSchool()) {
         	MapLocation loc = getHQLocation();
         	Direction away = curr.directionTo(loc).opposite();
@@ -221,6 +224,7 @@ public strictfp class RobotPlayer {
             }
             else{
                 MapLocation jk = getClosestSoup(curr);
+                //ERROR HERE: inserting a null soupLoc
                 moveTo(souploc);
             }
         }
@@ -1212,8 +1216,7 @@ public strictfp class RobotPlayer {
         }
         moveToDrone(enHQDest);
     }
-
-
+    
 
     static PriorityQueue<Information> broadcastQueue = new PriorityQueue<>();
 
@@ -1227,6 +1230,7 @@ public strictfp class RobotPlayer {
             }
         }
     }
+
     static boolean tryBroadcast(int cost) throws GameActionException {
         if (rc.getTeamSoup()>=cost && !broadcastQueue.isEmpty()) {
             int[] message = new int[7];
@@ -1358,7 +1362,6 @@ public strictfp class RobotPlayer {
             }
         }
     }
-
 
     static int quadrantIn(MapLocation m) throws GameActionException{
         if(m.x < rc.getMapWidth()/2){
