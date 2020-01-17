@@ -4,10 +4,7 @@ import battlecode.common.*;
 
 
 import java.lang.reflect.Array;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.PriorityQueue;
+import java.util.*;
 
 public strictfp class RobotPlayer {
     static RobotController rc;
@@ -210,6 +207,7 @@ public strictfp class RobotPlayer {
                     rc.depositSoup(dir, rc.getSoupCarrying());
                 }
             }
+            souploc = null;
             moveTo(initialLoc);
         }
         //FIND SOUP
@@ -1141,8 +1139,65 @@ public strictfp class RobotPlayer {
             }
         }
     }
-    static boolean tryBroadcast(int cost){
-        return true;
+    static boolean tryBroadcast(int cost) throws GameActionException {
+        if (rc.getTeamSoup()>=cost && !broadcastQueue.isEmpty()) {
+            int[] message = new int[7];
+            BitSet bitSet=new BitSet(224);
+            int infocount=0;
+            int index=0;
+            while(infocount<11 && !broadcastQueue.isEmpty()) {
+                Information next = broadcastQueue.poll();
+                index++;
+                for (int i = 0; i < 3; i++) {
+                    int type = next.getType();
+                    bitSet.set(index, type % 2 == 1);
+                    index++;
+                    type /= 2;
+                }
+                for (int i = 0; i < 8; i++) {
+                    int x = next.getX();
+                    bitSet.set(index, x % 2 == 1);
+                    index++;
+                    x /= 2;
+                }
+                for (int i = 0; i < 8; i++) {
+                    int y = next.getY();
+                    bitSet.set(index, y % 2 == 1);
+                    index++;
+                    y /= 2;
+                }
+                infocount++;
+            }
+            bitSet.set(0 * 20, true);
+            //bitSet.set(1*20,true);
+            bitSet.set(2 * 20, true);
+            bitSet.set(3 * 20, true);
+            bitSet.set(4 * 20, true);
+            //bitSet.set(5*20,true);
+            bitSet.set(6 * 20, true);
+            //bitSet.set(7*20,true);
+            //bitSet.set(8*20,true);
+            bitSet.set(9 * 20, true);
+            bitSet.set(10 * 20, true);
+            for (int i = 220; i < 224; i++) {
+                bitSet.set(i, infocount % 2 == 1);
+                infocount /= 2;
+            }
+            long[] longs=bitSet.toLongArray();
+            message[0]= ((int)longs[0]);
+            message[1]= ((int)(longs[0]>>>32));
+            message[2]= ((int)longs[1]);
+            message[3]= ((int)(longs[1]>>>32));
+            message[4]= ((int)longs[2]);
+            message[5]= ((int)(longs[2]>>>32));
+            message[6]= ((int)longs[3]);
+
+            rc.submitTransaction(message, cost);
+            return true;
+        }
+        else{
+            return false;
+        }
     }
 
 

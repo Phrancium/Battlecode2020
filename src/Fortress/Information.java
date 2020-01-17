@@ -13,6 +13,14 @@ public class Information implements Comparable {
         return type;
     }
 
+    public int getX() {
+        return x;
+    }
+
+    public int getY() {
+        return y;
+    }
+
     public Information(int type, int x, int y) {
         this.type = type;
         this.x = x;
