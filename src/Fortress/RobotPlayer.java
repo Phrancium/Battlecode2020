@@ -78,14 +78,7 @@ public strictfp class RobotPlayer {
 
         //landscaper task determiner
         if(rc.getType() == RobotType.LANDSCAPER){
-            if(rc.getRoundNum() < 150){
-                task = "zerg";
-            }
-            if(rc.getRoundNum() < 300){
                 task = "castle";
-            }else{
-                task = "terraform";
-            }
         }
         //drone task determiner
         if(rc.getType() == RobotType.DELIVERY_DRONE){
@@ -426,7 +419,7 @@ public strictfp class RobotPlayer {
         		bury(i.getLocation(), at);
         	}
         }
-        
+        if(at.distanceSquaredTo(home) < 45 && at.distanceSquaredTo(home) > 8)
     }
     
     static void bury(MapLocation target, MapLocation at) throws GameActionException{
@@ -459,7 +452,7 @@ public strictfp class RobotPlayer {
     	MapLocation home = HQ;
         MapLocation at = rc.getLocation();
         Direction dir = at.directionTo(home);
-        MapLocation[] build = new MapLocation[8];
+        MapLocation[] build = new MapLocation[9];
         for(int i = 0; i < 9; i++) {
         	build[i] = home.add(direction[i]);
         }
