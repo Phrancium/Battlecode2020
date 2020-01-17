@@ -1186,6 +1186,10 @@ public strictfp class RobotPlayer {
         }
     }
 
+    static void recieveBroadcast(int round) throws  GameActionException{
+
+    }
+
 
     static int quadrantIn(MapLocation m) throws GameActionException{
         if(m.x < rc.getMapWidth()/2){
