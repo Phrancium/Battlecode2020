@@ -1200,8 +1200,58 @@ public strictfp class RobotPlayer {
         }
     }
 
-    static void recieveBroadcast(int round) throws  GameActionException{
+    static BitSet findTransaction(Transaction[] transactions){
+        for (int i = 0; i < 7 ; i++) {
+            int[] curr=transactions[i].getMessage();
+            long[] longs=new long[4];
+            longs[0] = ((long)curr[0]) | (((long) curr[1] << 32));
+            longs[1] = ((long)curr[2]) | (((long) curr[3] << 32));
+            longs[2] = ((long)curr[4]) | (((long) curr[5] << 32));
+            longs[3] = (long)curr[6];
+            BitSet bitSet=BitSet.valueOf(longs);
+            if (bitSet.get(0 * 20)&&
+            bitSet.get(2 * 20)&&
+            bitSet.get(3 * 20)&&
+            bitSet.get(4 * 20)&&
+            bitSet.get(6 * 20)&&
+            bitSet.get(9 * 20)&&
+            bitSet.get(10 * 20)){
+                return bitSet;
+            }
+        }
+        return null;
 
+    }
+
+    static void receiveBroadcast(int round) throws  GameActionException{
+        Transaction[] transactions=rc.getBlock(round);
+        BitSet ours=findTransaction(transactions);
+        if (ours!=null){
+            int count=0;
+            for (int i = 220; i < 224; i++) {
+                count*=2;
+                if (ours.get(i)) count++;
+            }
+            for (int i = 0; i < count; i++) {
+                int type=0;
+                for (int j = 0; j < 3; j++) {
+                    type*=2;
+                    if (ours.get(i*20+j)) type++;
+                }
+                int x=0;
+                for (int j = 3; j < 11; j++) {
+                    x*=2;
+                    if (ours.get(i*20+j)) x++;
+                }
+                int y=0;
+                for (int j = 11; j < 19; j++) {
+                    y*=2;
+                    if (ours.get(i*20+j)) y++;
+                }
+                switch ()type;
+
+            }
+        }
     }
 
 
