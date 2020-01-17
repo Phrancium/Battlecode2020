@@ -195,7 +195,6 @@ public strictfp class RobotPlayer {
                 tryBuild(RobotType.FULFILLMENT_CENTER, away.rotateRight());
             }
         }
-        openEyes(curr);
         //MINE SOUP
         if (souploc != null && rc.getSoupCarrying() < 96){
             mineSoup();
@@ -208,26 +207,21 @@ public strictfp class RobotPlayer {
                 }
             }
             souploc = null;
-            moveTo(initialLoc);
+            if(getClosestRefine(curr) == null) {
+                moveTo(initialLoc);
+            }else{
+                moveTo(getClosestRefine(curr));
+            }
         }
         //FIND SOUP
         else {
+            openEyes(curr);
             if (soup.isEmpty()){
                 moveTo(curr.subtract(curr.directionTo(initialLoc)));
             }
             else{
-                int dist=10;
-                MapLocation index=null;
-                for (MapLocation l : soup) {
-                    int currdist=curr.distanceSquaredTo(l);
-                    if (currdist<dist) {
-                        index=l;
-                        dist=currdist;
-                    }
-                }
-                souploc=index;
+                MapLocation jk = getClosestSoup(curr);
                 moveTo(souploc);
-
             }
         }
 
@@ -235,18 +229,64 @@ public strictfp class RobotPlayer {
     static void openEyes(MapLocation loc) throws GameActionException{
         int selfX = loc.x;
         int selfY = loc.y;
-        scan:
-        for(int x = -5; x <6; x++){
-            for (int y = -5; y < 6; y++){
-                MapLocation check = new MapLocation(selfX + x, selfY + y);
-                if (rc.canSenseLocation(check)){
-                    if(rc.senseSoup(check) > 5){
-                        soup.add(check);
-                        break scan;
+        int x = 0;
+        int y = 0;
+        while( Math.abs(x) < 5){
+            while(Math.abs(y) < 5){
+                MapLocation n = new MapLocation(selfX + x, selfY + y);
+                if(rc.onTheMap(n) && rc.canSenseLocation(n)){
+                    if(rc.senseSoup(n) > 0){
+                        if(!soup.contains(n) && !irSoup.contains(n)){
+                            if(!senseSoupAround(n)) {
+                                irSoup.add(n);
+                            }else {
+                                soup.add(n);
+                            }
+                        }
                     }
                 }
+                if( y > 0){
+                    y = y*(-1);
+                }else{
+                    y = y*(-1) + 1;
+                }
+            }
+            if( x > 0){
+                x = x*(-1);
+            }else{
+                x = x*(-1) +1;
             }
         }
+    }
+
+    static MapLocation getClosestRefine( MapLocation m){
+        if(refineries.isEmpty()){
+            return null;
+        }
+        MapLocation o = null;
+        int diss = 1000000;
+        for (MapLocation n : refineries){
+            int ned = m.distanceSquaredTo(n);
+            if(ned < diss){
+                o = n;
+            }
+        }
+        return o;
+    }
+
+    static MapLocation getClosestSoup( MapLocation m){
+        if(soup.isEmpty()){
+            return null;
+        }
+        MapLocation o = null;
+        int diss = 1000000;
+        for (MapLocation n : soup){
+            int ned = m.distanceSquaredTo(n);
+            if(ned < diss){
+                o = n;
+            }
+        }
+        return o;
     }
 
     /**robot mines soup **/
@@ -369,10 +409,10 @@ public strictfp class RobotPlayer {
 
     //Builds Landscapers
     static void runDesignSchool() throws GameActionException {
-//        for (Direction dir : directions)
-//            if (tryBuild(RobotType.LANDSCAPER, dir)) {
-//                robotsBuilt++;
-//            }
+        for (Direction dir : directions)
+            if (tryBuild(RobotType.LANDSCAPER, dir)) {
+                robotsBuilt++;
+            }
     }
     //Builds Drones
     static void runFulfillmentCenter() throws GameActionException {
