@@ -199,6 +199,9 @@ public strictfp class RobotPlayer {
 //                tryBuild(RobotType.FULFILLMENT_CENTER, away.rotateRight());
 //            }
 //        }
+        //System.out.println("SCHOOLS BUILT: " + schoolsBuilt);
+
+        //NOTE: schoolsBuilt is saved per miner, meaning each miner will want to make its own design school
         //MINE SOUP
         openEyes(curr);
         if (souploc != null && rc.getSoupCarrying() < 96){
@@ -1319,8 +1322,7 @@ public strictfp class RobotPlayer {
         }
         moveToDrone(enHQDest);
     }
-
-
+    
 
     static PriorityQueue<Information> broadcastQueue = new PriorityQueue<>();
 
@@ -1334,6 +1336,7 @@ public strictfp class RobotPlayer {
             }
         }
     }
+
     static boolean tryBroadcast(int cost) throws GameActionException {
         if (rc.getTeamSoup()>=cost && !broadcastQueue.isEmpty()) {
             int[] message = new int[7];
@@ -1465,7 +1468,6 @@ public strictfp class RobotPlayer {
             }
         }
     }
-
 
     static int quadrantIn(MapLocation m) throws GameActionException{
         if(m.x < rc.getMapWidth()/2){
