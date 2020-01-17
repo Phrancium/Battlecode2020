@@ -7,6 +7,7 @@ import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.PriorityQueue;
 
 public strictfp class RobotPlayer {
     static RobotController rc;
@@ -624,6 +625,83 @@ public strictfp class RobotPlayer {
         //     tryMove(randomDirection());
         // }
     }
+    static HashMap<Integer, ArrayList<MapLocation>> scan(MapLocation at) throws GameActionException{
+        RobotInfo[] r = rc.senseNearbyRobots(rc.getCurrentSensorRadiusSquared(), rc.getTeam().opponent());
+        RobotInfo[] r2d2 = rc.senseNearbyRobots(rc.getCurrentSensorRadiusSquared(), rc.getTeam().opponent());
+        HashMap<Integer, ArrayList<MapLocation>> news = new HashMap<>();
+        for(int i = 2; i < 7; i++){
+            news.put(1, new ArrayList<MapLocation>());
+        }
+        int myX = at.x;
+        int myY = at.y;
+        for(RobotInfo i : r){
+            if(i.getType() == RobotType.NET_GUN){
+                oppNet.add(i.getLocation());
+                news.get(5).add(i.getLocation());
+            }
+            if((i.getType() == RobotType.DESIGN_SCHOOL || i.getType() == RobotType.NET_GUN || i.getType() == RobotType.FULFILLMENT_CENTER || i.getType() == RobotType.REFINERY) && quadrantIn(i.getLocation()) == quadrantIn(HQ)){
+                offensiveEnemyBuildings.add(i.getLocation());
+                news.get(6).add(i.getLocation());
+            }
+            if(i.getType() == RobotType.HQ){
+                EnemyHQ = i.getLocation();
+            }
+        }
+        for(RobotInfo i : r2d2){
+            if(i.getType() == RobotType.REFINERY){
+                refineries.add(i.getLocation());
+                news.get(4).add(i.getLocation());
+            }
+        }
+
+        for(int x = -4; x < 5; x++){
+            for(int y = -4; y < 5; y++){
+                MapLocation n = new MapLocation(myX + x, myY + y);
+                if(rc.onTheMap(n) && rc.canSenseLocation(n)){
+                    if (rc.senseFlooding(n) && !senseFloodingAround(n)){
+                        if(!water.contains(n)) {
+                            water.add(n);
+                            news.get(3).add(n);
+                        }
+                    }
+                    if(rc.senseSoup(n) > 0 && !senseSoupAround(n)){
+                        if(!soup.contains(n)){
+                            soup.add(n);
+                            news.get(2).add(n);
+                        }
+                    }
+                }
+            }
+        }
+        return news;
+    }
+    static boolean senseFloodingAround(MapLocation n) throws GameActionException{
+        int directionsFlooded = 0;
+        for(Direction d : directions){
+            if(rc.onTheMap(n.add(d))) {
+                if (rc.canSenseLocation(n.add(d))) {
+                    if (rc.senseFlooding(n.add(d))) {
+                        directionsFlooded++;
+                    }
+                }
+            }
+        }
+        return (directionsFlooded > 5);
+    }
+
+    static boolean senseSoupAround(MapLocation n) throws GameActionException{
+        int directionsSoup = 0;
+        for(Direction d : directions){
+            if(rc.onTheMap(n.add(d))){
+                if (rc.canSenseLocation(n.add(d))) {
+                    if (rc.senseSoup(n.add(d)) > 0) {
+                        directionsSoup++;
+                    }
+                }
+            }
+        }
+        return (directionsSoup > 5);
+    }
     static void scout(MapLocation at) throws GameActionException {
         if(scoutDest ==  null){
             scoutDest = mapCenter;
@@ -761,6 +839,20 @@ public strictfp class RobotPlayer {
 
     }
 
+    static boolean tryMoveD(Direction dir) throws GameActionException {
+        // System.out.println("I am trying to move " + dir + "; " + rc.isReady() + " " + rc.getCooldownTurns() + " " + rc.canMove(dir));
+        if (rc.isReady() && rc.canMove(dir)) {
+            rc.move(dir);
+            return true;
+        } else return false;
+        //todo: add a case for it to move in the opposite direction when it senses flooding next to it
+        //note: according to the hashmap, +4 positions from any one position leads to the OPPOSITE POSITION.
+        //ig 1: NORTH, 5: SOUTH
+        //of course, it'll have to loop around somehow.
+
+
+    }
+
     static void moveTo(MapLocation dest) throws GameActionException{
         //Find general direction of destination
         MapLocation loc = rc.getLocation();
@@ -832,27 +924,27 @@ public strictfp class RobotPlayer {
         //See if general direction is valid
         if(rc.canMove(moveDirection)){
             path = moveDirection.opposite();
-            tryMove(moveDirection);
+            tryMoveD(moveDirection);
         }else if(rc.canMove(moveDirection.rotateLeft()) && !ew.contains(moveDirection.rotateLeft())){
             path = moveDirection.rotateLeft().opposite();
-            tryMove(moveDirection.rotateLeft());
+            tryMoveD(moveDirection.rotateLeft());
         }else if(rc.canMove(moveDirection.rotateRight()) && !ew.contains(moveDirection.rotateRight())) {
             path = moveDirection.rotateRight().opposite();
-            tryMove(moveDirection.rotateRight());
+            tryMoveD(moveDirection.rotateRight());
         }else if(rc.canMove(moveDirection.rotateLeft().rotateLeft()) && !ew.contains(moveDirection.rotateLeft().rotateLeft())){
             path = moveDirection.rotateLeft().rotateLeft().opposite();
-            tryMove(moveDirection.rotateLeft().rotateLeft());
+            tryMoveD(moveDirection.rotateLeft().rotateLeft());
         }else if(rc.canMove(moveDirection.rotateRight().rotateRight()) && !ew.contains(moveDirection.rotateRight().rotateRight())) {
             path = moveDirection.rotateRight().rotateRight().opposite();
-            tryMove(moveDirection.rotateRight().rotateRight());
+            tryMoveD(moveDirection.rotateRight().rotateRight());
         }else if(rc.canMove(moveDirection.rotateLeft().rotateLeft().rotateLeft()) && !ew.contains(moveDirection.rotateLeft().rotateLeft().rotateLeft())) {
             path = moveDirection.rotateLeft().rotateLeft().rotateLeft().opposite();
-            tryMove(moveDirection.rotateLeft().rotateLeft().rotateLeft());
+            tryMoveD(moveDirection.rotateLeft().rotateLeft().rotateLeft());
         }else if(rc.canMove(moveDirection.rotateRight().rotateRight().rotateRight()) && !ew.contains(moveDirection.rotateRight().rotateRight().rotateRight())) {
             path = moveDirection.rotateRight().rotateRight().rotateRight().opposite();
-            tryMove(moveDirection.rotateRight().rotateRight().rotateRight());
+            tryMoveD(moveDirection.rotateRight().rotateRight().rotateRight());
         } else{
-            tryMove(moveDirection.opposite());
+            tryMoveD(moveDirection.opposite());
         }
     }
 
@@ -1011,76 +1103,21 @@ public strictfp class RobotPlayer {
         }
     }
 
-    static HashMap<Integer, ArrayList<MapLocation>> scan(MapLocation at) throws GameActionException{
-        RobotInfo[] r = rc.senseNearbyRobots(rc.getCurrentSensorRadiusSquared(), rc.getTeam().opponent());
-        RobotInfo[] r2d2 = rc.senseNearbyRobots(rc.getCurrentSensorRadiusSquared(), rc.getTeam().opponent());
-        HashMap<Integer, ArrayList<MapLocation>> news = new HashMap<>();
-        for(int i = 2; i < 7; i++){
-            news.put(1, new ArrayList<MapLocation>());
-        }
-        int myX = at.x;
-        int myY = at.y;
-        for(RobotInfo i : r){
-            if(i.getType() == RobotType.NET_GUN){
-                oppNet.add(i.getLocation());
-                news.get(5).add(i.getLocation());
-            }
-            if((i.getType() == RobotType.DESIGN_SCHOOL || i.getType() == RobotType.NET_GUN || i.getType() == RobotType.FULFILLMENT_CENTER || i.getType() == RobotType.REFINERY) && quadrantIn(i.getLocation()) == quadrantIn(HQ)){
-                offensiveEnemyBuildings.add(i.getLocation());
-                news.get(6).add(i.getLocation());
-            }
-            if(i.getType() == RobotType.HQ){
-                EnemyHQ = i.getLocation();
-            }
-        }
-        for(RobotInfo i : r2d2){
-            if(i.getType() == RobotType.REFINERY){
-                refineries.add(i.getLocation());
-                news.get(4).add(i.getLocation());
-            }
-        }
 
-        for(int x = -4; x < 5; x++){
-            for(int y = -4; y < 5; y++){
-                MapLocation n = new MapLocation(myX + x, myY + y);
-                if(rc.onTheMap(n) && rc.canSenseLocation(n)){
-                    if (rc.senseFlooding(n) && !senseFloodingAround(n)){
-                        if(!water.contains(n)) {
-                            water.add(n);
-                            news.get(3).add(n);
-                        }
-                    }
-                    if(rc.senseSoup(n) > 0 && !senseSoupAround(n)){
-                        if(!soup.contains(n)){
-                            soup.add(n);
-                            news.get(2).add(n);
-                        }
-                    }
-                }
+
+    static PriorityQueue<Information> broadcastQueue = new PriorityQueue<>();
+
+    static void updateBroadcast(HashMap<Integer,ArrayList<MapLocation>> out) throws GameActionException {
+        for (Integer i :
+                out.keySet()) {
+            ArrayList<MapLocation> currlist=out.get(i);
+            for (MapLocation l :
+                    currlist) {
+                broadcastQueue.add(new Information(i, l.x,l.y));
             }
         }
-        return news;
     }
 
-    static boolean senseFloodingAround(MapLocation n) throws GameActionException{
-        int directionsFlooded = 0;
-        for(Direction d : directions){
-            if(rc.senseFlooding(n.add(d))){
-                directionsFlooded++;
-            }
-        }
-        return (directionsFlooded > 5);
-    }
-
-    static boolean senseSoupAround(MapLocation n) throws GameActionException{
-        int directionsSoup = 0;
-        for(Direction d : directions){
-            if(rc.senseSoup(n.add(d)) > 0){
-                directionsSoup++;
-            }
-        }
-        return (directionsSoup > 5);
-    }
 
     static int quadrantIn(MapLocation m) throws GameActionException{
         if(m.x < rc.getMapWidth()/2){

@@ -25,6 +25,7 @@ public strictfp class RobotPlayer {
     static MapLocation souploc;
     static Direction path;
     static String task;
+    static MapLocation rushDest;
     static int schoolsBuilt;
     static boolean moveOnce = false;
     //___________________________________________________________________________________________________________
@@ -49,6 +50,8 @@ public strictfp class RobotPlayer {
         path = Direction.CENTER;
 
         task = "idle";
+
+        rushDest = null;
 
         initialLoc = rc.getLocation();
         System.out.println("INITIAL LOCATION IS: " + initialLoc);
@@ -581,19 +584,14 @@ public strictfp class RobotPlayer {
                 postLocation(3, d.location.x, d.location.y, 1);
             }
         }
-        if(hqX < mapW/2) {
-            if (at.x < dest1.x - 2) {
-                zergRush(dest1);
-            } else {
-                zergRush(dest2);
-            }
-        }else{
-            if (at.x > dest1.x + 2) {
-                zergRush(dest1);
-            } else {
-                zergRush(dest2);
-            }
+        if(rushDest == null){
+            rushDest = dest1;
         }
+        if(at.distanceSquaredTo(dest1) < 16){
+            rushDest = dest2;
+        }
+        zergRush(rushDest);
+
     }
     //___________________________________________________________________________________________________________
 }
