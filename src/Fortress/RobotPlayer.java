@@ -81,7 +81,7 @@ public strictfp class RobotPlayer {
 
         //landscaper task determiner
         if(rc.getType() == RobotType.LANDSCAPER){
-                task = "castle";
+                task = "terraform";
         }
         //drone task determiner
         if(rc.getType() == RobotType.DELIVERY_DRONE){
@@ -369,10 +369,10 @@ public strictfp class RobotPlayer {
 
     //Builds Landscapers
     static void runDesignSchool() throws GameActionException {
-//        for (Direction dir : directions)
-//            if (tryBuild(RobotType.LANDSCAPER, dir)) {
-//                robotsBuilt++;
-//            }
+        for (Direction dir : directions)
+            if (tryBuild(RobotType.LANDSCAPER, dir)) {
+                robotsBuilt++;
+            }
     }
     //Builds Drones
     static void runFulfillmentCenter() throws GameActionException {
@@ -439,18 +439,17 @@ public strictfp class RobotPlayer {
         	frontRow[4] = frontRow[2].add(dir.rotateLeft().rotateLeft());
         	frontRow[5] = frontRow[3].add(dir.rotateRight().rotateRight());
         	frontRow[6] = frontRow[4].add(dir.rotateLeft().rotateLeft());
-        	frontRow[7] = frontRow[5].add(dir.rotateRight().rotateRight());
-        	frontRow[8] = frontRow[6].add(dir.rotateLeft().rotateLeft());
         	
         	if(rc.getDirtCarrying() < 25) {
-        		if(rc.isReady() && rc.canDigDirt(dir.opposite())) {
-            		rc.digDirt(dir.opposite());
-            		digLoc.add(at.add(dir.opposite()));
+        		
+        		if(rc.isReady() && rc.canDigDirt(dir)) {
+            		rc.digDirt(dir);
+            		digLoc.add(at.add(dir));
         		}
         	}
         	
         	if(rc.getDirtCarrying() == 25) {
-        		for(int i = 1; i < 9; i++) {
+        		for(int i = 1; i < 7; i++) {
         			if(rc.canSenseLocation(frontRow[i]) && !digLoc.contains(frontRow[i])) {
         				if(rc.senseElevation(frontRow[i]) < rc.senseElevation(frontRow[0]) && rc.senseRobotAtLocation(frontRow[i]) == null) {
         					if(at.distanceSquaredTo(frontRow[i]) > 2) {
@@ -461,6 +460,9 @@ public strictfp class RobotPlayer {
         					}
         				}
         			}
+        			if(rc.senseElevation(at) < 8) {
+    					rc.depositDirt(Direction.CENTER);
+    				}
         		}
         		if(rc.isReady()) {
         			tryMove(dir.opposite());
