@@ -371,10 +371,10 @@ public strictfp class RobotPlayer {
 
     //Builds Landscapers
     static void runDesignSchool() throws GameActionException {
-//        for (Direction dir : directions)
-//            if (tryBuild(RobotType.LANDSCAPER, dir)) {
-//                robotsBuilt++;
-//            }
+        for (Direction dir : directions)
+            if (tryBuild(RobotType.LANDSCAPER, dir)) {
+                robotsBuilt++;
+            }
     }
     //Builds Drones
     static void runFulfillmentCenter() throws GameActionException {
@@ -720,12 +720,14 @@ public strictfp class RobotPlayer {
             scoutDest = mapCenter;
             scouted.add(scoutDest);
         }
-        if (at.distanceSquaredTo(scoutDest) < 3) {
+        int xAdd = rc.getMapWidth()/8;
+        int yAdd = rc.getMapHeight()/8;
+        if (at.distanceSquaredTo(scoutDest) < 16) {
             int q = quadrantIn(scoutDest);
             if(q == 1){
                 MapLocation newDest = new MapLocation( at.x ,rc.getMapHeight() - at.y);
                 if(!scouted.contains(newDest)){
-                    scoutDest = new MapLocation(at.x ,rc.getMapHeight() - at.y - 8);
+                    scoutDest = new MapLocation(at.x ,rc.getMapHeight() - at.y - yAdd);
                     if(rc.onTheMap(scoutDest)) {
                         scouted.add(scoutDest);
                     }else{
@@ -736,7 +738,7 @@ public strictfp class RobotPlayer {
             } else if(q == 2){
                 MapLocation newDest = new MapLocation( rc.getMapWidth() - at.x ,at.y);
                 if(!scouted.contains(newDest)){
-                    scoutDest = new MapLocation(rc.getMapWidth() - at.x - 8 , at.y);
+                    scoutDest = new MapLocation(rc.getMapWidth() - at.x + xAdd, at.y);
                     if(rc.onTheMap(scoutDest)) {
                         scouted.add(scoutDest);
                     }else{
@@ -747,7 +749,7 @@ public strictfp class RobotPlayer {
             }else if(q == 3){
                 MapLocation newDest = new MapLocation( at.x ,rc.getMapHeight() - at.y);
                 if(!scouted.contains(newDest)){
-                    scoutDest = new MapLocation(at.x ,rc.getMapHeight() - at.y + 8);
+                    scoutDest = new MapLocation(at.x ,rc.getMapHeight() - at.y + yAdd);
                     if(rc.onTheMap(scoutDest)) {
                         scouted.add(scoutDest);
                     }else{
@@ -758,7 +760,7 @@ public strictfp class RobotPlayer {
             }else if(q == 4){
                 MapLocation newDest = new MapLocation( rc.getMapWidth() - at.x ,at.y);
                 if(!scouted.contains(newDest)){
-                    scoutDest = new MapLocation(rc.getMapWidth() - at.x + 8 , at.y);
+                    scoutDest = new MapLocation(rc.getMapWidth() - at.x - xAdd, at.y);
                     if(rc.onTheMap(scoutDest)) {
                         scouted.add(scoutDest);
                     }else{
@@ -768,6 +770,7 @@ public strictfp class RobotPlayer {
                 }
             }
         }
+
         moveToDrone(scoutDest);
     }
     //__________________________________________________________________________________________________________________
