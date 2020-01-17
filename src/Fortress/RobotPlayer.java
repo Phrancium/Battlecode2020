@@ -7,6 +7,7 @@ import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.PriorityQueue;
 
 public strictfp class RobotPlayer {
     static RobotController rc;
@@ -1043,6 +1044,19 @@ public strictfp class RobotPlayer {
             }
         }
         return news;
+    }
+
+    static PriorityQueue<Information> broadcastQueue = new PriorityQueue<>();
+
+    static void updateBroadcast(HashMap<Integer,ArrayList<MapLocation>> out) throws GameActionException {
+        for (Integer i :
+                out.keySet()) {
+            ArrayList<MapLocation> currlist=out.get(i);
+            for (MapLocation l :
+                    currlist) {
+                broadcastQueue.add(new Information(i, l.x,l.y));
+            }
+        }
     }
 
     static boolean senseFloodingAround(MapLocation n) throws GameActionException{
