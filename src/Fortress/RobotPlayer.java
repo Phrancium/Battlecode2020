@@ -44,7 +44,7 @@ public strictfp class RobotPlayer {
     /**MapLocation arrays containing all the relevent MapLocations **/
 
 
-    static ArrayList<MapLocation> water = new ArrayList<>();
+    static MapLocation water;
     static ArrayList<MapLocation> soup = new ArrayList<>();
     static ArrayList<MapLocation> refineries = new ArrayList<>();
     static ArrayList<MapLocation> oppNet = new ArrayList<>();
@@ -369,10 +369,10 @@ public strictfp class RobotPlayer {
 
     //Builds Landscapers
     static void runDesignSchool() throws GameActionException {
-        for (Direction dir : directions)
-            if (tryBuild(RobotType.LANDSCAPER, dir)) {
-                robotsBuilt++;
-            }
+//        for (Direction dir : directions)
+//            if (tryBuild(RobotType.LANDSCAPER, dir)) {
+//                robotsBuilt++;
+//            }
     }
     //Builds Drones
     static void runFulfillmentCenter() throws GameActionException {
@@ -657,20 +657,12 @@ public strictfp class RobotPlayer {
             }
         }
 
-        for(int x = -4; x < 5; x++){
-            for(int y = -4; y < 5; y++){
+        int x = 0;
+        int y = 0;
+        while( Math.abs(x) < 5){
+            while(Math.abs(y) < 5){
                 MapLocation n = new MapLocation(myX + x, myY + y);
                 if(rc.onTheMap(n) && rc.canSenseLocation(n)){
-                    if (rc.senseFlooding(n)){
-                        if(!water.contains(n) && !irWater.contains(n)) {
-                            if(!senseFloodingAround(n)) {
-                                irWater.add(n);
-                            }else {
-                                water.add(n);
-                                news.get(3).add(n);
-                            }
-                        }
-                    }
                     if(rc.senseSoup(n) > 0){
                         if(!soup.contains(n) && !irSoup.contains(n)){
                             if(!senseSoupAround(n)) {
@@ -682,22 +674,44 @@ public strictfp class RobotPlayer {
                         }
                     }
                 }
+                if( y > 0){
+                    y = y*(-1);
+                }else{
+                    y = y*(-1) + 1;
+                }
+            }
+            if( x > 0){
+                x = x*(-1);
+            }else{
+                x = x*(-1) +1;
+            }
+        }
+
+        int j = 0;
+        int q = 0;
+        while( Math.abs(x) < 5){
+            while(Math.abs(y) < 5){
+                MapLocation n = new MapLocation(myX + x, myY + y);
+                if(rc.onTheMap(n) && rc.canSenseLocation(n)){
+                    if(rc.senseFlooding(n)){
+                        water = n;
+                        x = 5;
+                        y = 5;
+                    }
+                }
+                if( y > 0){
+                    y = y*(-1);
+                }else{
+                    y = y*(-1) + 1;
+                }
+            }
+            if( x > 0){
+                x = x*(-1);
+            }else{
+                x = x*(-1) +1;
             }
         }
         return news;
-    }
-    static boolean senseFloodingAround(MapLocation n) throws GameActionException{
-        for(MapLocation d : water){
-            if(d.isAdjacentTo(n)){
-                return false;
-            }
-        }
-        for(MapLocation d : irWater){
-            if(d.isAdjacentTo(n)){
-                return false;
-            }
-        }
-        return true;
     }
 
     static boolean senseSoupAround(MapLocation n) throws GameActionException{
