@@ -170,35 +170,35 @@ public strictfp class RobotPlayer {
         //scanForSoup(curr);
         //souploc = getSoupLocation();
         //build design school
-        //System.out.println("robots built: "+ robotsBuilt);
-//        if (schoolsBuilt < 1 && !scanForDesignSchool()) {
-//        	MapLocation loc = getHQLocation();
-//        	Direction away = curr.directionTo(loc).opposite();
-//        	if(rc.canBuildRobot(RobotType.DESIGN_SCHOOL, away)){
-//        	    schoolsBuilt++;
-//                tryBuild(RobotType.DESIGN_SCHOOL, away);
-//            }else if(rc.canBuildRobot(RobotType.DESIGN_SCHOOL, away.rotateLeft())) {
-//                schoolsBuilt++;
-//                tryBuild(RobotType.DESIGN_SCHOOL, away.rotateLeft());
-//            }else if(rc.canBuildRobot(RobotType.DESIGN_SCHOOL, away.rotateRight())){
-//                schoolsBuilt++;
-//                tryBuild(RobotType.DESIGN_SCHOOL, away.rotateRight());
-//            }
-//        }
-//        if (factoriesBuilt < 1 && !scanForDroneFactory()) {
-//            MapLocation loc = getHQLocation();
-//            Direction away = curr.directionTo(loc).opposite();
-//            if(rc.canBuildRobot(RobotType.FULFILLMENT_CENTER, away)){
-//                factoriesBuilt++;
-//                tryBuild(RobotType.FULFILLMENT_CENTER, away);
-//            }else if(rc.canBuildRobot(RobotType.FULFILLMENT_CENTER, away.rotateLeft())) {
-//                factoriesBuilt++;
-//                tryBuild(RobotType.FULFILLMENT_CENTER, away.rotateLeft());
-//            }else if(rc.canBuildRobot(RobotType.FULFILLMENT_CENTER, away.rotateRight())){
-//                factoriesBuilt++;
-//                tryBuild(RobotType.FULFILLMENT_CENTER, away.rotateRight());
-//            }
-//        }
+        System.out.println("robots built: "+ robotsBuilt);
+        if (schoolsBuilt < 1 && !scanForDesignSchool()) {
+        	MapLocation loc = getHQLocation();
+        	Direction away = curr.directionTo(loc).opposite();
+        	if(rc.canBuildRobot(RobotType.DESIGN_SCHOOL, away)){
+        	    schoolsBuilt++;
+                tryBuild(RobotType.DESIGN_SCHOOL, away);
+            }else if(rc.canBuildRobot(RobotType.DESIGN_SCHOOL, away.rotateLeft())) {
+                schoolsBuilt++;
+                tryBuild(RobotType.DESIGN_SCHOOL, away.rotateLeft());
+            }else if(rc.canBuildRobot(RobotType.DESIGN_SCHOOL, away.rotateRight())){
+                schoolsBuilt++;
+                tryBuild(RobotType.DESIGN_SCHOOL, away.rotateRight());
+            }
+        }
+        if (factoriesBuilt < 1 && !scanForDroneFactory()) {
+            MapLocation loc = getHQLocation();
+            Direction away = curr.directionTo(loc).opposite();
+            if(rc.canBuildRobot(RobotType.FULFILLMENT_CENTER, away)){
+                factoriesBuilt++;
+                tryBuild(RobotType.FULFILLMENT_CENTER, away);
+            }else if(rc.canBuildRobot(RobotType.FULFILLMENT_CENTER, away.rotateLeft())) {
+                factoriesBuilt++;
+                tryBuild(RobotType.FULFILLMENT_CENTER, away.rotateLeft());
+            }else if(rc.canBuildRobot(RobotType.FULFILLMENT_CENTER, away.rotateRight())){
+                factoriesBuilt++;
+                tryBuild(RobotType.FULFILLMENT_CENTER, away.rotateRight());
+            }
+        }
         //System.out.println("SCHOOLS BUILT: " + schoolsBuilt);
 
         //NOTE: schoolsBuilt is saved per miner, meaning each miner will want to make its own design school
@@ -209,7 +209,6 @@ public strictfp class RobotPlayer {
         }
         //MOVE BACK TO HQ AND DEPOSIT SOUP (todo: implement refineries)
         else if (rc.getSoupCarrying() > 95){
-            System.out.println(rc.getSoupCarrying());
             for (Direction dir : directions){
                 if(rc.canDepositSoup(dir)){
                     rc.depositSoup(dir, rc.getSoupCarrying());
@@ -248,9 +247,29 @@ public strictfp class RobotPlayer {
 //        int x = 0;
 //        int y = 0;
         MapLocation[] miso = rc.senseNearbySoup();
+        int totS = 0;
         for(MapLocation m : miso) {
             if (!soup.contains(m)) {
                     soup.add(m);
+            }
+            if(rc.canSenseLocation(m)) {
+                totS += rc.senseSoup(m);
+            }
+        }
+        RobotInfo[] r2d2 = rc.senseNearbyRobots(rc.getCurrentSensorRadiusSquared(), rc.getTeam());
+        for(RobotInfo i : r2d2){
+            if(i.getType() == RobotType.REFINERY){
+                refineries.add(i.getLocation());
+            }
+        }
+
+        if(totS > 200 && (refineries.isEmpty()|| loc.distanceSquaredTo(getClosestRefine(loc)) > 150)){
+
+            for(Direction d : directions) {
+                if(rc.canBuildRobot(RobotType.REFINERY, d)) {
+                    refineries.add(loc.add(d));
+                    rc.buildRobot(RobotType.REFINERY, d);
+                }
             }
         }
 //        while( Math.abs(x) < 6 || Math.abs(y) < 6){
@@ -832,7 +851,7 @@ public strictfp class RobotPlayer {
     }
     static HashMap<Integer, ArrayList<MapLocation>> scan(MapLocation at) throws GameActionException{
         RobotInfo[] r = rc.senseNearbyRobots(rc.getCurrentSensorRadiusSquared(), rc.getTeam().opponent());
-        RobotInfo[] r2d2 = rc.senseNearbyRobots(rc.getCurrentSensorRadiusSquared(), rc.getTeam().opponent());
+        RobotInfo[] r2d2 = rc.senseNearbyRobots(rc.getCurrentSensorRadiusSquared(), rc.getTeam());
         HashMap<Integer, ArrayList<MapLocation>> news = new HashMap<>();
         for(int i = 1; i < 6; i++){
             news.put(i, new ArrayList<MapLocation>());
@@ -1084,30 +1103,39 @@ public strictfp class RobotPlayer {
         MapLocation loc = rc.getLocation();
         Direction moveDirection = loc.directionTo(dest);
         rc.setIndicatorLine(loc, dest, 0, 0, 0);
+        System.out.println(moveDirection);
         //See if general direction is valid
-        if(rc.canMove(moveDirection)){
+        if(rc.canMove(moveDirection) && !rc.senseFlooding(loc.add(moveDirection))){
+            System.out.println(1);
             path = moveDirection.opposite();
             tryMove(moveDirection);
-        }else if(rc.canMove(moveDirection.rotateLeft()) && moveDirection.rotateLeft() != path){
+        }else if(rc.canMove(moveDirection.rotateLeft()) && !rc.senseFlooding(loc.add(moveDirection.rotateLeft())) && moveDirection.rotateLeft() != path){
+            System.out.println(2);
             path = moveDirection.rotateLeft().opposite();
             tryMove(moveDirection.rotateLeft());
-        }else if(rc.canMove(moveDirection.rotateRight()) && moveDirection.rotateRight() != path) {
+        }else if(rc.canMove(moveDirection.rotateRight()) && !rc.senseFlooding(loc.add(moveDirection.rotateRight()))&& moveDirection.rotateRight() != path) {
+            System.out.println(3);
             path = moveDirection.rotateRight().opposite();
             tryMove(moveDirection.rotateRight());
-        }else if(rc.canMove(moveDirection.rotateLeft().rotateLeft()) && moveDirection.rotateLeft().rotateLeft() != path) {
+        }else if(rc.canMove(moveDirection.rotateLeft().rotateLeft()) && !rc.senseFlooding(loc.add(moveDirection.rotateLeft().rotateLeft())) && moveDirection.rotateLeft().rotateLeft() != path) {
+            System.out.println(4);
             path = moveDirection.rotateLeft().rotateLeft().opposite();
             tryMove(moveDirection.rotateLeft().rotateLeft());
-        }else if(rc.canMove(moveDirection.rotateRight().rotateRight()) && moveDirection.rotateRight().rotateRight() != path) {
+        }else if(rc.canMove(moveDirection.rotateRight().rotateRight()) && !rc.senseFlooding(loc.add(moveDirection.rotateRight().rotateRight())) && moveDirection.rotateRight().rotateRight() != path) {
+            System.out.println(5);
             path = moveDirection.rotateRight().rotateRight().opposite();
             tryMove(moveDirection.rotateRight().rotateRight());
-        }else if(rc.canMove(moveDirection.rotateLeft().rotateLeft().rotateLeft()) && moveDirection.rotateLeft().rotateLeft().rotateLeft() != path) {
+        }else if(rc.canMove(moveDirection.rotateLeft().rotateLeft().rotateLeft()) && !rc.senseFlooding(loc.add(moveDirection.rotateLeft().rotateLeft().rotateLeft())) && moveDirection.rotateLeft().rotateLeft().rotateLeft() != path) {
+            System.out.println(6);
             path = moveDirection.rotateLeft().rotateLeft().rotateLeft().opposite();
             tryMove(moveDirection.rotateLeft().rotateLeft().rotateLeft());
-        }else if(rc.canMove(moveDirection.rotateRight().rotateRight().rotateRight()) && moveDirection.rotateRight().rotateRight().rotateRight() != path) {
+        }else if(rc.canMove(moveDirection.rotateRight().rotateRight().rotateRight()) && !rc.senseFlooding(loc.add(moveDirection.rotateRight().rotateRight().rotateRight())) && moveDirection.rotateRight().rotateRight().rotateRight() != path) {
+            System.out.println(7);
             path = moveDirection.rotateRight().rotateRight().rotateRight().opposite();
             tryMove(moveDirection.rotateRight().rotateRight().rotateRight());
         } else{
-            tryMove(randomDirection());
+            System.out.println(8);
+            tryMove(path);
         }
     }
 

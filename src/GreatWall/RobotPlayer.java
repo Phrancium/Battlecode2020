@@ -500,30 +500,38 @@ public strictfp class RobotPlayer {
         //Find general direction of destination
         MapLocation loc = rc.getLocation();
         Direction moveDirection = loc.directionTo(dest);
-
+        System.out.println(moveDirection);
         //See if general direction is valid
         if(rc.canMove(moveDirection)){
+            System.out.println(1);
             path = moveDirection.opposite();
             tryMove(moveDirection);
         }else if(rc.canMove(moveDirection.rotateLeft()) && moveDirection.rotateLeft() != path){
+            System.out.println(2);
             path = moveDirection.rotateLeft().opposite();
             tryMove(moveDirection.rotateLeft());
         }else if(rc.canMove(moveDirection.rotateRight()) && moveDirection.rotateRight() != path) {
+            System.out.println(3);
             path = moveDirection.rotateRight().opposite();
             tryMove(moveDirection.rotateRight());
         }else if(rc.canMove(moveDirection.rotateLeft().rotateLeft()) && moveDirection.rotateLeft().rotateLeft() != path) {
+            System.out.println(4);
             path = moveDirection.rotateLeft().rotateLeft().opposite();
             tryMove(moveDirection.rotateLeft().rotateLeft());
         }else if(rc.canMove(moveDirection.rotateRight().rotateRight()) && moveDirection.rotateRight().rotateRight() != path) {
+            System.out.println(5);
             path = moveDirection.rotateRight().rotateRight().opposite();
             tryMove(moveDirection.rotateRight().rotateRight());
         }else if(rc.canMove(moveDirection.rotateLeft().rotateLeft().rotateLeft()) && moveDirection.rotateLeft().rotateLeft().rotateLeft() != path) {
+            System.out.println(6);
             path = moveDirection.rotateLeft().rotateLeft().rotateLeft().opposite();
             tryMove(moveDirection.rotateLeft().rotateLeft().rotateLeft());
         }else if(rc.canMove(moveDirection.rotateRight().rotateRight().rotateRight()) && moveDirection.rotateRight().rotateRight().rotateRight() != path) {
+            System.out.println(7);
             path = moveDirection.rotateRight().rotateRight().rotateRight().opposite();
             tryMove(moveDirection.rotateRight().rotateRight().rotateRight());
         } else{
+            System.out.println(8);
             tryMove(randomDirection());
         }
     }
