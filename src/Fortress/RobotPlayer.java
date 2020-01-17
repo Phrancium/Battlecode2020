@@ -209,7 +209,6 @@ public strictfp class RobotPlayer {
                     rc.depositSoup(dir, rc.getSoupCarrying());
                 }
             }
-            souploc = null;
             if(getClosestRefine(curr) == null) {
                 moveTo(initialLoc);
             }else{
@@ -246,6 +245,13 @@ public strictfp class RobotPlayer {
                             }else {
                                 soup.add(n);
                             }
+                        }
+                    }else if(rc.senseSoup(n) < 7){
+                        if(souploc.equals(n)){
+                            souploc = null;
+                        }
+                        if(soup.contains(n)){
+                            soup.remove(n);
                         }
                     }
                 }
