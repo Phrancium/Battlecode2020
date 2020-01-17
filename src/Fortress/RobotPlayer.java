@@ -1093,6 +1093,9 @@ public strictfp class RobotPlayer {
             }
         }
     }
+    static boolean tryBroadcast(int cost){
+        return true;
+    }
 
 
     static int quadrantIn(MapLocation m) throws GameActionException{
