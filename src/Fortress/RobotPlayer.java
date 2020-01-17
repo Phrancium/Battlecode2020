@@ -51,7 +51,7 @@ public strictfp class RobotPlayer {
     static ArrayList<MapLocation> offensiveEnemyBuildings = new ArrayList<>();
     static MapLocation EnemyHQ;
     
-    static MapLocation digLoc[];
+    static ArrayList<MapLocation> digLoc = new ArrayList<>();
 
     static ArrayList<MapLocation> irWater = new ArrayList<>();
     static ArrayList<MapLocation> irSoup = new ArrayList<>();
@@ -452,6 +452,12 @@ public strictfp class RobotPlayer {
             terraform();
         }
     }
+    
+    static void tryDig(Direction dir) throws GameActionException{
+    	if(rc.isReady() && rc.canDigDirt(dir))
+    		rc.digDirt(dir);
+    		
+    }
 
     static void terraform() throws GameActionException{
         MapLocation home = HQ;
@@ -463,7 +469,46 @@ public strictfp class RobotPlayer {
         		bury(i.getLocation(), at);
         	}
         }
-        //if(at.distanceSquaredTo(home) < 45 && at.distanceSquaredTo(home) > 8)
+        if(at.distanceSquaredTo(home) > 8) {
+        	
+        	MapLocation frontRow[] = new MapLocation[9];
+        	frontRow[0] = at;
+        	frontRow[1] = frontRow[0].add(dir.rotateRight().rotateRight());
+        	frontRow[2] = frontRow[0].add(dir.rotateLeft().rotateLeft());
+        	frontRow[3] = frontRow[1].add(dir.rotateRight().rotateRight());
+        	frontRow[4] = frontRow[2].add(dir.rotateLeft().rotateLeft());
+        	frontRow[5] = frontRow[3].add(dir.rotateRight().rotateRight());
+        	frontRow[6] = frontRow[4].add(dir.rotateLeft().rotateLeft());
+        	frontRow[7] = frontRow[5].add(dir.rotateRight().rotateRight());
+        	frontRow[8] = frontRow[6].add(dir.rotateLeft().rotateLeft());
+        	
+        	if(rc.getDirtCarrying() < 25) {
+        		if(rc.isReady() && rc.canDigDirt(dir.opposite())) {
+            		rc.digDirt(dir.opposite());
+            		digLoc.add(at.add(dir.opposite()));
+        		}
+        	}
+        	
+        	if(rc.getDirtCarrying() == 25) {
+        		for(int i = 1; i < 9; i++) {
+        			if(rc.canSenseLocation(frontRow[i]) && !digLoc.contains(frontRow[i])) {
+        				if(rc.senseElevation(frontRow[i]) < rc.senseElevation(frontRow[0]) && rc.senseRobotAtLocation(frontRow[i]) == null) {
+        					if(at.distanceSquaredTo(frontRow[i]) > 2) {
+        						moveTo(frontRow[i]);
+        					}
+        					else if(rc.canDepositDirt(at.directionTo(frontRow[i]))){
+        						rc.depositDirt(at.directionTo(frontRow[i]));
+        					}
+        				}
+        			}
+        		}
+        		if(rc.isReady()) {
+        			tryMove(dir.opposite());
+        			tryMove(dir.opposite().rotateLeft());
+        			tryMove(dir.opposite().rotateRight());
+        		}
+        	}
+        }
     }
     
     static void bury(MapLocation target, MapLocation at) throws GameActionException{
@@ -672,8 +717,8 @@ public strictfp class RobotPlayer {
         RobotInfo[] r = rc.senseNearbyRobots(rc.getCurrentSensorRadiusSquared(), rc.getTeam().opponent());
         RobotInfo[] r2d2 = rc.senseNearbyRobots(rc.getCurrentSensorRadiusSquared(), rc.getTeam().opponent());
         HashMap<Integer, ArrayList<MapLocation>> news = new HashMap<>();
-        for(int i = 2; i < 7; i++){
-            news.put(1, new ArrayList<MapLocation>());
+        for(int i = 1; i < 6; i++){
+            news.put(i, new ArrayList<MapLocation>());
         }
         int myX = at.x;
         int myY = at.y;
@@ -684,10 +729,11 @@ public strictfp class RobotPlayer {
             }
             if((i.getType() == RobotType.DESIGN_SCHOOL || i.getType() == RobotType.NET_GUN || i.getType() == RobotType.FULFILLMENT_CENTER || i.getType() == RobotType.REFINERY) && quadrantIn(i.getLocation()) == quadrantIn(HQ)){
                 offensiveEnemyBuildings.add(i.getLocation());
-                news.get(6).add(i.getLocation());
+                news.get(3).add(i.getLocation());
             }
             if(i.getType() == RobotType.HQ){
                 EnemyHQ = i.getLocation();
+                news.get(1).add(i.getLocation());
             }
         }
         for(RobotInfo i : r2d2){
@@ -1237,6 +1283,77 @@ public strictfp class RobotPlayer {
         }
         else{
             return false;
+        }
+    }
+
+    static BitSet findTransaction(Transaction[] transactions){
+        for (int i = 0; i < 7 ; i++) {
+            int[] curr=transactions[i].getMessage();
+            long[] longs=new long[4];
+            longs[0] = ((long)curr[0]) | (((long) curr[1] << 32));
+            longs[1] = ((long)curr[2]) | (((long) curr[3] << 32));
+            longs[2] = ((long)curr[4]) | (((long) curr[5] << 32));
+            longs[3] = (long)curr[6];
+            BitSet bitSet=BitSet.valueOf(longs);
+            if (bitSet.get(0 * 20)&&
+            bitSet.get(2 * 20)&&
+            bitSet.get(3 * 20)&&
+            bitSet.get(4 * 20)&&
+            bitSet.get(6 * 20)&&
+            bitSet.get(9 * 20)&&
+            bitSet.get(10 * 20)){
+                return bitSet;
+            }
+        }
+        return null;
+
+    }
+
+    static void receiveBroadcast(int round) throws  GameActionException{
+        Transaction[] transactions=rc.getBlock(round);
+        BitSet ours=findTransaction(transactions);
+        if (ours!=null){
+            int count=0;
+            for (int i = 220; i < 224; i++) {
+                count*=2;
+                if (ours.get(i)) count++;
+            }
+            for (int i = 0; i < count; i++) {
+                int type=0;
+                for (int j = 0; j < 3; j++) {
+                    type*=2;
+                    if (ours.get(i*20+j)) type++;
+                }
+                int x=0;
+                for (int j = 3; j < 11; j++) {
+                    x*=2;
+                    if (ours.get(i*20+j)) x++;
+                }
+                int y=0;
+                for (int j = 11; j < 19; j++) {
+                    y*=2;
+                    if (ours.get(i*20+j)) y++;
+                }
+                switch (type){
+                    case 1:
+                        EnemyHQ=new MapLocation(x,y);
+                        break;
+                    case 2:
+                        soup.add(new MapLocation(x,y));
+                        break;
+                    case 3:
+                        offensiveEnemyBuildings.add(new MapLocation(x,y));
+                        break;
+                    case 4:
+                        refineries.add(new MapLocation(x,y));
+                        break;
+                    case 5:
+                        oppNet.add(new MapLocation(x,y));
+                        break;
+                }
+
+
+            }
         }
     }
 
