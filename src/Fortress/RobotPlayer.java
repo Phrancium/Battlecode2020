@@ -33,6 +33,7 @@ public strictfp class RobotPlayer {
     static int numBuilt;
     static int mapQuadrant;
     static int schoolsBuilt;
+    static MapLocation enHQDest;
     static int factoriesBuilt;
     static  MapLocation HQ;
     static MapLocation scoutDest;
@@ -54,6 +55,9 @@ public strictfp class RobotPlayer {
     
     static MapLocation digLoc[];
 
+    static ArrayList<MapLocation> irWater = new ArrayList<>();
+    static ArrayList<MapLocation> irSoup = new ArrayList<>();
+
     //__________________________________________________________________________________________________________________
     //RUN CODE BELOW
     /**
@@ -70,6 +74,7 @@ public strictfp class RobotPlayer {
         schoolsBuilt = 0;
         factoriesBuilt = 0;
         souploc = null;
+        enHQDest = null;
         EnemyHQ = null;
         path = Direction.CENTER;
         HQ = getHQLocation();
@@ -365,10 +370,10 @@ public strictfp class RobotPlayer {
 
     //Builds Landscapers
     static void runDesignSchool() throws GameActionException {
-        for (Direction dir : directions)
-            if (tryBuild(RobotType.LANDSCAPER, dir)) {
-                robotsBuilt++;
-            }
+//        for (Direction dir : directions)
+//            if (tryBuild(RobotType.LANDSCAPER, dir)) {
+//                robotsBuilt++;
+//            }
     }
     //Builds Drones
     static void runFulfillmentCenter() throws GameActionException {
@@ -633,16 +638,24 @@ public strictfp class RobotPlayer {
             for(int y = -4; y < 5; y++){
                 MapLocation n = new MapLocation(myX + x, myY + y);
                 if(rc.onTheMap(n) && rc.canSenseLocation(n)){
-                    if (rc.senseFlooding(n) && !senseFloodingAround(n)){
-                        if(!water.contains(n)) {
-                            water.add(n);
-                            news.get(3).add(n);
+                    if (rc.senseFlooding(n)){
+                        if(!water.contains(n) && !irWater.contains(n)) {
+                            if(!senseFloodingAround(n)) {
+                                irWater.add(n);
+                            }else {
+                                water.add(n);
+                                news.get(3).add(n);
+                            }
                         }
                     }
-                    if(rc.senseSoup(n) > 0 && !senseSoupAround(n)){
-                        if(!soup.contains(n)){
-                            soup.add(n);
-                            news.get(2).add(n);
+                    if(rc.senseSoup(n) > 0){
+                        if(!soup.contains(n) && !irSoup.contains(n)){
+                            if(!senseSoupAround(n)) {
+                                irSoup.add(n);
+                            }else {
+                                soup.add(n);
+                                news.get(2).add(n);
+                            }
                         }
                     }
                 }
@@ -651,31 +664,31 @@ public strictfp class RobotPlayer {
         return news;
     }
     static boolean senseFloodingAround(MapLocation n) throws GameActionException{
-        int directionsFlooded = 0;
-        for(Direction d : directions){
-            if(rc.onTheMap(n.add(d))) {
-                if (rc.canSenseLocation(n.add(d))) {
-                    if (rc.senseFlooding(n.add(d))) {
-                        directionsFlooded++;
-                    }
-                }
+        for(MapLocation d : water){
+            if(d.isAdjacentTo(n)){
+                return false;
             }
         }
-        return (directionsFlooded > 5);
+        for(MapLocation d : irWater){
+            if(d.isAdjacentTo(n)){
+                return false;
+            }
+        }
+        return true;
     }
 
     static boolean senseSoupAround(MapLocation n) throws GameActionException{
-        int directionsSoup = 0;
-        for(Direction d : directions){
-            if(rc.onTheMap(n.add(d))){
-                if (rc.canSenseLocation(n.add(d))) {
-                    if (rc.senseSoup(n.add(d)) > 0) {
-                        directionsSoup++;
-                    }
-                }
+        for(MapLocation d : soup){
+            if(d.isAdjacentTo(n)){
+                return false;
             }
         }
-        return (directionsSoup > 5);
+        for(MapLocation d : irSoup){
+            if(d.isAdjacentTo(n)){
+                return false;
+            }
+        }
+        return true;
     }
     static void scout(MapLocation at) throws GameActionException {
         if(scoutDest ==  null){
@@ -1063,19 +1076,13 @@ public strictfp class RobotPlayer {
         if(at.x == dest2.x && at.y==dest2.y){
             EnemyHQ = new MapLocation( hqX, mapH - hqY);
         }
-        if(hqX < mapW/2) {
-            if (at.x < dest1.x - 3) {
-                moveToDrone(dest1);
-            } else {
-                moveToDrone(dest2);
-            }
-        }else{
-            if (at.x > dest1.x + 3) {
-                moveToDrone(dest1);
-            } else {
-                moveToDrone(dest2);
-            }
+        if(enHQDest == null){
+            enHQDest = dest1;
         }
+        if(at.distanceSquaredTo(dest1) < 16){
+            enHQDest = dest2;
+        }
+        moveToDrone(enHQDest);
     }
 
 
