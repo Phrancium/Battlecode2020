@@ -195,7 +195,6 @@ public strictfp class RobotPlayer {
                 tryBuild(RobotType.FULFILLMENT_CENTER, away.rotateRight());
             }
         }
-        openEyes(curr);
         //MINE SOUP
         if (souploc != null && rc.getSoupCarrying() < 96){
             mineSoup();
@@ -208,26 +207,21 @@ public strictfp class RobotPlayer {
                 }
             }
             souploc = null;
-            moveTo(initialLoc);
+            if(getClosestRefine(curr) == null) {
+                moveTo(initialLoc);
+            }else{
+                moveTo(getClosestRefine(curr));
+            }
         }
         //FIND SOUP
         else {
+            openEyes(curr);
             if (soup.isEmpty()){
                 moveTo(curr.subtract(curr.directionTo(initialLoc)));
             }
             else{
-                int dist=10;
-                MapLocation index=null;
-                for (MapLocation l : soup) {
-                    int currdist=curr.distanceSquaredTo(l);
-                    if (currdist<dist) {
-                        index=l;
-                        dist=currdist;
-                    }
-                }
-                souploc=index;
+                MapLocation jk = getClosestSoup(curr);
                 moveTo(souploc);
-
             }
         }
 
@@ -235,18 +229,64 @@ public strictfp class RobotPlayer {
     static void openEyes(MapLocation loc) throws GameActionException{
         int selfX = loc.x;
         int selfY = loc.y;
-        scan:
-        for(int x = -5; x <6; x++){
-            for (int y = -5; y < 6; y++){
-                MapLocation check = new MapLocation(selfX + x, selfY + y);
-                if (rc.canSenseLocation(check)){
-                    if(rc.senseSoup(check) > 5){
-                        soup.add(check);
-                        break scan;
+        int x = 0;
+        int y = 0;
+        while( Math.abs(x) < 5){
+            while(Math.abs(y) < 5){
+                MapLocation n = new MapLocation(selfX + x, selfY + y);
+                if(rc.onTheMap(n) && rc.canSenseLocation(n)){
+                    if(rc.senseSoup(n) > 0){
+                        if(!soup.contains(n) && !irSoup.contains(n)){
+                            if(!senseSoupAround(n)) {
+                                irSoup.add(n);
+                            }else {
+                                soup.add(n);
+                            }
+                        }
                     }
                 }
+                if( y > 0){
+                    y = y*(-1);
+                }else{
+                    y = y*(-1) + 1;
+                }
+            }
+            if( x > 0){
+                x = x*(-1);
+            }else{
+                x = x*(-1) +1;
             }
         }
+    }
+
+    static MapLocation getClosestRefine( MapLocation m){
+        if(refineries.isEmpty()){
+            return null;
+        }
+        MapLocation o = null;
+        int diss = 1000000;
+        for (MapLocation n : refineries){
+            int ned = m.distanceSquaredTo(n);
+            if(ned < diss){
+                o = n;
+            }
+        }
+        return o;
+    }
+
+    static MapLocation getClosestSoup( MapLocation m){
+        if(soup.isEmpty()){
+            return null;
+        }
+        MapLocation o = null;
+        int diss = 1000000;
+        for (MapLocation n : soup){
+            int ned = m.distanceSquaredTo(n);
+            if(ned < diss){
+                o = n;
+            }
+        }
+        return o;
     }
 
     /**robot mines soup **/
@@ -679,8 +719,8 @@ public strictfp class RobotPlayer {
         RobotInfo[] r = rc.senseNearbyRobots(rc.getCurrentSensorRadiusSquared(), rc.getTeam().opponent());
         RobotInfo[] r2d2 = rc.senseNearbyRobots(rc.getCurrentSensorRadiusSquared(), rc.getTeam().opponent());
         HashMap<Integer, ArrayList<MapLocation>> news = new HashMap<>();
-        for(int i = 2; i < 7; i++){
-            news.put(1, new ArrayList<MapLocation>());
+        for(int i = 1; i < 6; i++){
+            news.put(i, new ArrayList<MapLocation>());
         }
         int myX = at.x;
         int myY = at.y;
@@ -691,10 +731,11 @@ public strictfp class RobotPlayer {
             }
             if((i.getType() == RobotType.DESIGN_SCHOOL || i.getType() == RobotType.NET_GUN || i.getType() == RobotType.FULFILLMENT_CENTER || i.getType() == RobotType.REFINERY) && quadrantIn(i.getLocation()) == quadrantIn(HQ)){
                 offensiveEnemyBuildings.add(i.getLocation());
-                news.get(6).add(i.getLocation());
+                news.get(3).add(i.getLocation());
             }
             if(i.getType() == RobotType.HQ){
                 EnemyHQ = i.getLocation();
+                news.get(1).add(i.getLocation());
             }
         }
         for(RobotInfo i : r2d2){
@@ -1244,6 +1285,77 @@ public strictfp class RobotPlayer {
         }
         else{
             return false;
+        }
+    }
+
+    static BitSet findTransaction(Transaction[] transactions){
+        for (int i = 0; i < 7 ; i++) {
+            int[] curr=transactions[i].getMessage();
+            long[] longs=new long[4];
+            longs[0] = ((long)curr[0]) | (((long) curr[1] << 32));
+            longs[1] = ((long)curr[2]) | (((long) curr[3] << 32));
+            longs[2] = ((long)curr[4]) | (((long) curr[5] << 32));
+            longs[3] = (long)curr[6];
+            BitSet bitSet=BitSet.valueOf(longs);
+            if (bitSet.get(0 * 20)&&
+            bitSet.get(2 * 20)&&
+            bitSet.get(3 * 20)&&
+            bitSet.get(4 * 20)&&
+            bitSet.get(6 * 20)&&
+            bitSet.get(9 * 20)&&
+            bitSet.get(10 * 20)){
+                return bitSet;
+            }
+        }
+        return null;
+
+    }
+
+    static void receiveBroadcast(int round) throws  GameActionException{
+        Transaction[] transactions=rc.getBlock(round);
+        BitSet ours=findTransaction(transactions);
+        if (ours!=null){
+            int count=0;
+            for (int i = 220; i < 224; i++) {
+                count*=2;
+                if (ours.get(i)) count++;
+            }
+            for (int i = 0; i < count; i++) {
+                int type=0;
+                for (int j = 0; j < 3; j++) {
+                    type*=2;
+                    if (ours.get(i*20+j)) type++;
+                }
+                int x=0;
+                for (int j = 3; j < 11; j++) {
+                    x*=2;
+                    if (ours.get(i*20+j)) x++;
+                }
+                int y=0;
+                for (int j = 11; j < 19; j++) {
+                    y*=2;
+                    if (ours.get(i*20+j)) y++;
+                }
+                switch (type){
+                    case 1:
+                        EnemyHQ=new MapLocation(x,y);
+                        break;
+                    case 2:
+                        soup.add(new MapLocation(x,y));
+                        break;
+                    case 3:
+                        offensiveEnemyBuildings.add(new MapLocation(x,y));
+                        break;
+                    case 4:
+                        refineries.add(new MapLocation(x,y));
+                        break;
+                    case 5:
+                        oppNet.add(new MapLocation(x,y));
+                        break;
+                }
+
+
+            }
         }
     }
 
