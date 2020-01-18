@@ -1426,7 +1426,8 @@ public strictfp class RobotPlayer {
         }
     }
 
-    static BitSet findTransaction(Transaction[] transactions){
+    static ArrayList<BitSet> findTransaction(Transaction[] transactions){
+        ArrayList<BitSet> out=new ArrayList<>();
         for (int i = 0; i < 7 ; i++) {
             int[] curr=transactions[i].getMessage();
             long[] longs=new long[4];
@@ -1435,24 +1436,29 @@ public strictfp class RobotPlayer {
             longs[2] = ((long)curr[4]) | (((long) curr[5] << 32));
             longs[3] = (long)curr[6];
             BitSet bitSet=BitSet.valueOf(longs);
-            if (bitSet.get(0 * 20)&&
-            bitSet.get(2 * 20)&&
-            bitSet.get(3 * 20)&&
-            bitSet.get(4 * 20)&&
-            bitSet.get(6 * 20)&&
-            bitSet.get(9 * 20)&&
-            bitSet.get(10 * 20)){
-                return bitSet;
+            if (    bitSet.get(0 * 20)&&
+                    !bitSet.get(1 * 20)&&
+                    bitSet.get(2 * 20)&&
+                    bitSet.get(3 * 20)&&
+                    bitSet.get(4 * 20)&&
+                    !bitSet.get(5 * 20)&&
+                    bitSet.get(6 * 20)&&
+                    !bitSet.get(7 * 20)&&
+                    !bitSet.get(8 * 20)&&
+                    bitSet.get(9 * 20)&&
+                    bitSet.get(10 * 20)){
+                out.add(bitSet);
             }
         }
-        return null;
+        return out;
 
     }
 
     static void receiveBroadcast(int round) throws  GameActionException{
         Transaction[] transactions=rc.getBlock(round);
-        BitSet ours=findTransaction(transactions);
-        if (ours!=null){
+        ArrayList<BitSet> ourlist=findTransaction(transactions);
+        for (BitSet ours :
+                ourlist) {
             int count=0;
             for (int i = 220; i < 224; i++) {
                 count*=2;
