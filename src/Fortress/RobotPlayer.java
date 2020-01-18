@@ -168,7 +168,9 @@ public strictfp class RobotPlayer {
         if(rc.getRoundNum() > 10) {
             receiveBroadcast(rc.getRoundNum() - 1);
         }
-        System.out.println(EnemyHQ.toString());
+//        if(EnemyHQ != null){
+            System.out.println(EnemyHQ);
+//        }
         MapLocation curr = rc.getLocation();
         if(HQ == null){
             HQ = getHQLocation();
@@ -813,7 +815,6 @@ public strictfp class RobotPlayer {
     //DELIVERY DRONE CODE BELOW
     static void runDeliveryDrone() throws GameActionException {
         if(task.equals("scout")){
-            System.out.println("here");
             if(rc.getRoundNum()%4 == 0){
                 tryBroadcast(1);
             }
