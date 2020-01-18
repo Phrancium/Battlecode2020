@@ -144,7 +144,7 @@ public strictfp class RobotPlayer {
     //HQ CODE BELOW
     static void runHQ() throws GameActionException {
     	if(rc.getRoundNum() == 1) {
-    		postLocation(1, rc.getLocation().x, rc.getLocation().y, 2);
+    		postLocation(1, rc.getLocation().x, rc.getLocation().y, 1);
     	}
     	RobotInfo[] r = rc.senseNearbyRobots();
     	for(RobotInfo s : r){
@@ -1454,7 +1454,7 @@ public strictfp class RobotPlayer {
 
     static ArrayList<BitSet> findTransaction(Transaction[] transactions){
         ArrayList<BitSet> out=new ArrayList<>();
-        for (int i = 0; i < 7 ; i++) {
+        for (int i = 0; i < transactions.length() ; i++) {
             int[] curr=transactions[i].getMessage();
             long[] longs=new long[4];
             longs[0] = ((long)curr[0]) | (((long) curr[1] << 32));
