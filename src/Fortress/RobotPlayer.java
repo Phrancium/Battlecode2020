@@ -165,10 +165,12 @@ public strictfp class RobotPlayer {
     //__________________________________________________________________________________________________________________
     //MINER CODE BELOW
     static void runMiner() throws GameActionException {
-        if(rc.getRoundNum() > 10) {
-            receiveBroadcast(rc.getRoundNum() - 1);
+//        if(rc.getRoundNum() > 10) {
+//            receiveBroadcast(rc.getRoundNum() - 1);
+//        }
+        if(EnemyHQ != null){
+            System.out.println(EnemyHQ);
         }
-        System.out.println(EnemyHQ.toString());
         MapLocation curr = rc.getLocation();
         if(HQ == null){
             HQ = getHQLocation();
@@ -813,7 +815,6 @@ public strictfp class RobotPlayer {
     //DELIVERY DRONE CODE BELOW
     static void runDeliveryDrone() throws GameActionException {
         if(task.equals("scout")){
-            System.out.println("here");
             if(rc.getRoundNum()%4 == 0){
                 tryBroadcast(1);
             }
@@ -1454,7 +1455,7 @@ public strictfp class RobotPlayer {
 
     static ArrayList<BitSet> findTransaction(Transaction[] transactions){
         ArrayList<BitSet> out=new ArrayList<>();
-        for (int i = 0; i < transactions.length() ; i++) {
+        for (int i = 0; i < transactions.length ; i++) {
             int[] curr=transactions[i].getMessage();
             long[] longs=new long[4];
             longs[0] = ((long)curr[0]) | (((long) curr[1] << 32));
