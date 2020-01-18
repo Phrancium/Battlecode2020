@@ -1464,6 +1464,9 @@ public strictfp class RobotPlayer {
                 count*=2;
                 if (ours.get(i)) count++;
             }
+            if (count>11){
+                break;
+            }
             for (int i = 0; i < count; i++) {
                 int type=0;
                 for (int j = 0; j < 3; j++) {
