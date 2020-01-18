@@ -165,12 +165,12 @@ public strictfp class RobotPlayer {
     //__________________________________________________________________________________________________________________
     //MINER CODE BELOW
     static void runMiner() throws GameActionException {
-//        if(rc.getRoundNum() > 10) {
-//            receiveBroadcast(rc.getRoundNum() - 1);
-//        }
-        if(EnemyHQ != null){
-            System.out.println(EnemyHQ);
+        if(rc.getRoundNum() > 10) {
+            receiveBroadcast(rc.getRoundNum() - 1);
         }
+//        if(EnemyHQ != null){
+            System.out.println(EnemyHQ);
+//        }
         MapLocation curr = rc.getLocation();
         if(HQ == null){
             HQ = getHQLocation();
