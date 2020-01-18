@@ -91,6 +91,8 @@ public strictfp class RobotPlayer {
             }else{
                 task = "killEnemy";
             }
+            task = "crunch";
+            task = "defend";
         }
 //        if(rc.getType() == RobotType.DELIVERY_DRONE){
 //            droneTask = "cow";
@@ -163,6 +165,9 @@ public strictfp class RobotPlayer {
     //__________________________________________________________________________________________________________________
     //MINER CODE BELOW
     static void runMiner() throws GameActionException {
+        if(rc.getRoundNum() > 10) {
+            receiveBroadcast(rc.getRoundNum() - 1);
+        }
         MapLocation curr = rc.getLocation();
         if(HQ == null){
             HQ = getHQLocation();
@@ -185,20 +190,20 @@ public strictfp class RobotPlayer {
 //                tryBuild(RobotType.DESIGN_SCHOOL, away.rotateRight());
 //            }
 //        }
-//        if (factoriesBuilt < 1 && !scanForDroneFactory()) {
-//            MapLocation loc = getHQLocation();
-//            Direction away = curr.directionTo(loc).opposite();
-//            if(rc.canBuildRobot(RobotType.FULFILLMENT_CENTER, away)){
-//                factoriesBuilt++;
-//                tryBuild(RobotType.FULFILLMENT_CENTER, away);
-//            }else if(rc.canBuildRobot(RobotType.FULFILLMENT_CENTER, away.rotateLeft())) {
-//                factoriesBuilt++;
-//                tryBuild(RobotType.FULFILLMENT_CENTER, away.rotateLeft());
-//            }else if(rc.canBuildRobot(RobotType.FULFILLMENT_CENTER, away.rotateRight())){
-//                factoriesBuilt++;
-//                tryBuild(RobotType.FULFILLMENT_CENTER, away.rotateRight());
-//            }
-//        }
+        if (factoriesBuilt < 1 && !scanForDroneFactory()) {
+            MapLocation loc = getHQLocation();
+            Direction away = curr.directionTo(loc).opposite();
+            if(rc.canBuildRobot(RobotType.FULFILLMENT_CENTER, away)){
+                factoriesBuilt++;
+                tryBuild(RobotType.FULFILLMENT_CENTER, away);
+            }else if(rc.canBuildRobot(RobotType.FULFILLMENT_CENTER, away.rotateLeft())) {
+                factoriesBuilt++;
+                tryBuild(RobotType.FULFILLMENT_CENTER, away.rotateLeft());
+            }else if(rc.canBuildRobot(RobotType.FULFILLMENT_CENTER, away.rotateRight())){
+                factoriesBuilt++;
+                tryBuild(RobotType.FULFILLMENT_CENTER, away.rotateRight());
+            }
+        }
         //System.out.println("SCHOOLS BUILT: " + schoolsBuilt);
 
         //NOTE: schoolsBuilt is saved per miner, meaning each miner will want to make its own design school
@@ -389,10 +394,9 @@ public strictfp class RobotPlayer {
         if(yAdd < 4){
             yAdd = 0;
         }
+        int q = qHQ(at);
         if (at.distanceSquaredTo(scoutDest) < 16) {
-            int xRel = at.x - HQ.x;
-            int yRel = at.y - HQ.y;
-            if(xRel > 0 && yRel > 0){
+            if(q == 1){
                 MapLocation newDest = new MapLocation( at.x ,rc.getMapHeight() - at.y);
                 if(!scouted.contains(newDest)){
                     scoutDest = new MapLocation(at.x ,rc.getMapHeight() - at.y - yAdd);
@@ -403,7 +407,7 @@ public strictfp class RobotPlayer {
                         scouted = new ArrayList<>();
                     }
                 }
-            } else if(xRel < 0 && yRel > 0){
+            } else if(q == 2){
                 MapLocation newDest = new MapLocation( rc.getMapWidth() - at.x ,at.y);
                 if(!scouted.contains(newDest)){
                     scoutDest = new MapLocation(rc.getMapWidth() - at.x + xAdd, at.y);
@@ -414,7 +418,7 @@ public strictfp class RobotPlayer {
                         scouted = new ArrayList<>();
                     }
                 }
-            }else if(xRel < 0 && yRel < 0){
+            }else if(q == 3){
                 MapLocation newDest = new MapLocation( at.x ,rc.getMapHeight() - at.y);
                 if(!scouted.contains(newDest)){
                     scoutDest = new MapLocation(at.x ,rc.getMapHeight() - at.y + yAdd);
@@ -425,7 +429,7 @@ public strictfp class RobotPlayer {
                         scouted = new ArrayList<>();
                     }
                 }
-            }else if(xRel > 0 && yRel < 0){
+            }else if(q == 4){
                 MapLocation newDest = new MapLocation( rc.getMapWidth() - at.x ,at.y);
                 if(!scouted.contains(newDest)){
                     scoutDest = new MapLocation(rc.getMapWidth() - at.x - xAdd, at.y);
@@ -439,7 +443,23 @@ public strictfp class RobotPlayer {
             }
         }
 
-        moveToDrone(scoutDest);
+        moveTo(scoutDest);
+    }
+
+    static int qHQ(MapLocation m){
+        if(m.x < HQ.x){
+            if(m.y < HQ.y){
+                return 3;
+            }else{
+                return 2;
+            }
+        }else{
+            if(m.y < HQ.y){
+                return 4;
+            }else{
+                return 1;
+            }
+        }
     }
 
     static boolean scanForDesignSchool(){
@@ -792,13 +812,22 @@ public strictfp class RobotPlayer {
     //DELIVERY DRONE CODE BELOW
     static void runDeliveryDrone() throws GameActionException {
         if(task.equals("scout")){
+            if(rc.getRoundNum()%4 == 0){
+                tryBroadcast(1);
+            }
             MapLocation loc = rc.getLocation();
-            scan(loc);
+            updateBroadcast(scan(loc));
             if(EnemyHQ == null){
                 findEnemyHQ(loc);
             }else{
                 scout(loc);
             }
+
+        }
+        if(task.equals("defend")){
+
+        }
+        if(task.equals(("crunch"))){
 
         }
         if (task.equals("killEnemy")){
