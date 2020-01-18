@@ -91,8 +91,8 @@ public strictfp class RobotPlayer {
             }else{
                 task = "killEnemy";
             }
-            task = "crunch";
-            task = "defend";
+//            task = "crunch";
+//            task = "defend";
         }
 //        if(rc.getType() == RobotType.DELIVERY_DRONE){
 //            droneTask = "cow";
@@ -168,6 +168,7 @@ public strictfp class RobotPlayer {
         if(rc.getRoundNum() > 10) {
             receiveBroadcast(rc.getRoundNum() - 1);
         }
+        System.out.println(EnemyHQ.toString());
         MapLocation curr = rc.getLocation();
         if(HQ == null){
             HQ = getHQLocation();
@@ -812,6 +813,7 @@ public strictfp class RobotPlayer {
     //DELIVERY DRONE CODE BELOW
     static void runDeliveryDrone() throws GameActionException {
         if(task.equals("scout")){
+            System.out.println("here");
             if(rc.getRoundNum()%4 == 0){
                 tryBroadcast(1);
             }
@@ -1132,38 +1134,29 @@ public strictfp class RobotPlayer {
         MapLocation loc = rc.getLocation();
         Direction moveDirection = loc.directionTo(dest);
         rc.setIndicatorLine(loc, dest, 0, 0, 0);
-        System.out.println(moveDirection);
         //See if general direction is valid
         if(canMoveTo(loc, moveDirection)){
-            System.out.println(1);
             path = moveDirection.opposite();
             tryMove(moveDirection);
         }else if(canMoveTo(loc, moveDirection.rotateLeft())){
-            System.out.println(2);
             path = moveDirection.rotateLeft().opposite();
             tryMove(moveDirection.rotateLeft());
         }else if(canMoveTo(loc, moveDirection.rotateRight())) {
-            System.out.println(3);
             path = moveDirection.rotateRight().opposite();
             tryMove(moveDirection.rotateRight());
         }else if(canMoveTo(loc, moveDirection.rotateLeft().rotateLeft())) {
-            System.out.println(4);
             path = moveDirection.rotateLeft().rotateLeft().opposite();
             tryMove(moveDirection.rotateLeft().rotateLeft());
         }else if(canMoveTo(loc, moveDirection.rotateRight().rotateRight())) {
-            System.out.println(5);
             path = moveDirection.rotateRight().rotateRight().opposite();
             tryMove(moveDirection.rotateRight().rotateRight());
         }else if(canMoveTo(loc, moveDirection.rotateLeft().rotateLeft().rotateLeft())) {
-            System.out.println(6);
             path = moveDirection.rotateLeft().rotateLeft().rotateLeft().opposite();
             tryMove(moveDirection.rotateLeft().rotateLeft().rotateLeft());
         }else if(canMoveTo(loc, moveDirection.rotateRight().rotateRight().rotateRight())) {
-            System.out.println(7);
             path = moveDirection.rotateRight().rotateRight().rotateRight().opposite();
             tryMove(moveDirection.rotateRight().rotateRight().rotateRight());
         } else{
-            System.out.println(8);
             tryMove(path);
         }
     }
