@@ -1488,8 +1488,7 @@ public strictfp class RobotPlayer {
                 ourlist) {
             int count=0;
             for (int i = 220; i < 224; i++) {
-                count*=2;
-                if (ours.get(i)) count++;
+                if (ours.get(i)) count+=1L<<i;
             }
             if (count>11){
                 break;
@@ -1497,18 +1496,15 @@ public strictfp class RobotPlayer {
             for (int i = 0; i < count; i++) {
                 int type=0;
                 for (int j = 0; j < 3; j++) {
-                    type*=2;
-                    if (ours.get(i*20+j)) type++;
+                    if (ours.get(i*20+j)) type+=1L<<i;
                 }
                 int x=0;
                 for (int j = 3; j < 11; j++) {
-                    x*=2;
-                    if (ours.get(i*20+j)) x++;
+                    if (ours.get(i*20+j)) x+=1L<<i;
                 }
                 int y=0;
                 for (int j = 11; j < 19; j++) {
-                    y*=2;
-                    if (ours.get(i*20+j)) y++;
+                    if (ours.get(i*20+j)) y+=1L<<i;
                 }
                 switch (type){
                     case 1:
