@@ -142,7 +142,7 @@ public strictfp class RobotPlayer {
     //HQ CODE BELOW
     static void runHQ() throws GameActionException {
     	if(rc.getRoundNum() == 1) {
-    		postLocation(1, rc.getLocation().x, rc.getLocation().y, 2);
+    		postLocation(1, rc.getLocation().x, rc.getLocation().y, 1);
     	}
     	RobotInfo[] r = rc.senseNearbyRobots();
     	for(RobotInfo s : r){
