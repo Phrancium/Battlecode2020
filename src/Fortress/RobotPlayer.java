@@ -86,7 +86,7 @@ public strictfp class RobotPlayer {
         }
         //drone task determiner
         if(rc.getType() == RobotType.DELIVERY_DRONE){
-            if(rc.getRoundNum() < 300){
+            if(rc.getRoundNum() < 10){
                 task = "scout";
             }else{
                 task = "killEnemy";
@@ -856,33 +856,73 @@ public strictfp class RobotPlayer {
             moveToDrone(EnemyHQ);
         }
         if (task.equals("killEnemy")){
+            MapLocation at = rc.getLocation();
+            scan(at);
             Team enemy = rc.getTeam().opponent();
             if (!rc.isCurrentlyHoldingUnit()) {
-                RobotInfo[] nearbyRobots = rc.senseNearbyRobots(GameConstants.DELIVERY_DRONE_PICKUP_RADIUS_SQUARED, enemy);
-                //tryMove(Direction.EAST);
-                moveToDrone(getEnemyHQLocationDrone());
-                if (nearbyRobots.length > 0) {
-                    Direction rando = randomDirection();
-                    RobotInfo targetEnemy = nearbyRobots[0];
-                    int enemyID = targetEnemy.getID();
-                    //may this dont work
-                    moveTo(targetEnemy.getLocation().add(rando));
-                    if (rc.canPickUpUnit(targetEnemy.getID())) {
-                        rc.pickUpUnit(targetEnemy.getID());
+                System.out.println("NOT CARRYING ROBOT");
+                RobotInfo[] nearbyRobots = rc.senseNearbyRobots(rc.getCurrentSensorRadiusSquared(), enemy);
+                //tryMove(Direction.EAST);A
+                //moveToDrone(getEnemyHQLocation());
+
+                // TODO: replace next line with enemy HQ LOC
+                //NOTE: this was tested on CENTRAL LAKE
+
+                if(nearbyRobots.length == 0){
+                    if(EnemyHQ != null) {
+                        moveToDrone(EnemyHQ);
+                        System.out.println("MOVING");
+                    }else{
+                        findEnemyHQ(at);
                     }
                 }
-            }else{
-                for (Direction dir : directions) {
-                    MapLocation adj = rc.adjacentLocation(dir);
-                    while (rc.onTheMap(adj)) {
-                        if (rc.senseFlooding(adj)) {
-                            if (rc.canDropUnit(dir)) {
-                                rc.dropUnit(dir);
-                            }
+                else{
+                    System.out.println("I DETECT ROBOTS: " + nearbyRobots.length);
+                    for (RobotInfo targetEnemy: nearbyRobots){
+                        int enemyID = targetEnemy.getID();
+                        //moveTo(targetEnemy.getLocation().add(rando));
+                        //TODO: make picking up enemies faster and more consistent
+                        if (rc.canPickUpUnit(targetEnemy.getID())) {
+                            rc.pickUpUnit(targetEnemy.getID());
+                            System.out.println("PICKED UP UNIT");
                         }
-                        tryMove(dir);
+                        moveToDrone(targetEnemy.getLocation());
                     }
-
+                }
+            }else {
+                System.out.println("IM CARRYING A ROBOT");
+                //tryMoveD(Direction.SOUTH);
+//                outerloop:
+//                for (int i = 0; i <= 6; i += 2) {
+//                    //TODO: use map to find water
+//                    Direction dir = directions[i];
+//                    MapLocation adj = rc.adjacentLocation(dir);
+//                    while (rc.onTheMap(adj)) {
+//                        if (rc.senseFlooding(adj)) {
+//                            if (rc.canDropUnit(dir)) {
+//                                rc.dropUnit(dir);
+//                                System.out.println("DROPPED ENEMY INTO WATER");
+//                                break outerloop;
+//
+//                            }
+//                        }
+//                        tryMoveD(dir);
+//                        adj = rc.adjacentLocation(dir);
+//                    }
+//
+//                }
+                if (water != null) {
+                    if (at.isAdjacentTo(water)) {
+                        rc.dropUnit(at.directionTo(water));
+                    }
+                    for (Direction g : directions) {
+                        if (rc.senseFlooding(at.add(g))) {
+                            rc.dropUnit(g);
+                        }
+                    }
+                    moveToDrone(water);
+                }else{
+                    scout(at);
                 }
             }
         }
@@ -923,7 +963,10 @@ public strictfp class RobotPlayer {
             }
             if(i.getType() == RobotType.HQ){
                 EnemyHQ = i.getLocation();
+                oppNet.add(i.getLocation());
+                System.out.println(oppNet);
                 news.get(1).add(i.getLocation());
+                news.get(5).add(i.getLocation());
             }
         }
         for(RobotInfo i : r2d2){
@@ -933,38 +976,16 @@ public strictfp class RobotPlayer {
             }
         }
 
-        int x = 0;
-        int y = 0;
-        while( Math.abs(x) < 5){
-            while(Math.abs(y) < 5){
-                MapLocation n = new MapLocation(myX + x, myY + y);
-                if(rc.onTheMap(n) && rc.canSenseLocation(n)){
-                    if(rc.senseSoup(n) > 0){
-                        if(!soup.contains(n) && !irSoup.contains(n)){
-                            if(!senseSoupAround(n)) {
-                                irSoup.add(n);
-                            }else {
-                                soup.add(n);
-                                news.get(2).add(n);
-                            }
-                        }
-                    }
-                }
-                if( y > 0){
-                    y = y*(-1);
-                }else{
-                    y = y*(-1) + 1;
-                }
-            }
-            if( x > 0){
-                x = x*(-1);
-            }else{
-                x = x*(-1) +1;
+        MapLocation[] miso = rc.senseNearbySoup();
+        int totS = 0;
+        for(MapLocation m : miso) {
+            if (!soup.contains(m)) {
+                soup.add(m);
+                news.get(2).add(m);
             }
         }
-
-        int j = 0;
-        int q = 0;
+        int x = 0;
+        int y = 0;
         while( Math.abs(x) < 5){
             while(Math.abs(y) < 5){
                 MapLocation n = new MapLocation(myX + x, myY + y);
@@ -1003,8 +1024,8 @@ public strictfp class RobotPlayer {
             scoutDest = mapCenter;
             scouted.add(scoutDest);
         }
-        int xAdd = rc.getMapWidth()/8;
-        int yAdd = rc.getMapHeight()/8;
+        int xAdd = rc.getMapWidth()/6;
+        int yAdd = rc.getMapHeight()/6;
         if (at.distanceSquaredTo(scoutDest) < 16) {
             int q = quadrantIn(scoutDest);
             if(q == 1){
@@ -1198,8 +1219,9 @@ public strictfp class RobotPlayer {
         Direction notgood = Direction.CENTER;
 
         //look for enemy netguns in range
+        System.out.println(oppNet);
         for(MapLocation gun : oppNet){
-            if(loc.distanceSquaredTo(gun) < 26){
+            if(loc.distanceSquaredTo(gun) < 25){
                 if(Math.abs(gun.x - loc.x) < 5 && Math.abs(gun.x - loc.x) > 2){
                     if(gun.x - loc.x > 0){
                         bad = Direction.EAST;
