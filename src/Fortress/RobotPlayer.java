@@ -160,7 +160,8 @@ public strictfp class RobotPlayer {
                 }
             }
         }
-    	updateEnemyHQLocation();
+    	//TODO: add some way to rebroadcast important info like enemyHQ
+    	//updateEnemyHQLocation();
         //}
     }
     //__________________________________________________________________________________________________________________
