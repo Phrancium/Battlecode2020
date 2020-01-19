@@ -1636,6 +1636,11 @@ public strictfp class RobotPlayer {
                 }
                 MapLocation next= new MapLocation(x,y);
                 switch (type){
+                    case 0:
+                        if(x==0 && y==0 && rc.getType()==RobotType.DELIVERY_DRONE) {
+                            task="crunch";
+                        }
+                        break;
                     case 1:
                         EnemyHQ=next;
                         break;
