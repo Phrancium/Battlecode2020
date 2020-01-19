@@ -1684,6 +1684,11 @@ public strictfp class RobotPlayer {
             }
         }
     }
+
+    static void commandDroneAttack(int cost) throws GameActionException{
+        broadcastQueue.add(new Information(0, 0,0));
+        tryBroadcast(cost);
+    }
     //__________________________________________________________________________________________________________________
 }
 
