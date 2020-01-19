@@ -57,6 +57,7 @@ public strictfp class RobotPlayer {
 
     static ArrayList<MapLocation> irWater = new ArrayList<>();
     static ArrayList<MapLocation> irSoup = new ArrayList<>();
+    static boolean checkHQ = true;
 
     //__________________________________________________________________________________________________________________
     //RUN CODE BELOW
@@ -87,7 +88,7 @@ public strictfp class RobotPlayer {
         }
         //drone task determiner
         if(rc.getType() == RobotType.DELIVERY_DRONE){
-            if(rc.getRoundNum() < 10){
+            if(rc.getRoundNum() < 5){
                 task = "scout";
             }else{
                 task = "killEnemy";
@@ -171,6 +172,9 @@ public strictfp class RobotPlayer {
             receiveBroadcast(rc.getRoundNum() - 1);
         }
 //        if(EnemyHQ != null){
+            System.out.println(soup);
+            System.out.println(oppNet);
+            System.out.println(offensiveEnemyBuildings);
             System.out.println(EnemyHQ);
 //        }
         MapLocation curr = rc.getLocation();
@@ -416,68 +420,79 @@ public strictfp class RobotPlayer {
     }
 
     static void scoutMiner(MapLocation at) throws GameActionException {
-        if(scoutDest ==  null){
+        if (scoutDest == null) {
             scoutDest = HQ;
             scouted.add(scoutDest);
         }
-        int xAdd = (rc.getMapWidth()-HQ.x)/4;
-        int yAdd = (rc.getMapHeight()-HQ.y)/4;
-        if(xAdd < 4){
-            xAdd = 0;
-        }
-        if(yAdd < 4){
-            yAdd = 0;
-        }
-        int q = qHQ(at);
+        int xAdd = rc.getMapWidth() / 6;
+        int yAdd = rc.getMapHeight() / 6;
         if (at.distanceSquaredTo(scoutDest) < 16) {
-            if(q == 1){
-                MapLocation newDest = new MapLocation( at.x ,rc.getMapHeight() - at.y);
-                if(!scouted.contains(newDest)){
-                    scoutDest = new MapLocation(at.x ,rc.getMapHeight() - at.y - yAdd);
-                    if(rc.onTheMap(scoutDest)) {
+            int q = quadrantIn(scoutDest);
+            if (q == 1) {
+                MapLocation newDest = new MapLocation(at.x, rc.getMapHeight() - at.y);
+                if (!scouted.contains(newDest)) {
+                    scoutDest = new MapLocation(at.x, rc.getMapHeight() - at.y + yAdd);
+                    if (rc.onTheMap(scoutDest)) {
                         scouted.add(scoutDest);
-                    }else{
+                    } else {
                         scoutDest = mapCenter;
                         scouted = new ArrayList<>();
                     }
                 }
-            } else if(q == 2){
-                MapLocation newDest = new MapLocation( rc.getMapWidth() - at.x ,at.y);
-                if(!scouted.contains(newDest)){
-                    scoutDest = new MapLocation(rc.getMapWidth() - at.x + xAdd, at.y);
-                    if(rc.onTheMap(scoutDest)) {
-                        scouted.add(scoutDest);
-                    }else{
-                        scoutDest = mapCenter;
-                        scouted = new ArrayList<>();
-                    }
-                }
-            }else if(q == 3){
-                MapLocation newDest = new MapLocation( at.x ,rc.getMapHeight() - at.y);
-                if(!scouted.contains(newDest)){
-                    scoutDest = new MapLocation(at.x ,rc.getMapHeight() - at.y + yAdd);
-                    if(rc.onTheMap(scoutDest)) {
-                        scouted.add(scoutDest);
-                    }else{
-                        scoutDest = mapCenter;
-                        scouted = new ArrayList<>();
-                    }
-                }
-            }else if(q == 4){
-                MapLocation newDest = new MapLocation( rc.getMapWidth() - at.x ,at.y);
-                if(!scouted.contains(newDest)){
+            } else if (q == 2) {
+                MapLocation newDest = new MapLocation(rc.getMapWidth() - at.x, at.y);
+                if (!scouted.contains(newDest)) {
                     scoutDest = new MapLocation(rc.getMapWidth() - at.x - xAdd, at.y);
-                    if(rc.onTheMap(scoutDest)) {
+                    if (rc.onTheMap(scoutDest)) {
                         scouted.add(scoutDest);
-                    }else{
+                    } else {
+                        scoutDest = mapCenter;
+                        scouted = new ArrayList<>();
+                    }
+                }
+            } else if (q == 3) {
+                MapLocation newDest = new MapLocation(at.x, rc.getMapHeight() - at.y);
+                if (!scouted.contains(newDest)) {
+                    scoutDest = new MapLocation(at.x, rc.getMapHeight() - at.y - yAdd);
+                    if (rc.onTheMap(scoutDest)) {
+                        scouted.add(scoutDest);
+                    } else {
+                        scoutDest = mapCenter;
+                        scouted = new ArrayList<>();
+                    }
+                }
+            } else if (q == 4) {
+                MapLocation newDest = new MapLocation(rc.getMapWidth() - at.x, at.y);
+                if (!scouted.contains(newDest)) {
+                    scoutDest = new MapLocation(rc.getMapWidth() - at.x + xAdd, at.y);
+                    if (rc.onTheMap(scoutDest)) {
+                        scouted.add(scoutDest);
+                    } else {
                         scoutDest = mapCenter;
                         scouted = new ArrayList<>();
                     }
                 }
             }
         }
+        if(isPath(at, scoutDest)) {
+            moveTo(scoutDest);
+        }else{
+            scoutDest = HQ;
+            moveTo(scoutDest);
+        }
 
-        moveTo(scoutDest);
+    }
+
+    static boolean isPath(MapLocation at, MapLocation to) throws  GameActionException{
+        Direction moo = at.directionTo(to);
+        Direction[] paths = {moo, moo.rotateLeft(), moo.rotateRight(), Direction.CENTER};
+        for( Direction i : paths){
+                MapLocation here = at.add(i);
+                if(!(rc.senseFlooding(here)) && Math.abs(rc.senseElevation(here) - rc.senseElevation(at)) < 4){
+                    return true;
+            }
+        }
+        return false;
     }
 
     static int qHQ(MapLocation m){
@@ -924,6 +939,12 @@ public strictfp class RobotPlayer {
             MapLocation at = rc.getLocation();
             scan(at);
             Team enemy = rc.getTeam().opponent();
+            if(at.distanceSquaredTo(HQ) < 16){
+                checkHQ = false;
+            }
+            if(checkHQ){
+                moveToDrone(HQ);
+            }
             if (!rc.isCurrentlyHoldingUnit()) {
 //                System.out.println("NOT CARRYING ROBOT");
                 RobotInfo[] nearbyRobots = rc.senseNearbyRobots(rc.getCurrentSensorRadiusSquared(), enemy);
@@ -977,11 +998,14 @@ public strictfp class RobotPlayer {
 //
 //                }
                 if (water != null) {
-                    if (at.isAdjacentTo(water)) {
+                    if (at.isAdjacentTo(water) && rc.canDropUnit(at.directionTo(water))) {
                         rc.dropUnit(at.directionTo(water));
                     }
+                    if(rc.senseFlooding(at) && rc.canDropUnit(Direction.CENTER)){
+                        rc.dropUnit(Direction.CENTER);
+                    }
                     for (Direction g : directions) {
-                        if (rc.senseFlooding(at.add(g))) {
+                        if (rc.senseFlooding(at.add(g)) && rc.canDropUnit(g)) {
                             rc.dropUnit(g);
                         }
                     }
@@ -1042,8 +1066,13 @@ public strictfp class RobotPlayer {
 
         MapLocation[] miso = rc.senseNearbySoup();
         int totS = 0;
+        for(MapLocation s : soup){
+            if(rc.canSenseLocation(s) && rc.senseSoup(s) == 0){
+                soup.remove(s);
+            }
+        }
         for(MapLocation m : miso) {
-            if (!soup.contains(m)) {
+            if (!soup.contains(m) && soup.size() < 5) {
                 soup.add(m);
                 news.get(2).add(m);
             }
