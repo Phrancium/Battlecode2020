@@ -828,10 +828,32 @@ public strictfp class RobotPlayer {
 
         }
         if(task.equals("defend")){
-
+            MapLocation at = rc.getLocation();
+            if(at.distanceSquaredTo(HQ) > 8){
+                moveToDrone(HQ);
+            }
         }
         if(task.equals(("crunch"))){
-
+            MapLocation loc = rc.getLocation();
+            scan(loc);
+            if(rc.isCurrentlyHoldingUnit()){
+                if(loc.isAdjacentTo(water)){
+                    rc.dropUnit(loc.directionTo(water));
+                }
+                for(Direction g : directions){
+                    if(rc.senseFlooding(loc.add(g))){
+                        rc.dropUnit(g);
+                    }
+                }
+                moveToDrone(water);
+            }
+            RobotInfo[] C3PO = rc.senseNearbyRobots(rc.getCurrentSensorRadiusSquared(), rc.getTeam().opponent());
+            for(RobotInfo z : C3PO){
+                if(rc.canPickUpUnit(z.getID())){
+                    rc.pickUpUnit(z.getID());
+                }
+            }
+            moveToDrone(EnemyHQ);
         }
         if (task.equals("killEnemy")){
             Team enemy = rc.getTeam().opponent();
