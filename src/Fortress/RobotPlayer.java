@@ -1643,21 +1643,38 @@ public strictfp class RobotPlayer {
                 for (int j = 11; j < 19; j++) {
                     if (ours.get(i*20+j+1)) y+=1L<<(j-11);
                 }
+                MapLocation next= new MapLocation(x,y);
                 switch (type){
+                    case 0:
+                        if(x==0 && y==0 && rc.getType()==RobotType.DELIVERY_DRONE) {
+                            task="crunch";
+                        }
+                        break;
                     case 1:
-                        EnemyHQ=new MapLocation(x,y);
+                        EnemyHQ=next;
                         break;
                     case 2:
-                        soup.add(new MapLocation(x,y));
+                        if(!soup.contains(next)) {
+                            soup.add(next);
+                        }
                         break;
                     case 3:
-                        offensiveEnemyBuildings.add(new MapLocation(x,y));
+                        if(!offensiveEnemyBuildings.contains(next)) {
+                            offensiveEnemyBuildings.add(next);
+                        }
                         break;
                     case 4:
-                        refineries.add(new MapLocation(x,y));
+                        if(!offensiveEnemyBuildings.contains(next)) {
+                            offensiveEnemyBuildings.add(next);
+                        }
+                        if(!refineries.contains(next)) {
+                            refineries.add(next);
+                        }
                         break;
                     case 5:
-                        oppNet.add(new MapLocation(x,y));
+                        if(!oppNet.contains(next)) {
+                            oppNet.add(next);
+                        }
                         break;
                 }
 
@@ -1680,6 +1697,11 @@ public strictfp class RobotPlayer {
                 return 1;
             }
         }
+    }
+
+    static void commandDroneAttack(int cost) throws GameActionException{
+        broadcastQueue.add(new Information(0, 0,0));
+        tryBroadcast(cost);
     }
     //__________________________________________________________________________________________________________________
 }
