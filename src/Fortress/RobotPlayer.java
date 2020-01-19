@@ -1438,11 +1438,11 @@ public strictfp class RobotPlayer {
             }
             long[] longs=bitSet.toLongArray();
             message[0]= ((int)longs[0]);
-            message[1]= ((int)(longs[0]>>>32));
+            message[1]= ((int)(longs[0]>>32));
             message[2]= ((int)longs[1]);
-            message[3]= ((int)(longs[1]>>>32));
+            message[3]= ((int)(longs[1]>>32));
             message[4]= ((int)longs[2]);
-            message[5]= ((int)(longs[2]>>>32));
+            message[5]= ((int)(longs[2]>>32));
             message[6]= ((int)longs[3]);
 
             rc.submitTransaction(message, cost);
@@ -1458,10 +1458,10 @@ public strictfp class RobotPlayer {
         for (int i = 0; i < transactions.length ; i++) {
             int[] curr=transactions[i].getMessage();
             long[] longs=new long[4];
-            longs[0] = ((long)curr[0]) | (((long) curr[1] << 32));
-            longs[1] = ((long)curr[2]) | (((long) curr[3] << 32));
-            longs[2] = ((long)curr[4]) | (((long) curr[5] << 32));
-            longs[3] = (long)curr[6];
+            longs[0] = (long) curr[1] << 32 | curr[0] & 0xFFFFFFFFL;
+            longs[1] = (long) curr[3] << 32 | curr[2] & 0xFFFFFFFFL;
+            longs[2] = (long) curr[5] << 32 | curr[4] & 0xFFFFFFFFL;
+            longs[3] = (long) curr[6] & 0xFFFFFFFFL;
             BitSet bitSet=BitSet.valueOf(longs);
             if (    bitSet.get(0 * 20)&&
                     !bitSet.get(1 * 20)&&
