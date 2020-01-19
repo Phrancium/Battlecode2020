@@ -73,6 +73,12 @@ public strictfp class RobotPlayer {
     static void runHQ() throws GameActionException {
         for (Direction dir : directions)
             tryBuild(RobotType.MINER, dir);
+        RobotInfo[] r = rc.senseNearbyRobots();
+        for(RobotInfo s : r){
+            if(s.getTeam() != rc.getTeam() && rc.canShootUnit(s.getID())){
+                rc.shootUnit(s.getID());
+            }
+        }
     }
 
     static void runMiner() throws GameActionException {

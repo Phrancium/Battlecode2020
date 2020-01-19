@@ -72,6 +72,7 @@ public strictfp class RobotPlayer {
         // and to get information on its current status.
         RobotPlayer.rc = rc;
         turnCount = 0;
+        robotsBuilt = 0;
         schoolsBuilt = 0;
         factoriesBuilt = 0;
         souploc = null;
@@ -88,7 +89,7 @@ public strictfp class RobotPlayer {
         }
         //drone task determiner
         if(rc.getType() == RobotType.DELIVERY_DRONE){
-            if(rc.getRoundNum() < 500){
+            if(rc.getRoundNum() < 4){
                 task = "scout";
             }else{
                 task = "killEnemy";
@@ -161,6 +162,13 @@ public strictfp class RobotPlayer {
                 }
             }
         }
+        if(robotsBuilt < 8 && turnCount < 300){
+            for (Direction dir : directions) {
+                if(tryBuild(RobotType.MINER, dir)) {
+                    robotsBuilt++;
+                }
+            }
+        }
     	//TODO: add some way to rebroadcast important info like enemyHQ
     	//updateEnemyHQLocation();
         //}
@@ -180,6 +188,7 @@ public strictfp class RobotPlayer {
         MapLocation curr = rc.getLocation();
         if(HQ == null){
             HQ = getHQLocation();
+            refineries.add(HQ);
         }
         //scanForSoup(curr);
         //souploc = getSoupLocation();
@@ -306,7 +315,7 @@ public strictfp class RobotPlayer {
             }
         }
 
-        if(totS > 200 && (refineries.isEmpty()|| loc.distanceSquaredTo(getClosestRefine(loc)) > 150)){
+        if(totS > 200 && (refineries.isEmpty()|| loc.distanceSquaredTo(getClosestRefine(loc)) > 81)){
 
             for(Direction d : directions) {
                 if(rc.canBuildRobot(RobotType.REFINERY, d)) {
