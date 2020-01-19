@@ -160,7 +160,8 @@ public strictfp class RobotPlayer {
                 }
             }
         }
-    	updateEnemyHQLocation();
+    	//TODO: add some way to rebroadcast important info like enemyHQ
+    	//updateEnemyHQLocation();
         //}
     }
     //__________________________________________________________________________________________________________________
@@ -1414,43 +1415,44 @@ public strictfp class RobotPlayer {
         return location;
     }
 
-    static MapLocation getEnemyHQLocationDrone() throws GameActionException {
-        //returns the enemy HQ location as a MapLocation
-        MapLocation location = null;
-        for(int k = 1; k < rc.getRoundNum()-1; k++) {
-            if(k > 0) {
-                Transaction[] block = rc.getBlock(k);
-                if(block.length != 0) {
-                    for(int i = 0; i < block.length; i++) {
-                        int[] message = block[i].getMessage();
-                        if(message[1] == 998997 && message[2] == 3) {
-                            location = new MapLocation(message[3], message[4]);
-                            System.out.println(location);
-                            return location;
-                        }
-                    }
-                }
-            }
-        }
-        return location;
-    }
-
-    static void updateEnemyHQLocation() throws GameActionException {
-        //looks for enemy hq location in block chain and moves it to a more recent round
-        for(int k = rc.getRoundNum()-61; k < rc.getRoundNum()-59; k++) {
-            if(k > 0) {
-                Transaction[] block = rc.getBlock(k);
-                if(block.length != 0) {
-                    for(int i = 0; i < block.length; i++) {
-                        int[] message = block[i].getMessage();
-                        if(message[1] == 998997 && message[2] == 3) {
-                            postLocation(3, message[3], message[4], 2);
-                        }
-                    }
-                }
-            }
-        }
-    }
+//    These 2 methods use old broadcasts and should not exist
+//    static MapLocation getEnemyHQLocationDrone() throws GameActionException {
+//        //returns the enemy HQ location as a MapLocation
+//        MapLocation location = null;
+//        for(int k = 1; k < rc.getRoundNum()-1; k++) {
+//            if(k > 0) {
+//                Transaction[] block = rc.getBlock(k);
+//                if(block.length != 0) {
+//                    for(int i = 0; i < block.length; i++) {
+//                        int[] message = block[i].getMessage();
+//                        if(message[1] == 998997 && message[2] == 3) {
+//                            location = new MapLocation(message[3], message[4]);
+//                            System.out.println(location);
+//                            return location;
+//                        }
+//                    }
+//                }
+//            }
+//        }
+//        return location;
+//    }
+//
+//    static void updateEnemyHQLocation() throws GameActionException {
+//        //looks for enemy hq location in block chain and moves it to a more recent round
+//        for(int k = rc.getRoundNum()-61; k < rc.getRoundNum()-59; k++) {
+//            if(k > 0) {
+//                Transaction[] block = rc.getBlock(k);
+//                if(block.length != 0) {
+//                    for(int i = 0; i < block.length; i++) {
+//                        int[] message = block[i].getMessage();
+//                        if(message[1] == 998997 && message[2] == 3) {
+//                            postLocation(3, message[3], message[4], 2);
+//                        }
+//                    }
+//                }
+//            }
+//        }
+//    }
 
     static void findEnemyHQ(MapLocation at) throws GameActionException{
         MapLocation home = getHQLocation();
