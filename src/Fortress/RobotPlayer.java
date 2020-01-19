@@ -87,7 +87,7 @@ public strictfp class RobotPlayer {
         }
         //drone task determiner
         if(rc.getType() == RobotType.DELIVERY_DRONE){
-            if(rc.getRoundNum() < 300){
+            if(rc.getRoundNum() < 10){
                 task = "scout";
             }else{
                 task = "killEnemy";
@@ -179,21 +179,21 @@ public strictfp class RobotPlayer {
         //scanForSoup(curr);
         //souploc = getSoupLocation();
         //build design school
-        System.out.println("robots built: "+ robotsBuilt);
-        if (schoolsBuilt < 1 && !scanForDesignSchool()) {
-        	MapLocation loc = getHQLocation();
-        	Direction away = curr.directionTo(loc).opposite();
-        	if(rc.canBuildRobot(RobotType.DESIGN_SCHOOL, away)){
-        	    schoolsBuilt++;
-                tryBuild(RobotType.DESIGN_SCHOOL, away);
-            }else if(rc.canBuildRobot(RobotType.DESIGN_SCHOOL, away.rotateLeft())) {
-                schoolsBuilt++;
-                tryBuild(RobotType.DESIGN_SCHOOL, away.rotateLeft());
-            }else if(rc.canBuildRobot(RobotType.DESIGN_SCHOOL, away.rotateRight())){
-                schoolsBuilt++;
-                tryBuild(RobotType.DESIGN_SCHOOL, away.rotateRight());
-            }
-        }
+//        System.out.println("robots built: "+ robotsBuilt);
+//        if (schoolsBuilt < 1 && !scanForDesignSchool()) {
+//        	MapLocation loc = getHQLocation();
+//        	Direction away = curr.directionTo(loc).opposite();
+//        	if(rc.canBuildRobot(RobotType.DESIGN_SCHOOL, away)){
+//        	    schoolsBuilt++;
+//                tryBuild(RobotType.DESIGN_SCHOOL, away);
+//            }else if(rc.canBuildRobot(RobotType.DESIGN_SCHOOL, away.rotateLeft())) {
+//                schoolsBuilt++;
+//                tryBuild(RobotType.DESIGN_SCHOOL, away.rotateLeft());
+//            }else if(rc.canBuildRobot(RobotType.DESIGN_SCHOOL, away.rotateRight())){
+//                schoolsBuilt++;
+//                tryBuild(RobotType.DESIGN_SCHOOL, away.rotateRight());
+//            }
+//        }
 //        if (factoriesBuilt < 1 && !scanForDroneFactory()) {
 //            MapLocation loc = getHQLocation();
 //            Direction away = curr.directionTo(loc).opposite();
@@ -920,33 +920,73 @@ public strictfp class RobotPlayer {
             moveToDrone(EnemyHQ);
         }
         if (task.equals("killEnemy")){
+            MapLocation at = rc.getLocation();
+            scan(at);
             Team enemy = rc.getTeam().opponent();
             if (!rc.isCurrentlyHoldingUnit()) {
-                RobotInfo[] nearbyRobots = rc.senseNearbyRobots(GameConstants.DELIVERY_DRONE_PICKUP_RADIUS_SQUARED, enemy);
-                //tryMove(Direction.EAST);
-                moveToDrone(getEnemyHQLocationDrone());
-                if (nearbyRobots.length > 0) {
-                    Direction rando = randomDirection();
-                    RobotInfo targetEnemy = nearbyRobots[0];
-                    int enemyID = targetEnemy.getID();
-                    //may this dont work
-                    moveTo(targetEnemy.getLocation().add(rando));
-                    if (rc.canPickUpUnit(targetEnemy.getID())) {
-                        rc.pickUpUnit(targetEnemy.getID());
+//                System.out.println("NOT CARRYING ROBOT");
+                RobotInfo[] nearbyRobots = rc.senseNearbyRobots(rc.getCurrentSensorRadiusSquared(), enemy);
+                //tryMove(Direction.EAST);A
+                //moveToDrone(getEnemyHQLocation());
+
+                // TODO: replace next line with enemy HQ LOC
+                //NOTE: this was tested on CENTRAL LAKE
+
+                if(nearbyRobots.length == 0){
+                    if(EnemyHQ != null) {
+                        moveToDrone(EnemyHQ);
+//                        System.out.println("MOVING");
+                    }else{
+                        findEnemyHQ(at);
                     }
                 }
-            }else{
-                for (Direction dir : directions) {
-                    MapLocation adj = rc.adjacentLocation(dir);
-                    while (rc.onTheMap(adj)) {
-                        if (rc.senseFlooding(adj)) {
-                            if (rc.canDropUnit(dir)) {
-                                rc.dropUnit(dir);
-                            }
+                else{
+//                    System.out.println("I DETECT ROBOTS: " + nearbyRobots.length);
+                    for (RobotInfo targetEnemy: nearbyRobots){
+                        int enemyID = targetEnemy.getID();
+                        //moveTo(targetEnemy.getLocation().add(rando));
+                        //TODO: make picking up enemies faster and more consistent
+                        if (rc.canPickUpUnit(targetEnemy.getID())) {
+                            rc.pickUpUnit(targetEnemy.getID());
+//                            System.out.println("PICKED UP UNIT");
                         }
-                        tryMove(dir);
+                        moveToDrone(targetEnemy.getLocation());
                     }
-
+                }
+            }else {
+//                System.out.println("IM CARRYING A ROBOT");
+                //tryMoveD(Direction.SOUTH);
+//                outerloop:
+//                for (int i = 0; i <= 6; i += 2) {
+//                    //TODO: use map to find water
+//                    Direction dir = directions[i];
+//                    MapLocation adj = rc.adjacentLocation(dir);
+//                    while (rc.onTheMap(adj)) {
+//                        if (rc.senseFlooding(adj)) {
+//                            if (rc.canDropUnit(dir)) {
+//                                rc.dropUnit(dir);
+//                                System.out.println("DROPPED ENEMY INTO WATER");
+//                                break outerloop;
+//
+//                            }
+//                        }
+//                        tryMoveD(dir);
+//                        adj = rc.adjacentLocation(dir);
+//                    }
+//
+//                }
+                if (water != null) {
+                    if (at.isAdjacentTo(water)) {
+                        rc.dropUnit(at.directionTo(water));
+                    }
+                    for (Direction g : directions) {
+                        if (rc.senseFlooding(at.add(g))) {
+                            rc.dropUnit(g);
+                        }
+                    }
+                    moveToDrone(water);
+                }else{
+                    scout(at);
                 }
             }
         }
@@ -977,17 +1017,19 @@ public strictfp class RobotPlayer {
         int myX = at.x;
         int myY = at.y;
         for(RobotInfo i : r){
-            if(i.getType() == RobotType.NET_GUN){
+            if(i.getType() == RobotType.NET_GUN && !oppNet.contains(i.getLocation())){
                 oppNet.add(i.getLocation());
                 news.get(5).add(i.getLocation());
             }
-            if((i.getType() == RobotType.DESIGN_SCHOOL || i.getType() == RobotType.NET_GUN || i.getType() == RobotType.FULFILLMENT_CENTER || i.getType() == RobotType.REFINERY) && quadrantIn(i.getLocation()) == quadrantIn(HQ)){
+            if((i.getType() == RobotType.DESIGN_SCHOOL || i.getType() == RobotType.NET_GUN || i.getType() == RobotType.FULFILLMENT_CENTER || i.getType() == RobotType.REFINERY) && quadrantIn(i.getLocation()) == quadrantIn(HQ) && !offensiveEnemyBuildings.contains(i.getLocation())){
                 offensiveEnemyBuildings.add(i.getLocation());
                 news.get(3).add(i.getLocation());
             }
-            if(i.getType() == RobotType.HQ){
+            if(i.getType() == RobotType.HQ && EnemyHQ == null){
                 EnemyHQ = i.getLocation();
+                oppNet.add(i.getLocation());
                 news.get(1).add(i.getLocation());
+                news.get(5).add(i.getLocation());
             }
         }
         for(RobotInfo i : r2d2){
@@ -997,38 +1039,16 @@ public strictfp class RobotPlayer {
             }
         }
 
-        int x = 0;
-        int y = 0;
-        while( Math.abs(x) < 5){
-            while(Math.abs(y) < 5){
-                MapLocation n = new MapLocation(myX + x, myY + y);
-                if(rc.onTheMap(n) && rc.canSenseLocation(n)){
-                    if(rc.senseSoup(n) > 0){
-                        if(!soup.contains(n) && !irSoup.contains(n)){
-                            if(!senseSoupAround(n)) {
-                                irSoup.add(n);
-                            }else {
-                                soup.add(n);
-                                news.get(2).add(n);
-                            }
-                        }
-                    }
-                }
-                if( y > 0){
-                    y = y*(-1);
-                }else{
-                    y = y*(-1) + 1;
-                }
-            }
-            if( x > 0){
-                x = x*(-1);
-            }else{
-                x = x*(-1) +1;
+        MapLocation[] miso = rc.senseNearbySoup();
+        int totS = 0;
+        for(MapLocation m : miso) {
+            if (!soup.contains(m)) {
+                soup.add(m);
+                news.get(2).add(m);
             }
         }
-
-        int j = 0;
-        int q = 0;
+        int x = 0;
+        int y = 0;
         while( Math.abs(x) < 5){
             while(Math.abs(y) < 5){
                 MapLocation n = new MapLocation(myX + x, myY + y);
@@ -1067,8 +1087,8 @@ public strictfp class RobotPlayer {
             scoutDest = mapCenter;
             scouted.add(scoutDest);
         }
-        int xAdd = rc.getMapWidth()/8;
-        int yAdd = rc.getMapHeight()/8;
+        int xAdd = rc.getMapWidth()/6;
+        int yAdd = rc.getMapHeight()/6;
         if (at.distanceSquaredTo(scoutDest) < 16) {
             int q = quadrantIn(scoutDest);
             if(q == 1){
@@ -1258,61 +1278,49 @@ public strictfp class RobotPlayer {
         Direction moveDirection = loc.directionTo(dest);
 
 
-        Direction bad = Direction.CENTER;
-        Direction notgood = Direction.CENTER;
-
-        //look for enemy netguns in range
-        for(MapLocation gun : oppNet){
-            if(loc.distanceSquaredTo(gun) < 26){
-                if(Math.abs(gun.x - loc.x) < 5 && Math.abs(gun.x - loc.x) > 2){
-                    if(gun.x - loc.x > 0){
-                        bad = Direction.EAST;
-                    }else{
-                        bad = Direction.WEST;
-                    }
-                }
-                if(Math.abs(gun.y - loc.y) < 5 && Math.abs(gun.y - loc.y) > 2){
-                    if(gun.x - loc.x > 0){
-                        notgood = Direction.NORTH;
-                    }else{
-                        notgood = Direction.SOUTH;
-                    }
-                }
-            }
-        }
-
-
-        Direction[] nonoDirections = {Direction.NORTHEAST, Direction.NORTHWEST, Direction.SOUTHEAST, Direction.SOUTHWEST, bad, notgood, path};
+        Direction[] nonoDirections = {Direction.NORTHEAST, Direction.NORTHWEST, Direction.SOUTHEAST, Direction.SOUTHWEST, path};
         ArrayList<Direction> ew = new ArrayList<>();
         for( Direction d : nonoDirections){
             ew.add(d);
         }
 
         //See if general direction is valid
-        if(rc.canMove(moveDirection)){
+        if(rc.canMove(moveDirection) && !ew.contains(moveDirection) && !netGunInRange(loc.add(moveDirection))){
             path = moveDirection.opposite();
             tryMoveD(moveDirection);
-        }else if(rc.canMove(moveDirection.rotateLeft()) && !ew.contains(moveDirection.rotateLeft())){
+        }else if(rc.canMove(moveDirection.rotateLeft()) && !ew.contains(moveDirection.rotateLeft()) && !netGunInRange(loc.add(moveDirection.rotateLeft()))){
             path = moveDirection.rotateLeft().opposite();
             tryMoveD(moveDirection.rotateLeft());
-        }else if(rc.canMove(moveDirection.rotateRight()) && !ew.contains(moveDirection.rotateRight())) {
+        }else if(rc.canMove(moveDirection.rotateRight()) && !ew.contains(moveDirection.rotateRight()) && !netGunInRange(loc.add(moveDirection.rotateRight()))) {
             path = moveDirection.rotateRight().opposite();
             tryMoveD(moveDirection.rotateRight());
-        }else if(rc.canMove(moveDirection.rotateLeft().rotateLeft()) && !ew.contains(moveDirection.rotateLeft().rotateLeft())){
+        }else if(rc.canMove(moveDirection.rotateLeft().rotateLeft()) && !ew.contains(moveDirection.rotateLeft().rotateLeft()) && !netGunInRange(loc.add(moveDirection.rotateLeft().rotateLeft()))){
             path = moveDirection.rotateLeft().rotateLeft().opposite();
             tryMoveD(moveDirection.rotateLeft().rotateLeft());
-        }else if(rc.canMove(moveDirection.rotateRight().rotateRight()) && !ew.contains(moveDirection.rotateRight().rotateRight())) {
+        }else if(rc.canMove(moveDirection.rotateRight().rotateRight()) && !ew.contains(moveDirection.rotateRight().rotateRight()) && !netGunInRange(loc.add(moveDirection.rotateRight().rotateRight()))) {
             path = moveDirection.rotateRight().rotateRight().opposite();
             tryMoveD(moveDirection.rotateRight().rotateRight());
-        }else if(rc.canMove(moveDirection.rotateLeft().rotateLeft().rotateLeft()) && !ew.contains(moveDirection.rotateLeft().rotateLeft().rotateLeft())) {
+        }else if(rc.canMove(moveDirection.rotateLeft().rotateLeft().rotateLeft()) && !ew.contains(moveDirection.rotateLeft().rotateLeft().rotateLeft()) && !netGunInRange(loc.add(moveDirection.rotateLeft().rotateLeft().rotateLeft()))) {
             path = moveDirection.rotateLeft().rotateLeft().rotateLeft().opposite();
             tryMoveD(moveDirection.rotateLeft().rotateLeft().rotateLeft());
-        }else if(rc.canMove(moveDirection.rotateRight().rotateRight().rotateRight()) && !ew.contains(moveDirection.rotateRight().rotateRight().rotateRight())) {
+        }else if(rc.canMove(moveDirection.rotateRight().rotateRight().rotateRight()) && !ew.contains(moveDirection.rotateRight().rotateRight().rotateRight()) && !netGunInRange(loc.add(moveDirection.rotateRight().rotateRight().rotateRight()))){
             path = moveDirection.rotateRight().rotateRight().rotateRight().opposite();
             tryMoveD(moveDirection.rotateRight().rotateRight().rotateRight());
         } else{
-            tryMoveD(moveDirection.opposite());
+            tryMoveD(path);
         }
+    }
+
+    static boolean netGunInRange(MapLocation move){
+        if(oppNet.isEmpty()){
+            return false;
+        }
+        for(MapLocation m : oppNet){
+            if(move.distanceSquaredTo(m) < 15){
+                return true;
+            }
+        }
+        return false;
     }
 
     static void goHome(MapLocation m) throws GameActionException {
