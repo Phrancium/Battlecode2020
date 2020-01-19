@@ -87,7 +87,7 @@ public strictfp class RobotPlayer {
         }
         //drone task determiner
         if(rc.getType() == RobotType.DELIVERY_DRONE){
-            if(rc.getRoundNum() < 10){
+            if(rc.getRoundNum() < 400){
                 task = "scout";
             }else{
                 task = "killEnemy";
@@ -170,6 +170,9 @@ public strictfp class RobotPlayer {
             receiveBroadcast(rc.getRoundNum() - 1);
         }
 //        if(EnemyHQ != null){
+            System.out.println(soup);
+            System.out.println(oppNet);
+            System.out.println(offensiveEnemyBuildings);
             System.out.println(EnemyHQ);
 //        }
         MapLocation curr = rc.getLocation();
