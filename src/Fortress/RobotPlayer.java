@@ -421,8 +421,16 @@ public strictfp class RobotPlayer {
 
     static void scoutMiner(MapLocation at) throws GameActionException {
         if (scoutDest == null) {
-            scoutDest = HQ;
-            scouted.add(scoutDest);
+            int q = quadrantIn(HQ);
+            if(q == 1){
+                scoutDest = new MapLocation(rc.getMapWidth(), rc.getMapHeight());
+            }else if(q == 2){
+                scoutDest = new MapLocation(1, rc.getMapHeight());
+            }else if(q == 3){
+                scoutDest = new MapLocation(1, 1);
+            }else if(q == 4){
+                scoutDest = new MapLocation(rc.getMapWidth(), 1);
+            }
         }
         int xAdd = rc.getMapWidth() / 6;
         int yAdd = rc.getMapHeight() / 6;
@@ -435,7 +443,7 @@ public strictfp class RobotPlayer {
                     if (rc.onTheMap(scoutDest)) {
                         scouted.add(scoutDest);
                     } else {
-                        scoutDest = mapCenter;
+                        scoutDest = HQ;
                         scouted = new ArrayList<>();
                     }
                 }
@@ -446,7 +454,7 @@ public strictfp class RobotPlayer {
                     if (rc.onTheMap(scoutDest)) {
                         scouted.add(scoutDest);
                     } else {
-                        scoutDest = mapCenter;
+                        scoutDest = HQ;
                         scouted = new ArrayList<>();
                     }
                 }
@@ -457,7 +465,7 @@ public strictfp class RobotPlayer {
                     if (rc.onTheMap(scoutDest)) {
                         scouted.add(scoutDest);
                     } else {
-                        scoutDest = mapCenter;
+                        scoutDest = HQ;
                         scouted = new ArrayList<>();
                     }
                 }
@@ -468,7 +476,7 @@ public strictfp class RobotPlayer {
                     if (rc.onTheMap(scoutDest)) {
                         scouted.add(scoutDest);
                     } else {
-                        scoutDest = mapCenter;
+                        scoutDest = HQ;
                         scouted = new ArrayList<>();
                     }
                 }
@@ -478,6 +486,7 @@ public strictfp class RobotPlayer {
             moveTo(scoutDest);
         }else{
             scoutDest = HQ;
+            scouted.add(scoutDest);
             moveTo(scoutDest);
         }
 
