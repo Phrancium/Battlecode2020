@@ -1497,21 +1497,21 @@ public strictfp class RobotPlayer {
                 index++;
                 for (int i = 0; i < 3; i++) {
                     int type = next.getType();
-                    bitSet.set(index, type % 2 == 1);
+                    bitSet.set(index, type % 2 != 0);
                     index++;
-                    type /= 2;
+                    type = type>>>1;
                 }
                 for (int i = 0; i < 8; i++) {
                     int x = next.getX();
-                    bitSet.set(index, x % 2 == 1);
+                    bitSet.set(index, x % 2 != 0);
                     index++;
-                    x /= 2;
+                    x = x >>>1;
                 }
                 for (int i = 0; i < 8; i++) {
                     int y = next.getY();
-                    bitSet.set(index, y % 2 == 1);
+                    bitSet.set(index, y % 2 != 0);
                     index++;
-                    y /= 2;
+                    y = y >>>1;
                 }
                 infocount++;
             }
@@ -1527,16 +1527,16 @@ public strictfp class RobotPlayer {
             bitSet.set(9 * 20, true);
             bitSet.set(10 * 20, true);
             for (int i = 220; i < 224; i++) {
-                bitSet.set(i, infocount % 2 == 1);
-                infocount /= 2;
+                bitSet.set(i, infocount % 2 != 0);
+                infocount = infocount>>> 1;
             }
             long[] longs=bitSet.toLongArray();
             message[0]= ((int)longs[0]);
-            message[1]= ((int)(longs[0]>>32));
+            message[1]= ((int)(longs[0]>>>32));
             message[2]= ((int)longs[1]);
-            message[3]= ((int)(longs[1]>>32));
+            message[3]= ((int)(longs[1]>>>32));
             message[4]= ((int)longs[2]);
-            message[5]= ((int)(longs[2]>>32));
+            message[5]= ((int)(longs[2]>>>32));
             message[6]= ((int)longs[3]);
 
             rc.submitTransaction(message, cost);
