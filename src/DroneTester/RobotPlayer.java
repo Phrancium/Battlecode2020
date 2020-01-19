@@ -819,7 +819,7 @@ public strictfp class RobotPlayer {
             if (!rc.isCurrentlyHoldingUnit()) {
                 System.out.println("NOT CARRYING ROBOT");
                 RobotInfo[] nearbyRobots = rc.senseNearbyRobots(-1, enemy);
-                //tryMove(Direction.EAST);
+                //tryMove(Direction.EAST);A
                 //moveToDrone(getEnemyHQLocation());
 
                 // TODO: replace next line with enemy HQ LOC
@@ -835,6 +835,7 @@ public strictfp class RobotPlayer {
                         int enemyID = targetEnemy.getID();
                         moveToDrone(targetEnemy.getLocation());
                         //moveTo(targetEnemy.getLocation().add(rando));
+                        //TODO: make picking up enemies faster and more consistent
                         if (rc.canPickUpUnit(targetEnemy.getID())) {
                             rc.pickUpUnit(targetEnemy.getID());
                             System.out.println("PICKED UP UNIT");
