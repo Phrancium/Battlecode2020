@@ -1497,20 +1497,23 @@ public strictfp class RobotPlayer {
             while(infocount<11 && !broadcastQueue.isEmpty()) {
                 Information next = broadcastQueue.poll();
                 index++;
+                int type = next.getType();
                 for (int i = 0; i < 3; i++) {
-                    int type = next.getType();
+
                     bitSet.set(index, type % 2 != 0);
                     index++;
                     type = type>>>1;
                 }
+                int x = next.getX();
                 for (int i = 0; i < 8; i++) {
-                    int x = next.getX();
+
                     bitSet.set(index, x % 2 != 0);
                     index++;
                     x = x >>>1;
                 }
+                int y = next.getY();
                 for (int i = 0; i < 8; i++) {
-                    int y = next.getY();
+
                     bitSet.set(index, y % 2 != 0);
                     index++;
                     y = y >>>1;
@@ -1592,15 +1595,15 @@ public strictfp class RobotPlayer {
             for (int i = 0; i < count; i++) {
                 int type=0;
                 for (int j = 0; j < 3; j++) {
-                    if (ours.get(i*20+j)) type+=1L<<j;
+                    if (ours.get(i*20+j+1)) type+=1L<<j;
                 }
                 int x=0;
                 for (int j = 3; j < 11; j++) {
-                    if (ours.get(i*20+j)) x+=1L<<(j-3);
+                    if (ours.get(i*20+j+1)) x+=1L<<(j-3);
                 }
                 int y=0;
                 for (int j = 11; j < 19; j++) {
-                    if (ours.get(i*20+j)) y+=1L<<(j-11);
+                    if (ours.get(i*20+j+1)) y+=1L<<(j-11);
                 }
                 switch (type){
                     case 1:
