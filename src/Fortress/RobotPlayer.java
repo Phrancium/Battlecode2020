@@ -180,10 +180,10 @@ public strictfp class RobotPlayer {
             receiveBroadcast(rc.getRoundNum() - 1);
         }
 //        if(EnemyHQ != null){
-            System.out.println(soup);
-            System.out.println(oppNet);
-            System.out.println(offensiveEnemyBuildings);
-            System.out.println(EnemyHQ);
+//            System.out.println(soup);
+//            System.out.println(oppNet);
+//            System.out.println(offensiveEnemyBuildings);
+//            System.out.println(EnemyHQ);
 //        }
         MapLocation curr = rc.getLocation();
         if(HQ == null){
@@ -365,17 +365,18 @@ public strictfp class RobotPlayer {
     static MapLocation getClosestRefine( MapLocation m){
         if(refineries.isEmpty()){
             return null;
-        }
-        MapLocation o = null;
-        int diss = 1000000;
-        for (MapLocation n : refineries){
-            int ned = m.distanceSquaredTo(n);
-            if(ned < diss){
-                diss = ned;
-                o = n;
+        }else {
+            MapLocation o = null;
+            int diss = 1000000;
+            for (MapLocation n : refineries) {
+                int ned = m.distanceSquaredTo(n);
+                if (ned < diss) {
+                    diss = ned;
+                    o = n;
+                }
             }
+            return o;
         }
-        return o;
     }
 
     static MapLocation getClosestSoup( MapLocation m){
@@ -965,14 +966,17 @@ public strictfp class RobotPlayer {
             }
             if (!rc.isCurrentlyHoldingUnit()) {
 //                System.out.println("NOT CARRYING ROBOT");
-                RobotInfo[] nearbyRobots = rc.senseNearbyRobots(rc.getCurrentSensorRadiusSquared(), enemy);
-                //tryMove(Direction.EAST);A
+                RobotInfo[] nearbyEnemies = rc.senseNearbyRobots(rc.getCurrentSensorRadiusSquared(), enemy);
+                RobotInfo[] nearbyCows = rc.senseNearbyRobots(rc.getCurrentSensorRadiusSquared(), Team.NEUTRAL);
+                ArrayList<RobotInfo> nearbyRobots = new ArrayList<>();
+
+                //tryMove(Direction.EAST);
                 //moveToDrone(getEnemyHQLocation());
 
                 // TODO: replace next line with enemy HQ LOC
                 //NOTE: this was tested on CENTRAL LAKE
 
-                if(nearbyRobots.length == 0){
+                if(nearbyEnemies.length == 0 && nearbyCows.length == 0){
                     if(EnemyHQ != null) {
                         moveToDrone(EnemyHQ);
 //                        System.out.println("MOVING");
@@ -981,6 +985,12 @@ public strictfp class RobotPlayer {
                     }
                 }
                 else{
+                    for(RobotInfo r : nearbyEnemies){
+                        nearbyRobots.add(r);
+                    }
+                    for(RobotInfo r : nearbyCows){
+                        nearbyRobots.add(r);
+                    }
 //                    System.out.println("I DETECT ROBOTS: " + nearbyRobots.length);
                     for (RobotInfo targetEnemy: nearbyRobots){
                         int enemyID = targetEnemy.getID();
@@ -1069,6 +1079,7 @@ public strictfp class RobotPlayer {
                 news.get(3).add(i.getLocation());
             }
             if(i.getType() == RobotType.HQ && EnemyHQ == null){
+//                System.out.println("FOUND HQ");
                 EnemyHQ = i.getLocation();
                 oppNet.add(i.getLocation());
                 news.get(1).add(i.getLocation());
@@ -1360,11 +1371,13 @@ public strictfp class RobotPlayer {
     }
 
     static boolean netGunInRange(MapLocation move){
+//        System.out.println(oppNet);
+//        System.out.println(EnemyHQ);
         if(oppNet.isEmpty()){
             return false;
         }
         for(MapLocation m : oppNet){
-            if(move.distanceSquaredTo(m) < 15){
+            if(move.distanceSquaredTo(m) < 16){
                 return true;
             }
         }
@@ -1375,7 +1388,7 @@ public strictfp class RobotPlayer {
         Direction d = randomDirection();
         for (Direction l : directions) {
             if (rc.canDepositSoup(l)) {
-                System.out.println("I deposited soup");
+//                System.out.println("I deposited soup");
                 rc.depositSoup(l, rc.getSoupCarrying());
             }
         }
@@ -1427,7 +1440,7 @@ public strictfp class RobotPlayer {
                         int[] message = block[i].getMessage();
                         if(message[1] == 998997 && message[2] == 2) {
                             location = new MapLocation(message[3], message[4]);
-                            System.out.println(location);
+//                            System.out.println(location);
                             return location;
                         }
                     }
@@ -1449,7 +1462,7 @@ public strictfp class RobotPlayer {
                         int[] message = block[i].getMessage();
                         if(message[1] == 998997 && message[2] == 3) {
                             location = new MapLocation(message[3], message[4]);
-                            System.out.println(location);
+//                            System.out.println(location);
                             return location;
                         }
                     }
@@ -1511,6 +1524,7 @@ public strictfp class RobotPlayer {
 
         if(at.x == dest2.x && at.y==dest2.y){
             EnemyHQ = new MapLocation( hqX, mapH - hqY);
+            oppNet.add(EnemyHQ);
         }
         if(enHQDest == null){
             enHQDest = dest1;
