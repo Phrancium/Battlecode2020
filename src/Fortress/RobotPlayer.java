@@ -24,6 +24,7 @@ public strictfp class RobotPlayer {
             RobotType.FULFILLMENT_CENTER, RobotType.NET_GUN};
 
     static int turnCount;
+    static boolean dirtFull = false;
     static HashMap<Integer, Direction> dirHash = new HashMap<Integer, Direction>();
     static MapLocation initialLoc;
     static MapLocation souploc;
@@ -82,7 +83,7 @@ public strictfp class RobotPlayer {
 
         //landscaper task determiner
         if(rc.getType() == RobotType.LANDSCAPER){
-                task = "terraform";
+                task = "castle";
         }
         //drone task determiner
         if(rc.getType() == RobotType.DELIVERY_DRONE){
@@ -170,21 +171,21 @@ public strictfp class RobotPlayer {
         //scanForSoup(curr);
         //souploc = getSoupLocation();
         //build design school
-//        System.out.println("robots built: "+ robotsBuilt);
-//        if (schoolsBuilt < 1 && !scanForDesignSchool()) {
-//        	MapLocation loc = getHQLocation();
-//        	Direction away = curr.directionTo(loc).opposite();
-//        	if(rc.canBuildRobot(RobotType.DESIGN_SCHOOL, away)){
-//        	    schoolsBuilt++;
-//                tryBuild(RobotType.DESIGN_SCHOOL, away);
-//            }else if(rc.canBuildRobot(RobotType.DESIGN_SCHOOL, away.rotateLeft())) {
-//                schoolsBuilt++;
-//                tryBuild(RobotType.DESIGN_SCHOOL, away.rotateLeft());
-//            }else if(rc.canBuildRobot(RobotType.DESIGN_SCHOOL, away.rotateRight())){
-//                schoolsBuilt++;
-//                tryBuild(RobotType.DESIGN_SCHOOL, away.rotateRight());
-//            }
-//        }
+        System.out.println("robots built: "+ robotsBuilt);
+        if (schoolsBuilt < 1 && !scanForDesignSchool()) {
+        	MapLocation loc = getHQLocation();
+        	Direction away = curr.directionTo(loc).opposite();
+        	if(rc.canBuildRobot(RobotType.DESIGN_SCHOOL, away)){
+        	    schoolsBuilt++;
+                tryBuild(RobotType.DESIGN_SCHOOL, away);
+            }else if(rc.canBuildRobot(RobotType.DESIGN_SCHOOL, away.rotateLeft())) {
+                schoolsBuilt++;
+                tryBuild(RobotType.DESIGN_SCHOOL, away.rotateLeft());
+            }else if(rc.canBuildRobot(RobotType.DESIGN_SCHOOL, away.rotateRight())){
+                schoolsBuilt++;
+                tryBuild(RobotType.DESIGN_SCHOOL, away.rotateRight());
+            }
+        }
 //        if (factoriesBuilt < 1 && !scanForDroneFactory()) {
 //            MapLocation loc = getHQLocation();
 //            Direction away = curr.directionTo(loc).opposite();
@@ -543,10 +544,12 @@ public strictfp class RobotPlayer {
 
     //Builds Landscapers
     static void runDesignSchool() throws GameActionException {
-        for (Direction dir : directions)
+        if(robotsBuilt < 16) {
+    	for (Direction dir : directions)
             if (tryBuild(RobotType.LANDSCAPER, dir)) {
                 robotsBuilt++;
             }
+    	}
     }
     //Builds Drones
     static void runFulfillmentCenter() throws GameActionException {
@@ -603,7 +606,20 @@ public strictfp class RobotPlayer {
         		bury(i.getLocation(), at);
         	}
         }
+        if(at.distanceSquaredTo(home) <= 8) {
+        	moveTo(at.add(dir.opposite()));
+        }
         if(at.distanceSquaredTo(home) > 8) {
+        	if(digLoc.isEmpty() && at.distanceSquaredTo(home) > 16) {
+        		moveTo(home);
+        	}
+        	
+        	else if(digLoc.isEmpty()) {
+        		if(rc.isReady() && rc.canDigDirt(dir)) {
+            		rc.digDirt(dir);
+            		digLoc.add(at.add(dir));
+        		}
+        	}
         	
         	MapLocation frontRow[] = new MapLocation[9];
         	frontRow[0] = at;
@@ -614,17 +630,28 @@ public strictfp class RobotPlayer {
         	frontRow[5] = frontRow[3].add(dir.rotateRight().rotateRight());
         	frontRow[6] = frontRow[4].add(dir.rotateLeft().rotateLeft());
         	
-        	if(rc.getDirtCarrying() < 25) {
-        		
-        		if(rc.isReady() && rc.canDigDirt(dir)) {
+        	if(rc.getDirtCarrying() == 25) {
+        		dirtFull = true;
+        	}
+        	
+        	if(rc.getDirtCarrying() == 0) {
+        		dirtFull = false;
+        	}
+        	
+        	if(!dirtFull) {
+        		if(at.distanceSquaredTo(digLoc.get(0)) > 2 && at.distanceSquaredTo(home) > 18) {
+        			moveTo(digLoc.get(0));
+        		}
+        		else if(rc.isReady() && rc.canDigDirt(dir)) {
             		rc.digDirt(dir);
-            		digLoc.add(at.add(dir));
         		}
         	}
         	
-        	if(rc.getDirtCarrying() == 25) {
+        	
+        	
+        	if(dirtFull) {
         		for(int i = 1; i < 7; i++) {
-        			if(rc.canSenseLocation(frontRow[i]) && !digLoc.contains(frontRow[i])) {
+        			if(rc.canSenseLocation(frontRow[i]) && !digLoc.contains(frontRow[i]) && rc.senseElevation(frontRow[i]) > -10) {
         				if(rc.senseElevation(frontRow[i]) < rc.senseElevation(frontRow[0]) && rc.senseRobotAtLocation(frontRow[i]) == null) {
         					if(at.distanceSquaredTo(frontRow[i]) > 2) {
         						moveTo(frontRow[i]);
@@ -634,14 +661,19 @@ public strictfp class RobotPlayer {
         					}
         				}
         			}
-        			if(rc.senseElevation(at) < 8) {
-    					rc.depositDirt(Direction.CENTER);
-    				}
         		}
-        		if(rc.isReady()) {
-        			tryMove(dir.opposite());
-        			tryMove(dir.opposite().rotateLeft());
-        			tryMove(dir.opposite().rotateRight());
+        		if(rc.canSenseLocation(at.add(dir.opposite()))) {
+        			if(rc.senseElevation(at) - rc.senseElevation(at.add(dir.opposite())) < 3) {
+        				rc.depositDirt(Direction.CENTER);
+        			}
+        			else if(rc.isReady()) {
+        				tryMove(dir.opposite());
+        				tryMove(dir.opposite().rotateLeft());
+        				tryMove(dir.opposite().rotateRight());
+        			}
+        		}
+        		else {
+        			dirtFull = false;
         		}
         	}
         }
@@ -690,6 +722,9 @@ public strictfp class RobotPlayer {
         			moveTo(build[i]);
         			break;
         		}
+        	}
+        	if(rc.isReady()) {
+        		task = "terraform";
         	}
         }
         else if(rc.canDigDirt(dir) && rc.getDirtCarrying() < 25) {
