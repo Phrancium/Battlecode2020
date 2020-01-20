@@ -1448,6 +1448,10 @@ public strictfp class RobotPlayer {
     }
 
     static void moveToDrone(MapLocation dest) throws GameActionException{
+        if (!dest.equals(prevdest)){
+            prevdest=dest;
+            prevLocations.clear();
+        }
         //Find general direction of destination
         MapLocation loc = rc.getLocation();
         Direction moveDirection = loc.directionTo(dest);
@@ -1461,7 +1465,7 @@ public strictfp class RobotPlayer {
         for( Direction d : nonoDirections){
             ew.add(d);
         }
-
+        prevLocations.add(loc);
         //See if general direction is valid
         if(rc.canMove(moveDirection) && !ew.contains(moveDirection) && !netGunInRange(loc.add(moveDirection))){
             path = moveDirection.opposite();
@@ -1490,10 +1494,14 @@ public strictfp class RobotPlayer {
     }
 
     static void moveToCrunch(MapLocation dest) throws GameActionException{
+        if (!dest.equals(prevdest)){
+            prevdest=dest;
+            prevLocations.clear();
+        }
         //Find general direction of destination
         MapLocation loc = rc.getLocation();
         Direction moveDirection = loc.directionTo(dest);
-
+        prevLocations.add(loc);
         //See if general direction is valid
         if(rc.canMove(moveDirection)){
             path = moveDirection.opposite();
@@ -1521,12 +1529,18 @@ public strictfp class RobotPlayer {
         }
     }
     static void moveToDroneHover(MapLocation dest) throws GameActionException{
+
+        if (!dest.equals(prevdest)){
+            prevdest=dest;
+            prevLocations.clear();
+        }
+
         //Find general direction of destination
         MapLocation loc = rc.getLocation();
         Direction moveDirection = loc.directionTo(dest);
-
+        prevLocations.add(loc);
         //See if general direction is valid
-        if(rc.canMove(moveDirection) && !netGunInRange(loc.add(moveDirection))){
+        if(rc.canMove(moveDirection) && !hQInRange(loc.add(moveDirection))){
             path = moveDirection.opposite();
             tryMoveD(moveDirection);
         }else if(rc.canMove(moveDirection.rotateLeft()) && !hQInRange(loc.add(moveDirection.rotateLeft()))){
