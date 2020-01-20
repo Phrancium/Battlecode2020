@@ -286,7 +286,7 @@ public strictfp class RobotPlayer {
             }
         }
         MapLocation[] miso = rc.senseNearbySoup();
-        int totS = 0;
+        int totS = rc.getSoupCarrying();
         for(MapLocation m : miso) {
             if (!soup.contains(m)) {
                     soup.add(m);
