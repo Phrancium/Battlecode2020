@@ -659,7 +659,7 @@ public strictfp class RobotPlayer {
          }
          }
          }**/
-        else if (rc.getRoundNum() > 249 && rc.getTeamSoup() > 210) {
+        else if (rc.getRoundNum() > 200 && rc.getTeamSoup() > 210) {
             for (Direction dir : randomDirections()) {
                 if (rc.canBuildRobot(RobotType.DELIVERY_DRONE, dir)) {
                     robotsBuilt++;
