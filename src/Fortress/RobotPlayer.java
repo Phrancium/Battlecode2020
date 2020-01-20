@@ -92,7 +92,7 @@ public strictfp class RobotPlayer {
         }
         //drone task determiner
         if(rc.getType() == RobotType.DELIVERY_DRONE){
-            if(rc.getRoundNum() < 140){
+            if(rc.getRoundNum() < 150){
                 task = "scout";
             }else{
                 task = "killEnemy";
@@ -232,7 +232,7 @@ public strictfp class RobotPlayer {
         }
         if(rc.getRoundNum() > 400 && rc.getTeamSoup() > 499){
             for (Direction dir : directions){
-                if(rc.canBuildRobot(RobotType.VAPORATOR, dir)){
+                if(rc.canBuildRobot(RobotType.VAPORATOR, dir) && curr.add(dir).distanceSquaredTo(HQ) > 8){
                     rc.buildRobot(RobotType.VAPORATOR, dir);
                 }
             }
@@ -588,12 +588,7 @@ public strictfp class RobotPlayer {
 
     //Builds Landscapers
     static void runDesignSchool() throws GameActionException {
-        if(robotsBuilt < 2 && rc.getRoundNum() < 300) {
-    	    for (Direction dir : directions)
-                if (tryBuild(RobotType.LANDSCAPER, dir)) {
-                    robotsBuilt++;
-            }
-    	}else if(robotsBuilt < 8 && rc.getRoundNum() > 300 && rc.getTeamSoup() > 201){
+        if(robotsBuilt < 16) {
             for (Direction dir : directions)
                 if (tryBuild(RobotType.LANDSCAPER, dir)) {
                     robotsBuilt++;
@@ -602,15 +597,29 @@ public strictfp class RobotPlayer {
     }
     //Builds Drones
     static void runFulfillmentCenter() throws GameActionException {
-        if(robotsBuilt < 8 && rc.getTeamSoup() > 201) {
+        if(robotsBuilt < 1 && rc.getRoundNum() < 200) {
             for (Direction dir : directions)
                 if (rc.canBuildRobot(RobotType.DELIVERY_DRONE, dir)) {
-                    broadcastQueue.add(new Information(0,1,1));
-                    tryBroadcast(1);
+//                    broadcastQueue.add(new Information(0,1,1));
+//                    tryBroadcast(1);
                     robotsBuilt++;
                     rc.buildRobot(RobotType.DELIVERY_DRONE,dir);
-                    break;
+//                    break;
                 }
+        }else if(rc.getRoundNum() < 600 && robotsBuilt < 13){
+            for (Direction dir : directions) {
+                if (rc.canBuildRobot(RobotType.DELIVERY_DRONE, dir)) {
+                    robotsBuilt++;
+                    rc.buildRobot(RobotType.DELIVERY_DRONE, dir);
+                }
+            }
+        }else{
+            for (Direction dir : directions) {
+                if (rc.canBuildRobot(RobotType.DELIVERY_DRONE, dir)) {
+                    robotsBuilt++;
+                    rc.buildRobot(RobotType.DELIVERY_DRONE, dir);
+                }
+            }
         }
 //        if(robotsBuilt < 20) {
 //            for (Direction dir : directions)
