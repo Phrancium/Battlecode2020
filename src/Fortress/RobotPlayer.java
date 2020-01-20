@@ -994,20 +994,6 @@ public strictfp class RobotPlayer {
                         scout(at);
                     }
                 }else {
-                    if (!isHQFull(at)) {
-                        RobotInfo[] nearbyFriendlies = rc.senseNearbyRobots(rc.getCurrentSensorRadiusSquared(), rc.getTeam());
-                        for(RobotInfo r : nearbyFriendlies){
-                            if(r.getType() == RobotType.LANDSCAPER && !r.getLocation().isAdjacentTo(HQ)){
-                                if(rc.canPickUpUnit(r.getID())){
-                                    heldUnit = r;
-                                    rc.pickUpUnit(r.getID());
-                                }
-                                else{
-                                    moveToDroneHover(r.getLocation());
-                                }
-                            }
-                        }
-                    } else {
                         RobotInfo[] nearbyEnemies = rc.senseNearbyRobots(rc.getCurrentSensorRadiusSquared(), enemy);
                         RobotInfo[] nearbyFriendlies = rc.senseNearbyRobots(rc.getCurrentSensorRadiusSquared(), rc.getTeam());
                         ArrayList<RobotInfo> nearbyRobots = new ArrayList<>();
@@ -1032,9 +1018,18 @@ public strictfp class RobotPlayer {
                             moveToDrone(closestEnemyRobot(at, nearbyRobots));
 
                         }
+                        if (!isHQFull(at)) {
+                            for(RobotInfo r : nearbyFriendlies){
+                                if(r.getType() == RobotType.LANDSCAPER && !r.getLocation().isAdjacentTo(HQ)){
+                                    if(rc.canPickUpUnit(r.getID())){
+                                        heldUnit = r;
+                                        rc.pickUpUnit(r.getID());
+                                    }
+                                }
+                            }
+                        }
                             moveToDroneHover(HQ);
 
-                    }
                 }
         }
         if (task.equals("killEnemy")){
