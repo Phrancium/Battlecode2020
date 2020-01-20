@@ -104,8 +104,10 @@ public strictfp class RobotPlayer {
             }else if(rc.getRoundNum() < 300 && rc.getRoundNum() > 150) {
                 task = "hover";
             }
-            else{
+            else if(rc.getRoundNum() < 1001 && rc.getRoundNum() > 299){
                 task = "killEnemy";
+            }else{
+                task = "defend";
             }
 //            task = "crunch";
 //            task = "defend";
