@@ -812,7 +812,7 @@ public strictfp class RobotPlayer {
         }
         else if (at.distanceSquaredTo(home) > 2){
         	for(int i = 0; i < 8; i++) {
-        		if(rc.onTheMap(build[i]) && !rc.isLocationOccupied(build[i])) {
+        		if(rc.canSenseLocation(build[i]) && !rc.isLocationOccupied(build[i])) {
         			moveTo(build[i]);
         			break;
         		}
