@@ -96,7 +96,10 @@ public strictfp class RobotPlayer {
         if(rc.getType() == RobotType.DELIVERY_DRONE){
             if(rc.getRoundNum() < 150){
                 task = "scout";
-            }else{
+            }else if(rc.getRoundNum() < 200) {
+                task = "hover";
+            }
+            else{
                 task = "killEnemy";
             }
 //            task = "crunch";
@@ -171,7 +174,13 @@ public strictfp class RobotPlayer {
                 }
             }
         }
-        if(robotsBuilt < 6){
+        if(robotsBuilt < 3 && rc.getRoundNum() < 150){
+            for (Direction dir : randomDirections()) {
+                if(tryBuild(RobotType.MINER, dir)) {
+                    robotsBuilt++;
+                }
+            }
+        }else if(robotsBuilt < 6 && rc.getRoundNum() > 150){
             for (Direction dir : randomDirections()) {
                 if(tryBuild(RobotType.MINER, dir)) {
                     robotsBuilt++;
@@ -215,6 +224,9 @@ public strictfp class RobotPlayer {
         openEyes(curr);
         //build design school
 //        System.out.println("robots built: "+ robotsBuilt);
+        if(rc.getTeamSoup() > 200 && curr.isAdjacentTo(HQ)){
+            moveTo(curr.add(curr.directionTo(HQ).opposite()));
+        }
         if (schoolsBuilt < 1) {
         	for(Direction d : directions) {
                 if (rc.canBuildRobot(RobotType.DESIGN_SCHOOL, d) && curr.add(d).distanceSquaredTo(HQ) > 8 && curr.add(d).distanceSquaredTo(HQ) < 64) {
@@ -312,7 +324,7 @@ public strictfp class RobotPlayer {
         }
             if ((refineries.isEmpty() && totS > 1) || (totS > 200 && loc.distanceSquaredTo(getClosestRefine(loc)) > 81)) {
                 for (Direction d : directions) {
-                    if (rc.canBuildRobot(RobotType.REFINERY, d) && loc.add(d).distanceSquaredTo(HQ) > 15) {
+                    if (rc.canBuildRobot(RobotType.REFINERY, d) && loc.add(d).distanceSquaredTo(HQ) > 8) {
                         refineries.add(loc.add(d));
                         rc.buildRobot(RobotType.REFINERY, d);
                     }
@@ -938,11 +950,10 @@ public strictfp class RobotPlayer {
             }
             moveToCrunch(EnemyHQ);
         }
-        if (task.equals("killEnemy")){
+        if(task == "hover"){
             MapLocation at = rc.getLocation();
             scan(at);
             Team enemy = rc.getTeam().opponent();
-            if(rc.getRoundNum() > 400 && rc.getRoundNum() < 500){
                 if(rc.isCurrentlyHoldingUnit()) {
                     if(heldUnit.getTeam() == rc.getTeam()) {
                         for (Direction g : directions) {
@@ -996,7 +1007,11 @@ public strictfp class RobotPlayer {
                         moveToDrone(HQ);
                     }
                 }
-                }
+        }
+        if (task.equals("killEnemy")){
+            MapLocation at = rc.getLocation();
+            scan(at);
+            Team enemy = rc.getTeam().opponent();
 
             if(at.distanceSquaredTo(HQ) < 16){
                 checkHQ = false;
