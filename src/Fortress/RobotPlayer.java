@@ -101,7 +101,7 @@ public strictfp class RobotPlayer {
         if(rc.getType() == RobotType.DELIVERY_DRONE){
             if(rc.getRoundNum() < 150){
                 task = "scout";
-            }else if(rc.getRoundNum() < 300 && rc.getRoundNum() > 150) {
+            }else if(rc.getRoundNum() < 200 && rc.getRoundNum() > 150) {
                 task = "hover";
             }
             else{
@@ -617,7 +617,7 @@ public strictfp class RobotPlayer {
                 if (tryBuild(RobotType.LANDSCAPER, dir)) {
                     robotsBuilt++;
                 }
-        }else if(robotsBuilt < 12 && rc.getRoundNum() >= 400 && rc.getTeamSoup() > 200){
+        }else if(robotsBuilt < 8 && rc.getRoundNum() >= 400 && rc.getTeamSoup() > 150){
             for (Direction dir : directions)
 
                 if (tryBuild(RobotType.LANDSCAPER, dir)) {
@@ -636,7 +636,7 @@ public strictfp class RobotPlayer {
                     rc.buildRobot(RobotType.DELIVERY_DRONE,dir);
 //                    break;
                 }
-        }else if(rc.getRoundNum() < 500 && rc.getRoundNum() > 150 && robotsBuilt < 4 && rc.getTeamSoup() > 200){
+        }else if(rc.getRoundNum() < 250 && rc.getRoundNum() > 150 && robotsBuilt < 4 && rc.getTeamSoup() > 200){
             for (Direction dir : randomDirections()) {
                 if (rc.canBuildRobot(RobotType.DELIVERY_DRONE, dir)) {
                     robotsBuilt++;
@@ -650,7 +650,7 @@ public strictfp class RobotPlayer {
                     rc.buildRobot(RobotType.DELIVERY_DRONE, dir);
                 }
             }
-        }**/else if(rc.getRoundNum() > 800){
+        }**/else if(rc.getRoundNum() > 249 && rc.getTeamSoup() > 155){
             for (Direction dir : randomDirections()) {
                 if (rc.canBuildRobot(RobotType.DELIVERY_DRONE, dir)) {
                     robotsBuilt++;
@@ -827,9 +827,9 @@ public strictfp class RobotPlayer {
         			break;
         		}
         	}
-        	if(rc.isReady()) {
-        		task = "terraform";
-        	}
+//        	if(rc.isReady()) {
+//        		task = "terraform";
+//        	}
         }
         else if(rc.canDigDirt(dir) && rc.getDirtCarrying() < 25) {
         	rc.digDirt(dir);
@@ -929,6 +929,8 @@ public strictfp class RobotPlayer {
     static void runDeliveryDrone() throws GameActionException {
         if(rc.getRoundNum() > 1500 && !task.equals("defend")){
             task = "crunch";
+        }if(rc.getRoundNum() > 800 && !task.equals("hover")){
+            task = "defend";
         }
         if(task.equals("scout")){
             if(rc.getRoundNum()%4 == 0 || broadcastQueue.size()>11){
