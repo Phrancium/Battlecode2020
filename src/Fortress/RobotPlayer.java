@@ -968,6 +968,27 @@ public strictfp class RobotPlayer {
             }
             MapLocation loc = rc.getLocation();
             updateBroadcast(scan(loc));
+
+            if(rc.isCurrentlyHoldingUnit()){
+                for(Direction g : directions){
+                    if(rc.senseFlooding(at.add(g))){
+                        rc.dropUnit(g);
+                    }
+                }
+            }
+            RobotInfo[] C3PO = rc.senseNearbyRobots(3, rc.getTeam().opponent());
+            RobotInfo[] nearbyCows = rc.senseNearbyRobots(3, Team.NEUTRAL);
+            for(RobotInfo z : C3PO){
+                if(rc.canPickUpUnit(z.getID())){
+                    rc.pickUpUnit(z.getID());
+                }
+            }
+            for(RobotInfo z : nearbyCows){
+                if(rc.canPickUpUnit(z.getID())){
+                    rc.pickUpUnit(z.getID());
+                }
+            }
+
             scout(loc);
 
         }
@@ -976,6 +997,21 @@ public strictfp class RobotPlayer {
             if(at.distanceSquaredTo(HQ) > 8){
                 moveToDrone(HQ);
             }
+
+            if(rc.isCurrentlyHoldingUnit()){
+                for(Direction g : directions){
+                    if(rc.senseFlooding(at.add(g))){
+                        rc.dropUnit(g);
+                    }
+                }
+            }
+            RobotInfo[] C3PO = rc.senseNearbyRobots(rc.getCurrentSensorRadiusSquared(), rc.getTeam().opponent());
+            for(RobotInfo z : C3PO){
+                if(rc.canPickUpUnit(z.getID())){
+                    rc.pickUpUnit(z.getID());
+                }
+            }
+
         }
         if(task.equals(("crunch"))){
             MapLocation loc = rc.getLocation();
