@@ -104,10 +104,8 @@ public strictfp class RobotPlayer {
             }else if(rc.getRoundNum() < 300 && rc.getRoundNum() > 150) {
                 task = "hover";
             }
-            else if(rc.getRoundNum() < 600 && rc.getRoundNum() > 199){
+            else{
                 task = "killEnemy";
-            }else{
-                task = "defend";
             }
 //            task = "crunch";
 //            task = "defend";
@@ -280,7 +278,7 @@ public strictfp class RobotPlayer {
                     rc.depositSoup(dir, rc.getSoupCarrying());
                 }
             }
-            if(!stay || curr.distanceSquaredTo(HQ) < 144) {
+            if(!stay || curr.distanceSquaredTo(HQ) < 225 || rc.getRoundNum() < 125) {
                 moveTo(getClosestRefine(curr));
             }
         }
