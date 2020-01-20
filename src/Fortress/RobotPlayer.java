@@ -229,7 +229,7 @@ public strictfp class RobotPlayer {
         }
         if (schoolsBuilt < 1) {
         	for(Direction d : directions) {
-                if (rc.canBuildRobot(RobotType.DESIGN_SCHOOL, d) && curr.add(d).distanceSquaredTo(HQ) > 8 && curr.add(d).distanceSquaredTo(HQ) < 64) {
+                if (rc.canBuildRobot(RobotType.DESIGN_SCHOOL, d) && curr.add(d).distanceSquaredTo(HQ) > 8 && curr.add(d).distanceSquaredTo(HQ) < 16) {
                     schoolsBuilt++;
                     addAndBroadcast(new Information(0,3,3));
                     tryBuild(RobotType.DESIGN_SCHOOL, d);
@@ -607,7 +607,7 @@ public strictfp class RobotPlayer {
                 if (tryBuild(RobotType.LANDSCAPER, dir)) {
                     robotsBuilt++;
                 }
-        }else if(robotsBuilt < 12 && rc.getRoundNum() > 200 && rc.getTeamSoup() > 200){
+        }else if(robotsBuilt < 10 && rc.getRoundNum() > 200 && rc.getTeamSoup() > 200){
             for (Direction dir : directions)
 
                 if (tryBuild(RobotType.LANDSCAPER, dir)) {
@@ -626,14 +626,14 @@ public strictfp class RobotPlayer {
                     rc.buildRobot(RobotType.DELIVERY_DRONE,dir);
 //                    break;
                 }
-        }else if(rc.getRoundNum() < 300 && rc.getRoundNum() > 150 && robotsBuilt < 2 && rc.getTeamSoup() > 200){
+        }else if(rc.getRoundNum() < 300 && rc.getRoundNum() > 150 && robotsBuilt < 3 && rc.getTeamSoup() > 200){
             for (Direction dir : randomDirections()) {
                 if (rc.canBuildRobot(RobotType.DELIVERY_DRONE, dir)) {
                     robotsBuilt++;
                     rc.buildRobot(RobotType.DELIVERY_DRONE, dir);
                 }
             }
-        }else if(rc.getRoundNum() > 300  && rc.getTeamSoup() > 200 && robotsBuilt < 7){
+        }else if(rc.getRoundNum() > 300  && rc.getTeamSoup() > 200 && robotsBuilt < 8){
             for (Direction dir : randomDirections()) {
                 if (rc.canBuildRobot(RobotType.DELIVERY_DRONE, dir)) {
                     robotsBuilt++;
