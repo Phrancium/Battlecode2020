@@ -280,7 +280,7 @@ public strictfp class RobotPlayer {
                     rc.depositSoup(dir, rc.getSoupCarrying());
                 }
             }
-            if(!stay || curr.distanceSquaredTo(HQ) < 144) {
+            if(!stay || curr.distanceSquaredTo(HQ) < 225) {
                 moveTo(getClosestRefine(curr));
             }
         }
