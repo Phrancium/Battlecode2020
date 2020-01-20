@@ -835,32 +835,32 @@ public strictfp class RobotPlayer {
         	if (rc.onTheMap(left) && (rc.senseElevation(left) < rc.senseElevation(at)) && rc.onTheMap(right) && rc.senseElevation(left) < rc.senseElevation(right) && ((rc.getRoundNum() > 650) || rc.senseElevation(left)<3)) {
         		if(rc.getDirtCarrying() > 0)
                     rc.depositDirt(at.directionTo(left));
-        		else if(rc.canDigDirt(dir.opposite()))
-                    rc.digDirt(dir.opposite());
+        		else if(rc.canDigDirt(dir.opposite().rotateLeft().rotateLeft()))
+                    rc.digDirt(dir.opposite().rotateLeft().rotateLeft());
+        		else if(rc.canDigDirt(dir.opposite().rotateRight().rotateRight()))
+                    rc.digDirt(dir.opposite().rotateRight().rotateRight());
         		else if(rc.canDigDirt(dir.opposite().rotateLeft()))
                     rc.digDirt(dir.opposite().rotateLeft());
-        		else if(rc.canDigDirt(dir.opposite().rotateRight()))
-                    rc.digDirt(dir.opposite().rotateRight());
         	}
         	else if(rc.onTheMap(right) && rc.senseElevation(right) < rc.senseElevation(at) && ((rc.getRoundNum() > 650) || rc.senseElevation(right)<3)) {
         		if(rc.getDirtCarrying() > 0)
                     rc.depositDirt(at.directionTo(right));
-        		else if(rc.canDigDirt(dir.opposite()))
-                    rc.digDirt(dir.opposite());
+        		else if(rc.canDigDirt(dir.opposite().rotateLeft().rotateLeft()))
+                    rc.digDirt(dir.opposite().rotateLeft().rotateLeft());
+        		else if(rc.canDigDirt(dir.opposite().rotateRight().rotateRight()))
+                    rc.digDirt(dir.opposite().rotateRight().rotateRight());
         		else if(rc.canDigDirt(dir.opposite().rotateLeft()))
                     rc.digDirt(dir.opposite().rotateLeft());
-        		else if(rc.canDigDirt(dir.opposite().rotateRight()))
-                    rc.digDirt(dir.opposite().rotateRight());
         	}
         	else {
         		if(rc.getDirtCarrying() > 0)
                     rc.depositDirt(Direction.CENTER);
-        		else if(rc.canDigDirt(dir.opposite()))
-                    rc.digDirt(dir.opposite());
+        		else if(rc.canDigDirt(dir.opposite().rotateLeft().rotateLeft()))
+                    rc.digDirt(dir.opposite().rotateLeft().rotateLeft());
+        		else if(rc.canDigDirt(dir.opposite().rotateRight().rotateRight()))
+                    rc.digDirt(dir.opposite().rotateRight().rotateRight());
         		else if(rc.canDigDirt(dir.opposite().rotateLeft()))
                     rc.digDirt(dir.opposite().rotateLeft());
-        		else if(rc.canDigDirt(dir.opposite().rotateRight()))
-                    rc.digDirt(dir.opposite().rotateRight());
         	}
         }
         else if (at.distanceSquaredTo(home) == 1) {	
