@@ -895,21 +895,21 @@ public strictfp class RobotPlayer {
     }
 
     static boolean isHQFull(MapLocation at) throws GameActionException{
-        if(rc.onTheMap(HQ.add(Direction.NORTH)) && !rc.isLocationOccupied(HQ.add(Direction.NORTH))){
+        if(rc.onTheMap(HQ.add(Direction.NORTH)) && rc.canSenseLocation(HQ.add(Direction.NORTH)) &&!rc.isLocationOccupied(HQ.add(Direction.NORTH))){
             return false;
-        }else if(rc.onTheMap(HQ.add(Direction.NORTHEAST)) && !rc.isLocationOccupied(HQ.add(Direction.NORTHEAST))){
+        }else if(rc.onTheMap(HQ.add(Direction.NORTHEAST)) && rc.canSenseLocation(HQ.add(Direction.NORTHEAST)) && !rc.isLocationOccupied(HQ.add(Direction.NORTHEAST))){
             return false;
-        }else if(rc.onTheMap(HQ.add(Direction.NORTHWEST)) && !rc.isLocationOccupied(HQ.add(Direction.NORTHWEST))){
+        }else if(rc.onTheMap(HQ.add(Direction.NORTHWEST)) && rc.canSenseLocation(HQ.add(Direction.NORTHWEST)) &&!rc.isLocationOccupied(HQ.add(Direction.NORTHWEST))){
             return false;
-        }else if(rc.onTheMap(HQ.add(Direction.SOUTH)) && !rc.isLocationOccupied(HQ.add(Direction.SOUTH))){
+        }else if(rc.onTheMap(HQ.add(Direction.SOUTH)) && rc.canSenseLocation(HQ.add(Direction.SOUTH)) &&!rc.isLocationOccupied(HQ.add(Direction.SOUTH))){
             return false;
-        }else if(rc.onTheMap(HQ.add(Direction.SOUTHEAST)) && !rc.isLocationOccupied(HQ.add(Direction.SOUTHEAST))){
+        }else if(rc.onTheMap(HQ.add(Direction.SOUTHEAST)) && rc.canSenseLocation(HQ.add(Direction.SOUTHEAST)) &&!rc.isLocationOccupied(HQ.add(Direction.SOUTHEAST))){
             return false;
-        }else if(rc.onTheMap(HQ.add(Direction.SOUTHWEST)) && !rc.isLocationOccupied(HQ.add(Direction.SOUTHWEST))){
+        }else if(rc.onTheMap(HQ.add(Direction.SOUTHWEST)) && rc.canSenseLocation(HQ.add(Direction.SOUTHWEST)) &&!rc.isLocationOccupied(HQ.add(Direction.SOUTHWEST))){
             return false;
-        }else if(rc.onTheMap(HQ.add(Direction.WEST)) && !rc.isLocationOccupied(HQ.add(Direction.WEST))){
+        }else if(rc.onTheMap(HQ.add(Direction.WEST)) && rc.canSenseLocation(HQ.add(Direction.WEST)) &&!rc.isLocationOccupied(HQ.add(Direction.WEST))){
             return false;
-        }else if(rc.onTheMap(HQ.add(Direction.EAST)) && !rc.isLocationOccupied(HQ.add(Direction.EAST))){
+        }else if(rc.onTheMap(HQ.add(Direction.EAST)) && rc.canSenseLocation(HQ.add(Direction.EAST)) &&!rc.isLocationOccupied(HQ.add(Direction.EAST))){
             return false;
         }
         return true;
