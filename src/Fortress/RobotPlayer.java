@@ -822,9 +822,9 @@ public strictfp class RobotPlayer {
         			break;
         		}
         	}
-        	if(rc.isReady()) {
-        		task = "terraform";
-        	}
+//        	if(rc.isReady()) {
+//        		task = "terraform";
+//        	}
         }
         else if(rc.canDigDirt(dir) && rc.getDirtCarrying() < 25) {
         	rc.digDirt(dir);
