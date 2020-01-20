@@ -96,7 +96,7 @@ public strictfp class RobotPlayer {
         if(rc.getType() == RobotType.DELIVERY_DRONE){
             if(rc.getRoundNum() < 150){
                 task = "scout";
-            }else if(rc.getRoundNum() < 200) {
+            }else if(rc.getRoundNum() < 200 && rc.getRoundNum() > 200) {
                 task = "hover";
             }
             else{
@@ -617,7 +617,7 @@ public strictfp class RobotPlayer {
     }
     //Builds Drones
     static void runFulfillmentCenter() throws GameActionException {
-        if(robotsBuilt < 1 && rc.getRoundNum() < 200 && rc.getTeamSoup() > 200) {
+        if(robotsBuilt < 1 && rc.getRoundNum() < 150 && rc.getTeamSoup() > 149) {
             for (Direction dir : randomDirections())
                 if (rc.canBuildRobot(RobotType.DELIVERY_DRONE, dir)) {
 //                    broadcastQueue.add(new Information(0,1,1));
@@ -626,14 +626,14 @@ public strictfp class RobotPlayer {
                     rc.buildRobot(RobotType.DELIVERY_DRONE,dir);
 //                    break;
                 }
-        }else if(rc.getRoundNum() < 600 && robotsBuilt < 13){
+        }else if(rc.getRoundNum() < 200 && rc.getRoundNum() > 150 && robotsBuilt < 2){
             for (Direction dir : randomDirections()) {
                 if (rc.canBuildRobot(RobotType.DELIVERY_DRONE, dir)) {
                     robotsBuilt++;
                     rc.buildRobot(RobotType.DELIVERY_DRONE, dir);
                 }
             }
-        }else{
+        }else if(rc.getRoundNum() > 300){
             for (Direction dir : randomDirections()) {
                 if (rc.canBuildRobot(RobotType.DELIVERY_DRONE, dir)) {
                     robotsBuilt++;
