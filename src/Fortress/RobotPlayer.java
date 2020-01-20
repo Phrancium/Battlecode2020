@@ -372,7 +372,11 @@ public strictfp class RobotPlayer {
             if(ned < diss){
                 diss = ned;
                 o = n;
+                if (diss<25){
+                    return o;
+                }
             }
+
         }
         return o;
     }
