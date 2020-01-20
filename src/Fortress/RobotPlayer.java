@@ -46,6 +46,7 @@ public strictfp class RobotPlayer {
 
     /**MapLocation arrays containing all the relevent MapLocations **/
 
+    static Direction randomInitialDirection;
 
     static MapLocation water;
     static ArrayList<MapLocation> soup = new ArrayList<>();
@@ -107,6 +108,7 @@ public strictfp class RobotPlayer {
 //        }
 
         initialLoc = rc.getLocation();
+        randomInitialDirection=randomDirection();
 //        System.out.println("INITIAL LOCATION IS: " + initialLoc);
 
         //fill up dirHash 1:Direction.NORTH, etc
@@ -269,7 +271,9 @@ public strictfp class RobotPlayer {
         else {
             if (soup.isEmpty()){
                 //scout in an expanding circle starting at HQ
-                scoutMiner(curr);
+                //scoutMiner(curr);
+                moveTo(curr.add(randomInitialDirection));
+
             }
             else{
                 souploc= getClosestSoup(curr);
