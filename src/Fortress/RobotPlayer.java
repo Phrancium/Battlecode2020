@@ -967,7 +967,7 @@ public strictfp class RobotPlayer {
             scan(at);
             Team enemy = rc.getTeam().opponent();
                 if(rc.isCurrentlyHoldingUnit()) {
-                    if(heldUnit.getType() == RobotType.MINER) {
+                    if(heldUnit.getType() == RobotType.MINER && heldUnit.getTeam() == rc.getTeam()) {
                         for (Direction g : directions) {
                             if (rc.canDropUnit(g) && at.add(g).distanceSquaredTo(HQ) > 8) {
                                 rc.dropUnit(g);
