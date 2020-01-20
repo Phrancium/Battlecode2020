@@ -221,7 +221,7 @@ public strictfp class RobotPlayer {
             HQ = getHQLocation();
 //            refineries.add(HQ);
         }
-        openEyes(curr);
+        boolean stay = openEyes(curr);
         //build design school
 //        System.out.println("robots built: "+ robotsBuilt);
         if(rc.getTeamSoup() > 200 && curr.isAdjacentTo(HQ)){
@@ -261,16 +261,14 @@ public strictfp class RobotPlayer {
         if (souploc != null && rc.getSoupCarrying() < 96){
             mineSoup();
         }
-        //MOVE BACK TO HQ AND DEPOSIT SOUP (todo: implement refineries)
+        //MOVE BACK TO HQ AND DEPOSIT SOUP
         else if (rc.getSoupCarrying() > 95){
             for (Direction dir : directions){
                 if(rc.canDepositSoup(dir)){
                     rc.depositSoup(dir, rc.getSoupCarrying());
                 }
             }
-            if(getClosestRefine(curr) == null) {
-                moveTo(HQ);
-            }else{
+            if(!stay && curr.distanceSquaredTo(HQ) > 81) {
                 moveTo(getClosestRefine(curr));
             }
         }
@@ -288,7 +286,7 @@ public strictfp class RobotPlayer {
         }
 
     }
-    static void openEyes(MapLocation loc) throws GameActionException{
+    static boolean openEyes(MapLocation loc) throws GameActionException{
         HashMap<Integer, ArrayList<MapLocation>> news = new HashMap<>();
         for(int i = 1; i < 6; i++){
             news.put(i, new ArrayList<MapLocation>());
@@ -322,14 +320,16 @@ public strictfp class RobotPlayer {
                 factoriesBuilt++;
             }
         }
-            if ((refineries.isEmpty() && totS > 1) || (totS > 200 && loc.distanceSquaredTo(getClosestRefine(loc)) > 81)) {
-                for (Direction d : directions) {
-                    if (rc.canBuildRobot(RobotType.REFINERY, d) && loc.add(d).distanceSquaredTo(HQ) > 8) {
-                        refineries.add(loc.add(d));
-                        rc.buildRobot(RobotType.REFINERY, d);
-                    }
+        if ((refineries.isEmpty() && totS > 1) || (totS > 200 && loc.distanceSquaredTo(getClosestRefine(loc)) > 81)) {
+            for (Direction d : directions) {
+                if (rc.canBuildRobot(RobotType.REFINERY, d) && loc.add(d).distanceSquaredTo(HQ) > 8) {
+                    refineries.add(loc.add(d));
+                    rc.buildRobot(RobotType.REFINERY, d);
                 }
             }
+            return true;
+        }
+        return false;
     }
 
     static MapLocation getClosestRefine( MapLocation m){
