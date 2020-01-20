@@ -214,32 +214,20 @@ public strictfp class RobotPlayer {
         //build design school
 //        System.out.println("robots built: "+ robotsBuilt);
         if (schoolsBuilt < 1) {
-        	MapLocation loc = getHQLocation();
-        	Direction away = curr.directionTo(loc).opposite();
-        	if(rc.canBuildRobot(RobotType.DESIGN_SCHOOL, away)){
-        	    schoolsBuilt++;
-                tryBuild(RobotType.DESIGN_SCHOOL, away);
-            }else if(rc.canBuildRobot(RobotType.DESIGN_SCHOOL, away.rotateLeft())) {
-                schoolsBuilt++;
-                tryBuild(RobotType.DESIGN_SCHOOL, away.rotateLeft());
-            }else if(rc.canBuildRobot(RobotType.DESIGN_SCHOOL, away.rotateRight())){
-                schoolsBuilt++;
-                tryBuild(RobotType.DESIGN_SCHOOL, away.rotateRight());
+        	for(Direction d : directions) {
+                if (rc.canBuildRobot(RobotType.DESIGN_SCHOOL, d) && curr.add(d).distanceSquaredTo(HQ) > 8) {
+                    schoolsBuilt++;
+                    tryBuild(RobotType.DESIGN_SCHOOL, d);
+                }
             }
         }
 
         if (factoriesBuilt < 1) {
-            MapLocation loc = getHQLocation();
-            Direction away = curr.directionTo(loc).opposite();
-            if(rc.canBuildRobot(RobotType.FULFILLMENT_CENTER, away)){
-                factoriesBuilt++;
-                tryBuild(RobotType.FULFILLMENT_CENTER, away);
-            }else if(rc.canBuildRobot(RobotType.FULFILLMENT_CENTER, away.rotateLeft())) {
-                factoriesBuilt++;
-                tryBuild(RobotType.FULFILLMENT_CENTER, away.rotateLeft());
-            }else if(rc.canBuildRobot(RobotType.FULFILLMENT_CENTER, away.rotateRight())){
-                factoriesBuilt++;
-                tryBuild(RobotType.FULFILLMENT_CENTER, away.rotateRight());
+            for(Direction d : directions) {
+                if (rc.canBuildRobot(RobotType.FULFILLMENT_CENTER, d) && curr.add(d).distanceSquaredTo(HQ) > 8) {
+                    factoriesBuilt++;
+                    tryBuild(RobotType.FULFILLMENT_CENTER, d);
+                }
             }
         }
         if(rc.getRoundNum() > 400 && rc.getTeamSoup() > 499){
@@ -893,7 +881,7 @@ public strictfp class RobotPlayer {
     //__________________________________________________________________________________________________________________
     //DELIVERY DRONE CODE BELOW
     static void runDeliveryDrone() throws GameActionException {
-        if(rc.getRoundNum() > 1500){
+        if(rc.getRoundNum() > 1500 && !task.equals("defend")){
             task = "crunch";
         }
         if(task.equals("scout")){
@@ -902,11 +890,7 @@ public strictfp class RobotPlayer {
             }
             MapLocation loc = rc.getLocation();
             updateBroadcast(scan(loc));
-            if(EnemyHQ == null){
-                findEnemyHQ(loc);
-            }else{
                 scout(loc);
-            }
 
         }
         if(task.equals("defend")){
