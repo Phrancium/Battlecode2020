@@ -234,7 +234,7 @@ public strictfp class RobotPlayer {
         if(rc.getTeamSoup() > 200 && curr.isAdjacentTo(HQ)){
             moveTo(curr.add(curr.directionTo(HQ).opposite()));
         }
-        if (schoolsBuilt < 1 && task=="first3") {
+        if (schoolsBuilt < 1 && task.equals("first3")) {
         	for(Direction d : directions) {
                 if (rc.canBuildRobot(RobotType.DESIGN_SCHOOL, d) && curr.add(d).distanceSquaredTo(HQ) > 8 && curr.add(d).distanceSquaredTo(HQ) < 16) {
                     schoolsBuilt++;
@@ -244,7 +244,7 @@ public strictfp class RobotPlayer {
             }
         }
 
-        if (factoriesBuilt < 1 && task=="first3") {
+        if (factoriesBuilt < 1 && task.equals("first3")) {
             for(Direction d : directions) {
                 if (rc.canBuildRobot(RobotType.FULFILLMENT_CENTER, d) && curr.add(d).distanceSquaredTo(HQ) > 8 && curr.add(d).distanceSquaredTo(HQ) < 64) {
                     factoriesBuilt++;
@@ -642,7 +642,7 @@ public strictfp class RobotPlayer {
                     rc.buildRobot(RobotType.DELIVERY_DRONE,dir);
 //                    break;
                 }
-        }else if(rc.getRoundNum() < 200 && rc.getRoundNum() > 124 && robotsBuilt < 4 && rc.getTeamSoup() > 200){
+        }else if(rc.getRoundNum() < 200 && rc.getRoundNum() > 124 && robotsBuilt < 3 && rc.getTeamSoup() > 200){
             for (Direction dir : randomDirections()) {
                 if (rc.canBuildRobot(RobotType.DELIVERY_DRONE, dir)) {
                     robotsBuilt++;
