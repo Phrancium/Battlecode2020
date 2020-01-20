@@ -877,7 +877,30 @@ public strictfp class RobotPlayer {
         else if (at.distanceSquaredTo(home) == 1) {	
         	MapLocation left = at.add(dir.rotateLeft().rotateLeft());
         	MapLocation right = at.add(dir.rotateRight().rotateRight());
-        	if (rc.onTheMap(left) && rc.senseElevation(left) < rc.senseElevation(at) && rc.onTheMap(right) && rc.senseElevation(left) < rc.senseElevation(right) &&  ((rc.getRoundNum() > 650) || rc.senseElevation(left)<3)) {
+        	MapLocation dleft = at.add(dir.rotateLeft());
+        	MapLocation dright = at.add(dir.rotateRight());
+        	
+        	if (rc.onTheMap(dleft) && (rc.getRoundNum() > 650) || rc.senseElevation(dleft)<3) {
+        		if(rc.getDirtCarrying() > 0)
+                    rc.depositDirt(at.directionTo(dleft));
+        		else if(rc.canDigDirt(dir.opposite()))
+                    rc.digDirt(dir.opposite());
+        		else if(rc.canDigDirt(dir.opposite().rotateLeft()))
+                    rc.digDirt(dir.opposite().rotateLeft());
+        		else if(rc.canDigDirt(dir.opposite().rotateRight()))
+                    rc.digDirt(dir.opposite().rotateRight());
+        	}
+        	else if(rc.onTheMap(dright) && (rc.getRoundNum() > 650) || rc.senseElevation(dright)<3) {
+        		if(rc.getDirtCarrying() > 0)
+                    rc.depositDirt(at.directionTo(dright));
+        		else if(rc.canDigDirt(dir.opposite()))
+                    rc.digDirt(dir.opposite());
+        		else if(rc.canDigDirt(dir.opposite().rotateLeft()))
+                    rc.digDirt(dir.opposite().rotateLeft());
+        		else if(rc.canDigDirt(dir.opposite().rotateRight()))
+                    rc.digDirt(dir.opposite().rotateRight());
+        	}
+        	if (rc.onTheMap(left) && rc.senseElevation(left) < rc.senseElevation(at) && rc.onTheMap(right) && rc.senseElevation(left) < rc.senseElevation(right) && ((rc.getRoundNum() > 650) || rc.senseElevation(left)<3)) {
         		if(rc.getDirtCarrying() > 0)
                     rc.depositDirt(at.directionTo(left));
         		else if(rc.canDigDirt(dir.opposite()))
