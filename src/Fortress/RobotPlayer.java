@@ -672,7 +672,6 @@ public strictfp class RobotPlayer {
 //                    robotsBuilt++;
 //                }
 //        }
-    }
 
     /**
      * Attempts to build a given robot in a given direction.
@@ -935,7 +934,7 @@ public strictfp class RobotPlayer {
     //__________________________________________________________________________________________________________________
     //DELIVERY DRONE CODE BELOW
     static void runDeliveryDrone() throws GameActionException {
-        if(rc.getRoundNum() > 1500 && !task.equals("defend")){
+        if(rc.getRoundNum() > 1000 && !task.equals("defend")){
             task = "crunch";
         }if(rc.getRoundNum() > 800 && task.equals("hover")){
             task = "defend";
