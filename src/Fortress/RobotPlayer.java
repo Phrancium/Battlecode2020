@@ -60,6 +60,7 @@ public strictfp class RobotPlayer {
     static ArrayList<MapLocation> irWater = new ArrayList<>();
     static ArrayList<MapLocation> irSoup = new ArrayList<>();
     static boolean checkHQ = true;
+    static int initialRound;
 
     //__________________________________________________________________________________________________________________
     //RUN CODE BELOW
@@ -108,6 +109,7 @@ public strictfp class RobotPlayer {
 //        }
 
         initialLoc = rc.getLocation();
+        initialRound=rc.getRoundNum();
         randomInitialDirection=randomDirection();
 //        System.out.println("INITIAL LOCATION IS: " + initialLoc);
 
@@ -117,6 +119,9 @@ public strictfp class RobotPlayer {
         }
         //System.out.println(dirHash);
 
+        for (int i = 0; i < 11; i++) {
+            receiveBroadcast(initialRound - i);
+        }
         //System.out.println("I'm a " + rc.getType() + " and I just got created!");
         while (true) {
             turnCount += 1;
@@ -166,7 +171,7 @@ public strictfp class RobotPlayer {
                 }
             }
         }
-        if(robotsBuilt < 6 && defenseUp(base)){
+        if(robotsBuilt < 6){
             for (Direction dir : directions) {
                 if(tryBuild(RobotType.MINER, dir)) {
                     robotsBuilt++;
@@ -272,8 +277,7 @@ public strictfp class RobotPlayer {
             if (soup.isEmpty()){
                 //scout in an expanding circle starting at HQ
                 //scoutMiner(curr);
-                moveTo(curr.add(randomInitialDirection));
-
+                scout(curr);
             }
             else{
                 souploc= getClosestSoup(curr);
@@ -283,6 +287,10 @@ public strictfp class RobotPlayer {
 
     }
     static void openEyes(MapLocation loc) throws GameActionException{
+        HashMap<Integer, ArrayList<MapLocation>> news = new HashMap<>();
+        for(int i = 1; i < 6; i++){
+            news.put(i, new ArrayList<MapLocation>());
+        }
 
         if(souploc != null && rc.canSenseLocation(souploc)){
             if(rc.senseSoup(souploc) == 0){
@@ -290,16 +298,12 @@ public strictfp class RobotPlayer {
                 souploc = null;
             }
         }
-
-//        int selfX = loc.x;
-//        int selfY = loc.y;
-//        int x = 0;
-//        int y = 0;
         MapLocation[] miso = rc.senseNearbySoup();
         int totS = 0;
         for(MapLocation m : miso) {
             if (!soup.contains(m)) {
                     soup.add(m);
+                    news.get(2).add(m);
             }
             if(rc.canSenseLocation(m)) {
                 totS += rc.senseSoup(m);
@@ -326,42 +330,6 @@ public strictfp class RobotPlayer {
                 }
             }
         }
-//        while( Math.abs(x) < 6 || Math.abs(y) < 6){
-//            MapLocation n = new MapLocation(selfX + x, selfY + y);
-//            if(rc.onTheMap(n) && rc.canSenseLocation(n)){
-//                if(rc.senseSoup(n) > 0) {
-//                    if(!soup.contains(n)){
-//                        soup.add(n);
-//                        if(soup.size() >= 2){
-//                            x = 6;
-//                            y = 6;
-//                        }
-//                    }
-//                }
-//            }
-//            if( x >= 0 && y >= 0 && x == y){
-//                x += 1;
-//            }else if(x > 0 && Math.abs(x) > Math.abs(y)){
-//                y -= 1;
-//            }else if(x > 0 && y < 0 && Math.abs(x) == Math.abs(y)){
-//                x -= 1;
-//            }else if(y < 0 && Math.abs(x) < Math.abs(y)){
-//                x -= 1;
-//            }else if(x < 0 && y < 0 && Math.abs(x) == Math.abs(y)){
-//                y += 1;
-//            }else if(x < 0 && Math.abs(x) > Math.abs(y)){
-//                y += 1;
-//            }else if(x < 0 && y > 0 && Math.abs(x) == Math.abs(y)){
-//                x += 1;
-//            }else if(y > 0 && Math.abs(y) > Math.abs(x)){
-//                x += 1;
-//            }
-//            System.out.println("["+x+","+y+"]");
-////            if(x == 0 && y == -1){
-////                x = 6;
-////                y = 6;
-////            }
-//        }
     }
 
     static MapLocation getClosestRefine( MapLocation m){
@@ -432,75 +400,76 @@ public strictfp class RobotPlayer {
     }
 
     static void scoutMiner(MapLocation at) throws GameActionException {
-        if (scoutDest == null) {
-            int q = quadrantIn(HQ);
-            if(q == 1){
-                scoutDest = new MapLocation(rc.getMapWidth(), rc.getMapHeight());
-            }else if(q == 2){
-                scoutDest = new MapLocation(1, rc.getMapHeight());
-            }else if(q == 3){
-                scoutDest = new MapLocation(1, 1);
-            }else if(q == 4){
-                scoutDest = new MapLocation(rc.getMapWidth(), 1);
-            }
-        }
-        int xAdd = rc.getMapWidth() / 6;
-        int yAdd = rc.getMapHeight() / 6;
-        if (at.distanceSquaredTo(scoutDest) < 16) {
-            int q = quadrantIn(scoutDest);
-            if (q == 1) {
-                MapLocation newDest = new MapLocation(at.x, rc.getMapHeight() - at.y);
-                if (!scouted.contains(newDest)) {
-                    scoutDest = new MapLocation(at.x, rc.getMapHeight() - at.y + yAdd);
-                    if (rc.onTheMap(scoutDest)) {
-                        scouted.add(scoutDest);
-                    } else {
-                        scoutDest = HQ;
-                        scouted = new ArrayList<>();
-                    }
-                }
-            } else if (q == 2) {
-                MapLocation newDest = new MapLocation(rc.getMapWidth() - at.x, at.y);
-                if (!scouted.contains(newDest)) {
-                    scoutDest = new MapLocation(rc.getMapWidth() - at.x - xAdd, at.y);
-                    if (rc.onTheMap(scoutDest)) {
-                        scouted.add(scoutDest);
-                    } else {
-                        scoutDest = HQ;
-                        scouted = new ArrayList<>();
-                    }
-                }
-            } else if (q == 3) {
-                MapLocation newDest = new MapLocation(at.x, rc.getMapHeight() - at.y);
-                if (!scouted.contains(newDest)) {
-                    scoutDest = new MapLocation(at.x, rc.getMapHeight() - at.y - yAdd);
-                    if (rc.onTheMap(scoutDest)) {
-                        scouted.add(scoutDest);
-                    } else {
-                        scoutDest = HQ;
-                        scouted = new ArrayList<>();
-                    }
-                }
-            } else if (q == 4) {
-                MapLocation newDest = new MapLocation(rc.getMapWidth() - at.x, at.y);
-                if (!scouted.contains(newDest)) {
-                    scoutDest = new MapLocation(rc.getMapWidth() - at.x + xAdd, at.y);
-                    if (rc.onTheMap(scoutDest)) {
-                        scouted.add(scoutDest);
-                    } else {
-                        scoutDest = HQ;
-                        scouted = new ArrayList<>();
-                    }
-                }
-            }
-        }
-        if(isPath(at, scoutDest)) {
-            moveTo(scoutDest);
-        }else{
-            scoutDest = HQ;
-            scouted.add(scoutDest);
-            moveTo(scoutDest);
-        }
+//        if (scoutDest == null) {
+//            int q = quadrantIn(HQ);
+//            if(q == 1){
+//                scoutDest = new MapLocation(rc.getMapWidth(), rc.getMapHeight());
+//            }else if(q == 2){
+//                scoutDest = new MapLocation(1, rc.getMapHeight());
+//            }else if(q == 3){
+//                scoutDest = new MapLocation(1, 1);
+//            }else if(q == 4){
+//                scoutDest = new MapLocation(rc.getMapWidth(), 1);
+//            }
+//        }
+//        int xAdd = rc.getMapWidth() / 6;
+//        int yAdd = rc.getMapHeight() / 6;
+//        if (at.distanceSquaredTo(scoutDest) < 16) {
+//            int q = quadrantIn(scoutDest);
+//            if (q == 1) {
+//                MapLocation newDest = new MapLocation(at.x, rc.getMapHeight() - at.y);
+//                if (!scouted.contains(newDest)) {
+//                    scoutDest = new MapLocation(at.x, rc.getMapHeight() - at.y + yAdd);
+//                    if (rc.onTheMap(scoutDest)) {
+//                        scouted.add(scoutDest);
+//                    } else {
+//                        scoutDest = HQ;
+//                        scouted = new ArrayList<>();
+//                    }
+//                }
+//            } else if (q == 2) {
+//                MapLocation newDest = new MapLocation(rc.getMapWidth() - at.x, at.y);
+//                if (!scouted.contains(newDest)) {
+//                    scoutDest = new MapLocation(rc.getMapWidth() - at.x - xAdd, at.y);
+//                    if (rc.onTheMap(scoutDest)) {
+//                        scouted.add(scoutDest);
+//                    } else {
+//                        scoutDest = HQ;
+//                        scouted = new ArrayList<>();
+//                    }
+//                }
+//            } else if (q == 3) {
+//                MapLocation newDest = new MapLocation(at.x, rc.getMapHeight() - at.y);
+//                if (!scouted.contains(newDest)) {
+//                    scoutDest = new MapLocation(at.x, rc.getMapHeight() - at.y - yAdd);
+//                    if (rc.onTheMap(scoutDest)) {
+//                        scouted.add(scoutDest);
+//                    } else {
+//                        scoutDest = HQ;
+//                        scouted = new ArrayList<>();
+//                    }
+//                }
+//            } else if (q == 4) {
+//                MapLocation newDest = new MapLocation(rc.getMapWidth() - at.x, at.y);
+//                if (!scouted.contains(newDest)) {
+//                    scoutDest = new MapLocation(rc.getMapWidth() - at.x + xAdd, at.y);
+//                    if (rc.onTheMap(scoutDest)) {
+//                        scouted.add(scoutDest);
+//                    } else {
+//                        scoutDest = HQ;
+//                        scouted = new ArrayList<>();
+//                    }
+//                }
+//            }
+//        }
+//        if(isPath(at, scoutDest)) {
+//            moveTo(scoutDest);
+//        }else{
+//            scoutDest = HQ;
+//            scouted.add(scoutDest);
+//            moveTo(scoutDest);
+//        }
+        moveTo(at.add(randomInitialDirection));
 
     }
 
@@ -649,8 +618,12 @@ public strictfp class RobotPlayer {
     static void runFulfillmentCenter() throws GameActionException {
         if(robotsBuilt < 8 && rc.getTeamSoup() > 201) {
             for (Direction dir : directions)
-                if (tryBuild(RobotType.DELIVERY_DRONE, dir)) {
+                if (rc.canBuildRobot(RobotType.DELIVERY_DRONE, dir)) {
+                    broadcastQueue.add(new Information(0,1,1));
+                    tryBroadcast(1);
                     robotsBuilt++;
+                    rc.buildRobot(RobotType.DELIVERY_DRONE,dir);
+                    break;
                 }
         }
 //        if(robotsBuilt < 20) {
@@ -964,7 +937,7 @@ public strictfp class RobotPlayer {
                     rc.pickUpUnit(z.getID());
                 }
             }
-            moveToDrone(EnemyHQ);
+            moveToCrunch(EnemyHQ);
         }
         if (task.equals("killEnemy")){
             MapLocation at = rc.getLocation();
@@ -1403,6 +1376,38 @@ public strictfp class RobotPlayer {
         }
     }
 
+    static void moveToCrunch(MapLocation dest) throws GameActionException{
+        //Find general direction of destination
+        MapLocation loc = rc.getLocation();
+        Direction moveDirection = loc.directionTo(dest);
+
+        //See if general direction is valid
+        if(rc.canMove(moveDirection)){
+            path = moveDirection.opposite();
+            tryMoveD(moveDirection);
+        }else if(rc.canMove(moveDirection.rotateLeft())){
+            path = moveDirection.rotateLeft().opposite();
+            tryMoveD(moveDirection.rotateLeft());
+        }else if(rc.canMove(moveDirection.rotateRight())) {
+            path = moveDirection.rotateRight().opposite();
+            tryMoveD(moveDirection.rotateRight());
+        }else if(rc.canMove(moveDirection.rotateLeft())){
+            path = moveDirection.rotateLeft().rotateLeft().opposite();
+            tryMoveD(moveDirection.rotateLeft().rotateLeft());
+        }else if(rc.canMove(moveDirection.rotateRight().rotateRight())) {
+            path = moveDirection.rotateRight().rotateRight().opposite();
+            tryMoveD(moveDirection.rotateRight().rotateRight());
+        }else if(rc.canMove(moveDirection.rotateLeft().rotateLeft().rotateLeft())) {
+            path = moveDirection.rotateLeft().rotateLeft().rotateLeft().opposite();
+            tryMoveD(moveDirection.rotateLeft().rotateLeft().rotateLeft());
+        }else if(rc.canMove(moveDirection.rotateRight().rotateRight().rotateRight())){
+            path = moveDirection.rotateRight().rotateRight().rotateRight().opposite();
+            tryMoveD(moveDirection.rotateRight().rotateRight().rotateRight());
+        } else{
+            tryMoveD(path);
+        }
+    }
+
     static boolean netGunInRange(MapLocation move){
 //        System.out.println(oppNet);
 //        System.out.println(EnemyHQ);
@@ -1705,7 +1710,11 @@ public strictfp class RobotPlayer {
                         if(x==0 && y==0 && rc.getType()==RobotType.DELIVERY_DRONE) {
                             task="crunch";
                         }
-                        break;
+                        else if (round-initialRound <= 10 &&  x==1 && y==1 && rc.getType()==RobotType.DELIVERY_DRONE) {
+                            task="scout";
+                        }
+                            break;
+
                     case 1:
                         EnemyHQ=next;
                         break;
