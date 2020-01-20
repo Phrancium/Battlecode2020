@@ -92,8 +92,10 @@ public strictfp class RobotPlayer {
         }
         //drone task determiner
         if(rc.getType() == RobotType.DELIVERY_DRONE){
-            if(rc.getRoundNum() < 100){
-                task = "scout";
+            if(rc.getRoundNum() < 10){
+                for (int i = 0; i < 11; i++) {
+                    receiveBroadcast(initialRound - i);
+                }
             }else{
                 task = "killEnemy";
             }
@@ -119,9 +121,7 @@ public strictfp class RobotPlayer {
         }
         //System.out.println(dirHash);
 
-        for (int i = 0; i < 11; i++) {
-            receiveBroadcast(initialRound - i);
-        }
+
         //System.out.println("I'm a " + rc.getType() + " and I just got created!");
         while (true) {
             turnCount += 1;
