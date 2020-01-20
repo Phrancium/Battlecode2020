@@ -971,7 +971,7 @@ public strictfp class RobotPlayer {
 
             if(rc.isCurrentlyHoldingUnit()){
                 for(Direction g : directions){
-                    if(rc.senseFlooding(at.add(g))){
+                    if(rc.senseFlooding(loc.add(g))){
                         rc.dropUnit(g);
                     }
                 }
