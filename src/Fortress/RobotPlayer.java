@@ -697,6 +697,9 @@ public strictfp class RobotPlayer {
         		bury(i.getLocation(), at);
         	}
         }
+        if(at.distanceSquaredTo(home) <= 2) {
+        	task = "castle";
+        }
         if(at.distanceSquaredTo(home) <= 8) {
         	zergRush(at.add(dir.opposite()));
         }
