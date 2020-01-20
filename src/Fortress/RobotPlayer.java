@@ -612,7 +612,7 @@ public strictfp class RobotPlayer {
                 if (tryBuild(RobotType.LANDSCAPER, dir)) {
                     robotsBuilt++;
                 }
-        }else if(robotsBuilt < 8 && rc.getRoundNum() >= 400 && rc.getTeamSoup() > 200){
+        }else if(robotsBuilt < 8 && rc.getRoundNum() >= 400 && rc.getTeamSoup() > 150){
             for (Direction dir : directions)
 
                 if (tryBuild(RobotType.LANDSCAPER, dir)) {
@@ -645,7 +645,7 @@ public strictfp class RobotPlayer {
                     rc.buildRobot(RobotType.DELIVERY_DRONE, dir);
                 }
             }
-        }**/else if(rc.getRoundNum() > 249){
+        }**/else if(rc.getRoundNum() > 249 && rc.getTeamSoup() > 155){
             for (Direction dir : randomDirections()) {
                 if (rc.canBuildRobot(RobotType.DELIVERY_DRONE, dir)) {
                     robotsBuilt++;
