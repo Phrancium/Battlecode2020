@@ -166,7 +166,7 @@ public strictfp class RobotPlayer {
                 }
             }
         }
-        if(robotsBuilt < 6 && defenseUp(base)){
+        if(robotsBuilt < 6){
             for (Direction dir : directions) {
                 if(tryBuild(RobotType.MINER, dir)) {
                     robotsBuilt++;
