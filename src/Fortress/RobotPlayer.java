@@ -626,7 +626,7 @@ public strictfp class RobotPlayer {
                     rc.buildRobot(RobotType.DELIVERY_DRONE,dir);
 //                    break;
                 }
-        }else if(rc.getRoundNum() < 300 && rc.getRoundNum() > 150 && robotsBuilt < 3 && rc.getTeamSoup() > 200){
+        }else if(rc.getRoundNum() < 300 && rc.getRoundNum() > 150 && robotsBuilt < 2 && rc.getTeamSoup() > 200){
             for (Direction dir : randomDirections()) {
                 if (rc.canBuildRobot(RobotType.DELIVERY_DRONE, dir)) {
                     robotsBuilt++;
