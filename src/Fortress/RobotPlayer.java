@@ -216,7 +216,7 @@ public strictfp class RobotPlayer {
 //        System.out.println("robots built: "+ robotsBuilt);
         if (schoolsBuilt < 1) {
         	for(Direction d : directions) {
-                if (rc.canBuildRobot(RobotType.DESIGN_SCHOOL, d) && curr.add(d).distanceSquaredTo(HQ) > 8) {
+                if (rc.canBuildRobot(RobotType.DESIGN_SCHOOL, d) && curr.add(d).distanceSquaredTo(HQ) > 8 && curr.add(d).distanceSquaredTo(HQ) < 64) {
                     schoolsBuilt++;
                     tryBuild(RobotType.DESIGN_SCHOOL, d);
                 }
