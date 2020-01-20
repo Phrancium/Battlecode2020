@@ -39,6 +39,7 @@ public strictfp class RobotPlayer {
     static  MapLocation HQ;
     static MapLocation scoutDest;
     static MapLocation mapCenter;
+    static RobotInfo heldUnit;
     static ArrayList<MapLocation> scouted = new ArrayList<>();
 
     static int robotsBuilt;
@@ -934,6 +935,62 @@ public strictfp class RobotPlayer {
             MapLocation at = rc.getLocation();
             scan(at);
             Team enemy = rc.getTeam().opponent();
+            if(rc.getRoundNum() > 400 && rc.getRoundNum() < 500){
+                if(rc.isCurrentlyHoldingUnit()) {
+                    if(heldUnit.getTeam() == rc.getTeam()) {
+                        for (Direction g : directions) {
+                            if (rc.canDropUnit(g) && at.add(g).distanceSquaredTo(HQ) > 8) {
+                                rc.dropUnit(g);
+                            }
+                        }
+                        moveToDrone(at.add(at.directionTo(HQ).opposite()));
+                    }else
+                    if (water != null) {
+                        if (at.isAdjacentTo(water) && rc.canDropUnit(at.directionTo(water))) {
+                            rc.dropUnit(at.directionTo(water));
+                        }
+                        if (rc.senseFlooding(at) && rc.canDropUnit(Direction.CENTER)) {
+                            rc.dropUnit(Direction.CENTER);
+                        }
+                        for (Direction g : directions) {
+                            if (rc.senseFlooding(at.add(g)) && rc.canDropUnit(g)) {
+                                rc.dropUnit(g);
+                            }
+                        }
+                        moveToDrone(water);
+                    } else {
+                        scout(at);
+                    }
+                }else {
+                    RobotInfo[] nearbyEnemies = rc.senseNearbyRobots(rc.getCurrentSensorRadiusSquared(), enemy);
+                    RobotInfo[] nearbyFriendlies = rc.senseNearbyRobots(rc.getCurrentSensorRadiusSquared(), rc.getTeam());
+                    ArrayList<RobotInfo> nearbyRobots = new ArrayList<>();
+                    for(RobotInfo r : nearbyEnemies){
+                        if((r.getType() == RobotType.MINER || r.getType() == RobotType.LANDSCAPER) && quadrantIn(r.getLocation()) == quadrantIn(HQ)) {
+                            nearbyRobots.add(r);
+                        }
+                    }
+                    for(RobotInfo r : nearbyFriendlies){
+                        if(quadrantIn(r.getLocation()) == quadrantIn(HQ) && r.getType() == RobotType.MINER && r.getLocation().isAdjacentTo(HQ)) {
+                            nearbyRobots.add(r);
+                        }
+                    }
+                    if (nearbyEnemies.length > 0) {
+                        for (RobotInfo targetEnemy : nearbyEnemies) {
+                            int enemyID = targetEnemy.getID();
+                            if (rc.canPickUpUnit(targetEnemy.getID())) {
+                                heldUnit = targetEnemy;
+                                rc.pickUpUnit(targetEnemy.getID());
+                            }
+                        }
+                        moveToDrone(closestEnemyRobot(at, nearbyRobots));
+
+                    }else{
+                        moveToDrone(HQ);
+                    }
+                }
+                }
+
             if(at.distanceSquaredTo(HQ) < 16){
                 checkHQ = false;
             }
