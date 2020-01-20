@@ -922,7 +922,7 @@ public strictfp class RobotPlayer {
             task = "crunch";
         }
         if(task.equals("scout")){
-            if(rc.getRoundNum()%4 == 0){
+            if(rc.getRoundNum()%4 == 0 || broadcastQueue.size()>11){
                 tryBroadcast(1);
             }
             MapLocation loc = rc.getLocation();
