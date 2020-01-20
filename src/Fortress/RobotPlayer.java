@@ -832,7 +832,7 @@ public strictfp class RobotPlayer {
         else if (at.distanceSquaredTo(home) > 1) {	
         	MapLocation left = at.add(dir.rotateLeft());
         	MapLocation right = at.add(dir.rotateRight());
-        	if (rc.onTheMap(left) && (rc.senseElevation(left) < rc.senseElevation(at)) && rc.onTheMap(right) && rc.senseElevation(left) < rc.senseElevation(right) && rc.getRoundNum() > 600) {
+        	if (rc.onTheMap(left) && (rc.senseElevation(left) < rc.senseElevation(at)) && rc.onTheMap(right) && rc.senseElevation(left) < rc.senseElevation(right) && ((rc.getRoundNum() > 650) || rc.senseElevation(left)<3)) {
         		if(rc.getDirtCarrying() > 0)
                     rc.depositDirt(at.directionTo(left));
         		else if(rc.canDigDirt(dir.opposite()))
@@ -842,7 +842,7 @@ public strictfp class RobotPlayer {
         		else if(rc.canDigDirt(dir.opposite().rotateRight()))
                     rc.digDirt(dir.opposite().rotateRight());
         	}
-        	else if(rc.onTheMap(right) && rc.senseElevation(right) < rc.senseElevation(at) && rc.getRoundNum() > 600) {
+        	else if(rc.onTheMap(right) && rc.senseElevation(right) < rc.senseElevation(at) && ((rc.getRoundNum() > 650) || rc.senseElevation(right)<3)) {
         		if(rc.getDirtCarrying() > 0)
                     rc.depositDirt(at.directionTo(right));
         		else if(rc.canDigDirt(dir.opposite()))
@@ -866,7 +866,7 @@ public strictfp class RobotPlayer {
         else if (at.distanceSquaredTo(home) == 1) {	
         	MapLocation left = at.add(dir.rotateLeft().rotateLeft());
         	MapLocation right = at.add(dir.rotateRight().rotateRight());
-        	if (rc.onTheMap(left) && rc.senseElevation(left) < rc.senseElevation(at) && rc.onTheMap(right) && rc.senseElevation(left) < rc.senseElevation(right) &&  rc.getRoundNum() > 600) {
+        	if (rc.onTheMap(left) && rc.senseElevation(left) < rc.senseElevation(at) && rc.onTheMap(right) && rc.senseElevation(left) < rc.senseElevation(right) &&  ((rc.getRoundNum() > 650) || rc.senseElevation(left)<3)) {
         		if(rc.getDirtCarrying() > 0)
                     rc.depositDirt(at.directionTo(left));
         		else if(rc.canDigDirt(dir.opposite()))
@@ -876,7 +876,7 @@ public strictfp class RobotPlayer {
         		else if(rc.canDigDirt(dir.opposite().rotateRight()))
                     rc.digDirt(dir.opposite().rotateRight());
         	}
-        	else if(rc.onTheMap(right) && rc.senseElevation(right) < rc.senseElevation(at) && rc.getRoundNum() > 600) {
+        	else if(rc.onTheMap(right) && rc.senseElevation(right) < rc.senseElevation(at) && ((rc.getRoundNum() > 650) || rc.senseElevation(right)<3)) {
         		if(rc.getDirtCarrying() > 0)
                     rc.depositDirt(at.directionTo(right));
         		else if(rc.canDigDirt(dir.opposite()))
@@ -1122,16 +1122,82 @@ public strictfp class RobotPlayer {
                     if(rc.senseFlooding(at) && rc.canDropUnit(Direction.CENTER)){
                         rc.dropUnit(Direction.CENTER);
                     }
-                    //for (Direction g : directions) {
-                    //    if (rc.senseFlooding(at.add(g)) && rc.canDropUnit(g)) {
-                    //        rc.dropUnit(g);
-                    //    }
-                    //}
+                    /*
+                    for (Direction g : directions) {
+                        if (rc.senseFlooding(at.add(g)) && rc.canDropUnit(g)) {
+                            rc.dropUnit(g);
+                        }
+                    }
+                    */
                     moveToDrone(water);
                 }else{
                     scout(at);
                 }
             }
+        }
+        if (task.equals("dropCow")){
+            MapLocation at = rc.getLocation();
+            scan(at);
+            Team enemy = rc.getTeam().opponent();
+
+            if(at.distanceSquaredTo(HQ) < 16){
+                checkHQ = false;
+            }
+            if(checkHQ){
+                moveToDrone(HQ);
+            }
+//            System.out.println(EnemyHQ);
+            if (!rc.isCurrentlyHoldingUnit()) {
+//                System.out.println("NOT CARRYING ROBOT");
+                //RobotInfo[] nearbyEnemies = rc.senseNearbyRobots(rc.getCurrentSensorRadiusSquared(), enemy);
+                RobotInfo[] nearbyCows = rc.senseNearbyRobots(rc.getCurrentSensorRadiusSquared(), Team.NEUTRAL);
+                ArrayList<RobotInfo> nearbyRobots = new ArrayList<>();
+                for(RobotInfo r : nearbyCows){
+                    //if(quadrantIn(r.getLocation()) == quadrantIn(HQ)) {
+                        nearbyRobots.add(r);
+                    //}
+                }
+
+                //tryMove(Direction.EAST);
+                //moveToDrone(getEnemyHQLocation());
+
+                // TODO: replace next line with enemy HQ LOC
+                //NOTE: this was tested on CENTRAL LAKE
+
+                if(nearbyRobots.isEmpty()){
+                    scout(at);
+                }
+                else{
+//                    System.out.println("I DETECT ROBOTS: " + nearbyRobots.length);
+                    for (RobotInfo targetEnemy: nearbyRobots){
+                        int enemyID = targetEnemy.getID();
+                        //moveTo(targetEnemy.getLocation().add(rando));
+                        //TODO: make picking up enemies faster and more consistent
+                        if (rc.canPickUpUnit(targetEnemy.getID())) {
+                            rc.pickUpUnit(targetEnemy.getID());
+//                            System.out.println("PICKED UP UNIT");
+                        }
+                    }
+                    moveToDrone(closestEnemyRobot(at, nearbyRobots));
+
+                }
+            }
+            else {
+                if(EnemyHQ != null) {
+                    if(at.distanceSquaredTo(EnemyHQ) < 49 && rc.canDropUnit(Direction.CENTER)){
+                        rc.dropUnit(Direction.CENTER);
+                    }
+                    moveToDrone(EnemyHQ);
+//                        System.out.println("MOVING");
+                }else{
+                    findEnemyHQ(at);
+                    if(at.distanceSquaredTo(EnemyHQ) < 49 && rc.canDropUnit(Direction.CENTER)){
+                        rc.dropUnit(Direction.CENTER);
+                    }
+                }
+
+            }
+
         }
             //tryMove(Direction.EAST);
             //moveTo(getEnemyHQLocation());
