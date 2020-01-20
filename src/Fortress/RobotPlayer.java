@@ -672,11 +672,11 @@ public strictfp class RobotPlayer {
         	}
         }
         if(at.distanceSquaredTo(home) <= 8) {
-        	moveTo(at.add(dir.opposite()));
+        	zergRush(at.add(dir.opposite()));
         }
         if(at.distanceSquaredTo(home) > 8) {
-        	if(digLoc.isEmpty() && at.distanceSquaredTo(home) > 16) {
-        		moveTo(home);
+        	if(digLoc.isEmpty() && at.distanceSquaredTo(home) > 18) {
+        		zergRush(home);
         	}
         	
         	else if(digLoc.isEmpty()) {
@@ -705,7 +705,7 @@ public strictfp class RobotPlayer {
         	
         	if(!dirtFull) {
         		if(at.distanceSquaredTo(digLoc.get(0)) > 2 && at.distanceSquaredTo(home) > 18) {
-        			moveTo(digLoc.get(0));
+        			zergRush(digLoc.get(0));
         		}
         		else if(rc.isReady() && rc.canDigDirt(dir)) {
             		rc.digDirt(dir);
@@ -718,8 +718,8 @@ public strictfp class RobotPlayer {
         		for(int i = 1; i < 7; i++) {
         			if(rc.canSenseLocation(frontRow[i]) && !digLoc.contains(frontRow[i]) && rc.senseElevation(frontRow[i]) > -10) {
         				if(rc.senseElevation(frontRow[i]) < rc.senseElevation(frontRow[0]) && rc.senseRobotAtLocation(frontRow[i]) == null) {
-        					if(at.distanceSquaredTo(frontRow[i]) > 2) {
-        						moveTo(frontRow[i]);
+        					if(at.distanceSquaredTo(frontRow[i]) > 2 && rc.isReady()) {
+        						zergRush(frontRow[i]);
         					}
         					else if(rc.canDepositDirt(at.directionTo(frontRow[i]))){
         						rc.depositDirt(at.directionTo(frontRow[i]));
@@ -728,7 +728,7 @@ public strictfp class RobotPlayer {
         			}
         		}
         		if(rc.canSenseLocation(at.add(dir.opposite()))) {
-        			if(rc.senseElevation(at) - rc.senseElevation(at.add(dir.opposite())) < 3) {
+        			if(rc.senseElevation(at) - rc.senseElevation(at.add(dir.opposite())) < 3 && rc.isReady()) {
         				rc.depositDirt(Direction.CENTER);
         			}
         			else if(rc.isReady()) {
@@ -779,7 +779,7 @@ public strictfp class RobotPlayer {
         	build[i] = home.add(direction[i]);
         }
         if(at.distanceSquaredTo(home) > 16){
-            moveTo(home);
+            zergRush(home);
         }
         else if (at.distanceSquaredTo(home) > 2){
         	for(int i = 0; i < 8; i++) {
@@ -1275,7 +1275,9 @@ public strictfp class RobotPlayer {
             if(rc.getDirtCarrying() == 25){
                 rc.depositDirt(moveDirection.rotateLeft().rotateLeft());
             }
-            rc.digDirt(moveDirection);
+            if(rc.canDigDirt(moveDirection)) {
+            	rc.digDirt(moveDirection);
+            }
         }
 
 //        if(rc.senseFlooding(rc.adjacentLocation(moveDirection)) && rc.senseFlooding(rc.adjacentLocation(moveDirection.rotateLeft())) && rc.senseFlooding(rc.adjacentLocation(moveDirection.rotateRight())) && rc.senseFlooding(rc.adjacentLocation(moveDirection.rotateRight())) && rc.senseFlooding(rc.adjacentLocation(moveDirection.rotateRight())) && rc.senseFlooding(rc.adjacentLocation(moveDirection.rotateRight())) && rc.senseFlooding(rc.adjacentLocation(moveDirection.rotateRight()))) {
