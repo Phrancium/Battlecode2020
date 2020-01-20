@@ -972,7 +972,7 @@ public strictfp class RobotPlayer {
             if(checkHQ){
                 moveToDrone(HQ);
             }
-            System.out.println(EnemyHQ);
+//            System.out.println(EnemyHQ);
             if (!rc.isCurrentlyHoldingUnit()) {
 //                System.out.println("NOT CARRYING ROBOT");
                 RobotInfo[] nearbyEnemies = rc.senseNearbyRobots(rc.getCurrentSensorRadiusSquared(), enemy);
@@ -1098,7 +1098,7 @@ public strictfp class RobotPlayer {
         int myX = at.x;
         int myY = at.y;
         for(RobotInfo i : r){
-            System.out.println(i.getType());
+//            System.out.println(i.getType());
             if(i.getType() == RobotType.NET_GUN && !oppNet.contains(i.getLocation())){
                 oppNet.add(i.getLocation());
                 news.get(5).add(i.getLocation());
@@ -1108,7 +1108,7 @@ public strictfp class RobotPlayer {
                 news.get(3).add(i.getLocation());
             }
             if(i.getType() == RobotType.HQ && EnemyHQ == null){
-                System.out.println("FOUND HQ");
+//                System.out.println("FOUND HQ");
                 EnemyHQ = i.getLocation();
                 oppNet.add(i.getLocation());
                 news.get(1).add(i.getLocation());
