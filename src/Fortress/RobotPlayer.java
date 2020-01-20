@@ -1372,13 +1372,22 @@ public strictfp class RobotPlayer {
 
 
     }
-
+    static MapLocation prevdest=null;
+    static HashSet<MapLocation> prevLocations = new HashSet<>();
     static void moveTo(MapLocation dest) throws GameActionException{
+//        if (!dest.equals(prevdest)){
+//            prevdest=dest;
+//            prevLocations.clear();
+//        }
+
         //Find general direction of destination
         MapLocation loc = rc.getLocation();
         Direction moveDirection = loc.directionTo(dest);
         rc.setIndicatorLine(loc, dest, 0, 0, 0);
         //See if general direction is valid
+
+        //prevLocations.add(loc);
+
         if(canMoveTo(loc, moveDirection)){
             path = moveDirection.opposite();
             tryMove(moveDirection);
@@ -1400,8 +1409,13 @@ public strictfp class RobotPlayer {
         }else if(canMoveTo(loc, moveDirection.rotateRight().rotateRight().rotateRight())) {
             path = moveDirection.rotateRight().rotateRight().rotateRight().opposite();
             tryMove(moveDirection.rotateRight().rotateRight().rotateRight());
+        }else if(canMoveTo(loc, moveDirection.opposite())) {
+            path = moveDirection;
+            tryMove(moveDirection.opposite());
         } else{
+            //prevLocations.remove(loc.add(path));
             tryMove(path);
+
         }
     }
 
