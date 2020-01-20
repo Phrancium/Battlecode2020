@@ -92,10 +92,8 @@ public strictfp class RobotPlayer {
         }
         //drone task determiner
         if(rc.getType() == RobotType.DELIVERY_DRONE){
-            if(rc.getRoundNum() < 10){
-                for (int i = 0; i < 11; i++) {
-                    receiveBroadcast(initialRound - i);
-                }
+            if(rc.getRoundNum() < 140){
+                task = "scout";
             }else{
                 task = "killEnemy";
             }
