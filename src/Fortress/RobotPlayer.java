@@ -107,7 +107,7 @@ public strictfp class RobotPlayer {
 //        }
 
         initialLoc = rc.getLocation();
-        System.out.println("INITIAL LOCATION IS: " + initialLoc);
+//        System.out.println("INITIAL LOCATION IS: " + initialLoc);
 
         //fill up dirHash 1:Direction.NORTH, etc
         for (int i = 0; i < directions.length; i++){
@@ -207,7 +207,7 @@ public strictfp class RobotPlayer {
         }
         openEyes(curr);
         //build design school
-        System.out.println("robots built: "+ robotsBuilt);
+//        System.out.println("robots built: "+ robotsBuilt);
         if (schoolsBuilt < 1) {
         	MapLocation loc = getHQLocation();
         	Direction away = curr.directionTo(loc).opposite();
@@ -978,6 +978,16 @@ public strictfp class RobotPlayer {
                 RobotInfo[] nearbyEnemies = rc.senseNearbyRobots(rc.getCurrentSensorRadiusSquared(), enemy);
                 RobotInfo[] nearbyCows = rc.senseNearbyRobots(rc.getCurrentSensorRadiusSquared(), Team.NEUTRAL);
                 ArrayList<RobotInfo> nearbyRobots = new ArrayList<>();
+                for(RobotInfo r : nearbyEnemies){
+                    if(r.getType() == RobotType.MINER || r.getType() == RobotType.LANDSCAPER) {
+                        nearbyRobots.add(r);
+                    }
+                }
+                for(RobotInfo r : nearbyCows){
+                    if(quadrantIn(r.getLocation()) == quadrantIn(HQ)) {
+                        nearbyRobots.add(r);
+                    }
+                }
 
                 //tryMove(Direction.EAST);
                 //moveToDrone(getEnemyHQLocation());
@@ -985,7 +995,7 @@ public strictfp class RobotPlayer {
                 // TODO: replace next line with enemy HQ LOC
                 //NOTE: this was tested on CENTRAL LAKE
 
-                if(nearbyEnemies.length == 0 && nearbyCows.length == 0){
+                if(nearbyRobots.isEmpty()){
                     if(EnemyHQ != null) {
                         moveToDrone(EnemyHQ);
 //                        System.out.println("MOVING");
@@ -994,23 +1004,18 @@ public strictfp class RobotPlayer {
                     }
                 }
                 else{
-                    for(RobotInfo r : nearbyEnemies){
-                        nearbyRobots.add(r);
-                    }
-                    for(RobotInfo r : nearbyCows){
-                        nearbyRobots.add(r);
-                    }
 //                    System.out.println("I DETECT ROBOTS: " + nearbyRobots.length);
                     for (RobotInfo targetEnemy: nearbyRobots){
                         int enemyID = targetEnemy.getID();
                         //moveTo(targetEnemy.getLocation().add(rando));
                         //TODO: make picking up enemies faster and more consistent
                         if (rc.canPickUpUnit(targetEnemy.getID())) {
-                            rc.pickUpUnit(targetEnemy.getID());
+                                rc.pickUpUnit(targetEnemy.getID());
 //                            System.out.println("PICKED UP UNIT");
                         }
-                        moveToDrone(targetEnemy.getLocation());
                     }
+                    moveToDrone(closestEnemyRobot(at, nearbyRobots));
+
                 }
             }else {
 //                System.out.println("IM CARRYING A ROBOT");
@@ -1069,6 +1074,20 @@ public strictfp class RobotPlayer {
         //     tryMove(randomDirection());
         // }
     }
+
+    static MapLocation closestEnemyRobot(MapLocation at, ArrayList<RobotInfo> m){
+        MapLocation o = null;
+        int diss = 1000000;
+        for (RobotInfo n : m){
+            int ned = at.distanceSquaredTo(n.getLocation());
+            if(ned < diss){
+                diss = ned;
+                o = n.getLocation();
+            }
+        }
+        return o;
+    }
+
     static HashMap<Integer, ArrayList<MapLocation>> scan(MapLocation at) throws GameActionException{
         RobotInfo[] r = rc.senseNearbyRobots(rc.getCurrentSensorRadiusSquared(), rc.getTeam().opponent());
         RobotInfo[] r2d2 = rc.senseNearbyRobots(rc.getCurrentSensorRadiusSquared(), rc.getTeam());
@@ -1078,6 +1097,7 @@ public strictfp class RobotPlayer {
         }
         int myX = at.x;
         int myY = at.y;
+        System.out.println(r.toString());
         for(RobotInfo i : r){
             if(i.getType() == RobotType.NET_GUN && !oppNet.contains(i.getLocation())){
                 oppNet.add(i.getLocation());

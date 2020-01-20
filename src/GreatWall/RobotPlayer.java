@@ -74,7 +74,7 @@ public strictfp class RobotPlayer {
         }
 
         initialLoc = rc.getLocation();
-        System.out.println("INITIAL LOCATION IS: " + initialLoc);
+//        System.out.println("INITIAL LOCATION IS: " + initialLoc);
 
         //fill up dirHash 1:Direction.NORTH, etc
         for (int i = 0; i < directions.length; i++){
@@ -422,7 +422,7 @@ public strictfp class RobotPlayer {
             if (robots.length > 0) {
                 // Pick up a first robot within range
                 rc.pickUpUnit(robots[0].getID());
-                System.out.println("I picked up " + robots[0].getID() + "!");
+//                System.out.println("I picked up " + robots[0].getID() + "!");
             }
         } else {
             // No close robots, so search for robots within sight radius
@@ -500,38 +500,38 @@ public strictfp class RobotPlayer {
         //Find general direction of destination
         MapLocation loc = rc.getLocation();
         Direction moveDirection = loc.directionTo(dest);
-        System.out.println(moveDirection);
+//        System.out.println(moveDirection);
         //See if general direction is valid
         if(rc.canMove(moveDirection)){
-            System.out.println(1);
+//            System.out.println(1);
             path = moveDirection.opposite();
             tryMove(moveDirection);
         }else if(rc.canMove(moveDirection.rotateLeft()) && moveDirection.rotateLeft() != path){
-            System.out.println(2);
+//            System.out.println(2);
             path = moveDirection.rotateLeft().opposite();
             tryMove(moveDirection.rotateLeft());
         }else if(rc.canMove(moveDirection.rotateRight()) && moveDirection.rotateRight() != path) {
-            System.out.println(3);
+//            System.out.println(3);
             path = moveDirection.rotateRight().opposite();
             tryMove(moveDirection.rotateRight());
         }else if(rc.canMove(moveDirection.rotateLeft().rotateLeft()) && moveDirection.rotateLeft().rotateLeft() != path) {
-            System.out.println(4);
+//            System.out.println(4);
             path = moveDirection.rotateLeft().rotateLeft().opposite();
             tryMove(moveDirection.rotateLeft().rotateLeft());
         }else if(rc.canMove(moveDirection.rotateRight().rotateRight()) && moveDirection.rotateRight().rotateRight() != path) {
-            System.out.println(5);
+//            System.out.println(5);
             path = moveDirection.rotateRight().rotateRight().opposite();
             tryMove(moveDirection.rotateRight().rotateRight());
         }else if(rc.canMove(moveDirection.rotateLeft().rotateLeft().rotateLeft()) && moveDirection.rotateLeft().rotateLeft().rotateLeft() != path) {
-            System.out.println(6);
+//            System.out.println(6);
             path = moveDirection.rotateLeft().rotateLeft().rotateLeft().opposite();
             tryMove(moveDirection.rotateLeft().rotateLeft().rotateLeft());
         }else if(rc.canMove(moveDirection.rotateRight().rotateRight().rotateRight()) && moveDirection.rotateRight().rotateRight().rotateRight() != path) {
-            System.out.println(7);
+//            System.out.println(7);
             path = moveDirection.rotateRight().rotateRight().rotateRight().opposite();
             tryMove(moveDirection.rotateRight().rotateRight().rotateRight());
         } else{
-            System.out.println(8);
+//            System.out.println(8);
             tryMove(randomDirection());
         }
     }
@@ -624,7 +624,7 @@ public strictfp class RobotPlayer {
     					int[] message = block[i].getMessage();
     					if(message[1] == 123121 && message[2] == 2) {
     						location = new MapLocation(message[3], message[4]);
-    						System.out.println(location);
+//    						System.out.println(location);
     						return location;
     					}
     				}
@@ -647,7 +647,7 @@ public strictfp class RobotPlayer {
     					int[] message = block[i].getMessage();
     					if(message[1] == 123121 && message[2] == 3) {
     						location = new MapLocation(message[3], message[4]);
-    						System.out.println(location);
+//    						System.out.println(location);
     						return location;
     					}
     				}
@@ -692,7 +692,7 @@ public strictfp class RobotPlayer {
         Direction d = randomDirection();
         for (Direction l : directions) {
             if (rc.canDepositSoup(l)) {
-                System.out.println("I deposited soup");
+//                System.out.println("I deposited soup");
                 rc.depositSoup(l, rc.getSoupCarrying());
             }
         }
