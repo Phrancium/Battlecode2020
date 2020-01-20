@@ -166,7 +166,7 @@ public strictfp class RobotPlayer {
                 }
             }
         }
-        if(robotsBuilt < 8 && turnCount < 300 && defenseUp(base)){
+        if(robotsBuilt < 6 && defenseUp(base)){
             for (Direction dir : directions) {
                 if(tryBuild(RobotType.MINER, dir)) {
                     robotsBuilt++;
@@ -976,7 +976,7 @@ public strictfp class RobotPlayer {
             if(checkHQ){
                 moveToDrone(HQ);
             }
-            System.out.println(EnemyHQ);
+//            System.out.println(EnemyHQ);
             if (!rc.isCurrentlyHoldingUnit()) {
 //                System.out.println("NOT CARRYING ROBOT");
                 RobotInfo[] nearbyEnemies = rc.senseNearbyRobots(rc.getCurrentSensorRadiusSquared(), enemy);
@@ -1101,8 +1101,8 @@ public strictfp class RobotPlayer {
         }
         int myX = at.x;
         int myY = at.y;
-        System.out.println(r.toString());
         for(RobotInfo i : r){
+//            System.out.println(i.getType());
             if(i.getType() == RobotType.NET_GUN && !oppNet.contains(i.getLocation())){
                 oppNet.add(i.getLocation());
                 news.get(5).add(i.getLocation());
