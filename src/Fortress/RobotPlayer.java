@@ -602,7 +602,7 @@ public strictfp class RobotPlayer {
 
     //Builds Landscapers
     static void runDesignSchool() throws GameActionException {
-        if(robotsBuilt < 3 && rc.getRoundNum() < 250 && rc.getTeamSoup() > 150) {
+        if(robotsBuilt < 3 && rc.getRoundNum() < 250 && rc.getTeamSoup() > 155) {
             for (Direction dir : directions)
                 if (tryBuild(RobotType.LANDSCAPER, dir)) {
                     robotsBuilt++;
