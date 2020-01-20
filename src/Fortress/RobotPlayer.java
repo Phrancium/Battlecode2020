@@ -225,7 +225,7 @@ public strictfp class RobotPlayer {
 
         if (factoriesBuilt < 1) {
             for(Direction d : directions) {
-                if (rc.canBuildRobot(RobotType.FULFILLMENT_CENTER, d) && curr.add(d).distanceSquaredTo(HQ) > 8) {
+                if (rc.canBuildRobot(RobotType.FULFILLMENT_CENTER, d) && curr.add(d).distanceSquaredTo(HQ) > 8 && curr.add(d).distanceSquaredTo(HQ) < 64) {
                     factoriesBuilt++;
                     tryBuild(RobotType.FULFILLMENT_CENTER, d);
                 }
@@ -308,10 +308,9 @@ public strictfp class RobotPlayer {
             }
         }
 
-        if(totS > 200 && (refineries.isEmpty()|| loc.distanceSquaredTo(getClosestRefine(loc)) > 81)){
-
+        if((totS > 200 && loc.distanceSquaredTo(getClosestRefine(loc)) > 81) || (refineries.size() == 1 && totS > 1)){
             for(Direction d : directions) {
-                if(rc.canBuildRobot(RobotType.REFINERY, d)) {
+                if(rc.canBuildRobot(RobotType.REFINERY, d) && loc.add(d).distanceSquaredTo(HQ) > 15) {
                     refineries.add(loc.add(d));
                     rc.buildRobot(RobotType.REFINERY, d);
                 }
@@ -589,7 +588,12 @@ public strictfp class RobotPlayer {
 
     //Builds Landscapers
     static void runDesignSchool() throws GameActionException {
-        if(robotsBuilt < 16) {
+        if(robotsBuilt < 8 && rc.getRoundNum() < 200) {
+            for (Direction dir : directions)
+                if (tryBuild(RobotType.LANDSCAPER, dir)) {
+                    robotsBuilt++;
+                }
+        }else if(rc.getRoundNum() > 200){
             for (Direction dir : directions)
                 if (tryBuild(RobotType.LANDSCAPER, dir)) {
                     robotsBuilt++;
