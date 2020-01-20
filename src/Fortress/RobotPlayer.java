@@ -1574,6 +1574,7 @@ public strictfp class RobotPlayer {
             path = moveDirection;
             tryMoveD(moveDirection.opposite());
         } else{
+            prevLocations.remove(loc.add(path));
             tryMoveD(path);
         }
     }
@@ -1610,6 +1611,7 @@ public strictfp class RobotPlayer {
             path = moveDirection.rotateRight().rotateRight().rotateRight().opposite();
             tryMoveD(moveDirection.rotateRight().rotateRight().rotateRight());
         } else{
+            prevLocations.remove(loc.add(path));
             tryMoveD(path);
         }
     }
@@ -1650,6 +1652,7 @@ public strictfp class RobotPlayer {
             path = moveDirection;
             tryMoveD(moveDirection.opposite());
         } else{
+            prevLocations.remove(loc.add(path));
             tryMoveD(path);
         }
     }
