@@ -1077,10 +1077,6 @@ public strictfp class RobotPlayer {
                         nearbyRobots.add(r);
                     }
                 }
-
-                //tryMove(Direction.EAST);
-                //moveToDrone(getEnemyHQLocation());
-
                 // TODO: replace next line with enemy HQ LOC
                 //NOTE: this was tested on CENTRAL LAKE
 
@@ -1108,28 +1104,7 @@ public strictfp class RobotPlayer {
                 }
             }
             else {
-//                System.out.println("IM CARRYING A ROBOT");
-                //tryMoveD(Direction.SOUTH);
-//                outerloop:
-//                for (int i = 0; i <= 6; i += 2) {
-//                    //TODO: use map to find water
-//                    Direction dir = directions[i];
-//                    MapLocation adj = rc.adjacentLocation(dir);
-//                    while (rc.onTheMap(adj)) {
-//                        if (rc.senseFlooding(adj)) {
-//                            if (rc.canDropUnit(dir)) {
-//                                rc.dropUnit(dir);
-//                                System.out.println("DROPPED ENEMY INTO WATER");
-//                                break outerloop;
-//
-//                            }
-//                        }
-//                        tryMoveD(dir);
-//                        adj = rc.adjacentLocation(dir);
-//                    }
-//
-//                }
-                if (water != null) {
+                if (water != null || rc.senseFlooding(at)) {
                     if (at.isAdjacentTo(water) && rc.canDropUnit(at.directionTo(water))) {
                         rc.dropUnit(at.directionTo(water));
                     }
