@@ -7,6 +7,7 @@ import com.sun.org.apache.xml.internal.utils.res.XResourceBundle;
 import java.awt.*;
 import java.lang.reflect.Array;
 import java.util.*;
+import java.util.List;
 
 public strictfp class RobotPlayer {
     static RobotController rc;
@@ -164,14 +165,14 @@ public strictfp class RobotPlayer {
             }
         }
     	if (rc.getRoundNum() < 20) {
-            for (Direction dir : directions) {
+            for (Direction dir : randomDirections()) {
                 if(tryBuild(RobotType.MINER, dir)) {
                     robotsBuilt++;
                 }
             }
         }
         if(robotsBuilt < 6){
-            for (Direction dir : directions) {
+            for (Direction dir : randomDirections()) {
                 if(tryBuild(RobotType.MINER, dir)) {
                     robotsBuilt++;
                 }
@@ -595,6 +596,7 @@ public strictfp class RobotPlayer {
                 }
         }else if(robotsBuilt < 12 && rc.getRoundNum() > 200){
             for (Direction dir : directions)
+
                 if (tryBuild(RobotType.LANDSCAPER, dir)) {
                     robotsBuilt++;
                 }
@@ -603,7 +605,7 @@ public strictfp class RobotPlayer {
     //Builds Drones
     static void runFulfillmentCenter() throws GameActionException {
         if(robotsBuilt < 1 && rc.getRoundNum() < 200) {
-            for (Direction dir : directions)
+            for (Direction dir : randomDirections())
                 if (rc.canBuildRobot(RobotType.DELIVERY_DRONE, dir)) {
 //                    broadcastQueue.add(new Information(0,1,1));
 //                    tryBroadcast(1);
@@ -612,14 +614,14 @@ public strictfp class RobotPlayer {
 //                    break;
                 }
         }else if(rc.getRoundNum() < 600 && robotsBuilt < 13){
-            for (Direction dir : directions) {
+            for (Direction dir : randomDirections()) {
                 if (rc.canBuildRobot(RobotType.DELIVERY_DRONE, dir)) {
                     robotsBuilt++;
                     rc.buildRobot(RobotType.DELIVERY_DRONE, dir);
                 }
             }
         }else{
-            for (Direction dir : directions) {
+            for (Direction dir : randomDirections()) {
                 if (rc.canBuildRobot(RobotType.DELIVERY_DRONE, dir)) {
                     robotsBuilt++;
                     rc.buildRobot(RobotType.DELIVERY_DRONE, dir);
@@ -1816,6 +1818,15 @@ public strictfp class RobotPlayer {
                 return 1;
             }
         }
+    }
+
+    static Direction[] randomDirections(){
+        List<Direction> intList = Arrays.asList(directions);
+
+        Collections.shuffle(intList);
+
+         return intList.toArray(new Direction[0]);
+
     }
 
     static void commandDroneAttack(int cost) throws GameActionException{
