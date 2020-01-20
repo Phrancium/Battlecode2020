@@ -989,7 +989,7 @@ public strictfp class RobotPlayer {
                                 rc.dropUnit(g);
                             }
                         }
-                        moveToDrone(water);
+                        moveToDroneHover(water);
                     } else {
                         scout(at);
                     }
@@ -1015,8 +1015,7 @@ public strictfp class RobotPlayer {
                                     rc.pickUpUnit(targetEnemy.getID());
                                 }
                             }
-                            moveToDrone(closestEnemyRobot(at, nearbyRobots));
-
+                            moveToDroneHover(closestEnemyRobot(at, nearbyRobots));
                         }
                         if (!isHQFull(at)) {
                             for(RobotInfo r : nearbyFriendlies){
