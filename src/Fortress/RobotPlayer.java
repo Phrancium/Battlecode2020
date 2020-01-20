@@ -299,10 +299,10 @@ public strictfp class RobotPlayer {
 
     }
     static boolean openEyes(MapLocation loc) throws GameActionException{
-        HashMap<Integer, ArrayList<MapLocation>> news = new HashMap<>();
-        for(int i = 1; i < 6; i++){
-            news.put(i, new ArrayList<MapLocation>());
-        }
+//        HashMap<Integer, ArrayList<MapLocation>> news = new HashMap<>();
+//        for(int i = 1; i < 6; i++){
+//            news.put(i, new ArrayList<MapLocation>());
+//        }
 
         if(souploc != null && rc.canSenseLocation(souploc)){
             if(rc.senseSoup(souploc) == 0){
@@ -315,7 +315,9 @@ public strictfp class RobotPlayer {
         for(MapLocation m : miso) {
             if (!soup.contains(m) && soup.size() < 6) {
                     soup.add(m);
-                    news.get(2).add(m);
+                    if (soup.size()==1){
+                        addAndBroadcast(new Information(2,m.x,m.y));
+                    }
             }
             if(rc.canSenseLocation(m)) {
                 totS += rc.senseSoup(m);
