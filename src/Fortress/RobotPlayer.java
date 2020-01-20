@@ -959,9 +959,10 @@ public strictfp class RobotPlayer {
     static void runDeliveryDrone() throws GameActionException {
         if(rc.getRoundNum() > 1000 && !task.equals("defend")){
             task = "crunch";
-        }if(rc.getRoundNum() > 800 && task.equals("hover")){
-            task = "defend";
         }
+//        if(rc.getRoundNum() > 800 && task.equals("hover")){
+//            task = "defend";
+//        }
         if(task.equals("scout")){
             if(rc.getRoundNum()%4 == 0 || broadcastQueue.size()>11){
                 tryBroadcast(1);
