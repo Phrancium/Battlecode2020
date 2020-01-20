@@ -996,6 +996,7 @@ public strictfp class RobotPlayer {
                         for(RobotInfo r : nearbyFriendlies){
                             if(r.getType() == RobotType.LANDSCAPER && !r.getLocation().isAdjacentTo(HQ)){
                                 if(rc.canPickUpUnit(r.getID())){
+                                    heldUnit = r;
                                     rc.pickUpUnit(r.getID());
                                 }
                                 else{
@@ -1017,8 +1018,8 @@ public strictfp class RobotPlayer {
                                 nearbyRobots.add(r);
                             }
                         }
-                        if (nearbyEnemies.length > 0) {
-                            for (RobotInfo targetEnemy : nearbyEnemies) {
+                        if (nearbyRobots.size() > 0) {
+                            for (RobotInfo targetEnemy : nearbyRobots) {
                                 int enemyID = targetEnemy.getID();
                                 if (rc.canPickUpUnit(targetEnemy.getID())) {
                                     heldUnit = targetEnemy;
@@ -1027,9 +1028,9 @@ public strictfp class RobotPlayer {
                             }
                             moveToDrone(closestEnemyRobot(at, nearbyRobots));
 
-                        } else {
-                            moveToDroneHover(HQ);
                         }
+                            moveToDroneHover(HQ);
+
                     }
                 }
         }
