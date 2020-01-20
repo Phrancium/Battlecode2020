@@ -602,12 +602,12 @@ public strictfp class RobotPlayer {
 
     //Builds Landscapers
     static void runDesignSchool() throws GameActionException {
-        if(robotsBuilt < 3 && rc.getRoundNum() < 250 && rc.getTeamSoup() > 200) {
+        if(robotsBuilt < 3 && rc.getRoundNum() < 250) {
             for (Direction dir : directions)
                 if (tryBuild(RobotType.LANDSCAPER, dir)) {
                     robotsBuilt++;
                 }
-        }else if(robotsBuilt < 12 && rc.getRoundNum() > 200){
+        }else if(robotsBuilt < 12 && rc.getRoundNum() > 200 && rc.getTeamSoup() > 200){
             for (Direction dir : directions)
 
                 if (tryBuild(RobotType.LANDSCAPER, dir)) {
@@ -617,7 +617,7 @@ public strictfp class RobotPlayer {
     }
     //Builds Drones
     static void runFulfillmentCenter() throws GameActionException {
-        if(robotsBuilt < 1 && rc.getRoundNum() < 150 && rc.getTeamSoup() > 149) {
+        if(robotsBuilt < 1 && rc.getRoundNum() < 150) {
             for (Direction dir : randomDirections())
                 if (rc.canBuildRobot(RobotType.DELIVERY_DRONE, dir)) {
 //                    broadcastQueue.add(new Information(0,1,1));
@@ -626,14 +626,14 @@ public strictfp class RobotPlayer {
                     rc.buildRobot(RobotType.DELIVERY_DRONE,dir);
 //                    break;
                 }
-        }else if(rc.getRoundNum() < 200 && rc.getRoundNum() > 150 && robotsBuilt < 2){
+        }else if(rc.getRoundNum() < 200 && rc.getRoundNum() > 150 && robotsBuilt < 2 && rc.getTeamSoup() > 200){
             for (Direction dir : randomDirections()) {
                 if (rc.canBuildRobot(RobotType.DELIVERY_DRONE, dir)) {
                     robotsBuilt++;
                     rc.buildRobot(RobotType.DELIVERY_DRONE, dir);
                 }
             }
-        }else if(rc.getRoundNum() > 300){
+        }else if(rc.getRoundNum() > 300  && rc.getTeamSoup() > 200){
             for (Direction dir : randomDirections()) {
                 if (rc.canBuildRobot(RobotType.DELIVERY_DRONE, dir)) {
                     robotsBuilt++;
