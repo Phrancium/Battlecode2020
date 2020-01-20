@@ -926,7 +926,7 @@ public strictfp class RobotPlayer {
             }
             MapLocation loc = rc.getLocation();
             updateBroadcast(scan(loc));
-                scout(loc);
+            scout(loc);
 
         }
         if(task.equals("defend")){
@@ -1087,7 +1087,8 @@ public strictfp class RobotPlayer {
                     moveToDrone(closestEnemyRobot(at, nearbyRobots));
 
                 }
-            }else {
+            }
+            else {
 //                System.out.println("IM CARRYING A ROBOT");
                 //tryMoveD(Direction.SOUTH);
 //                outerloop:
@@ -1116,11 +1117,11 @@ public strictfp class RobotPlayer {
                     if(rc.senseFlooding(at) && rc.canDropUnit(Direction.CENTER)){
                         rc.dropUnit(Direction.CENTER);
                     }
-                    for (Direction g : directions) {
-                        if (rc.senseFlooding(at.add(g)) && rc.canDropUnit(g)) {
-                            rc.dropUnit(g);
-                        }
-                    }
+                    //for (Direction g : directions) {
+                    //    if (rc.senseFlooding(at.add(g)) && rc.canDropUnit(g)) {
+                    //        rc.dropUnit(g);
+                    //    }
+                    //}
                     moveToDrone(water);
                 }else{
                     scout(at);
@@ -1743,7 +1744,6 @@ public strictfp class RobotPlayer {
         }
         moveToDrone(enHQDest);
     }
-    
 
     static PriorityQueue<Information> broadcastQueue = new PriorityQueue<>();
 
