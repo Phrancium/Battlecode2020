@@ -969,7 +969,7 @@ public strictfp class RobotPlayer {
                             }
                         }
                         moveToDrone(at.add(at.directionTo(HQ).opposite()));
-                    }else if(heldUnit.getType() == RobotType.LANDSCAPER){
+                    }else if(heldUnit.getType() == RobotType.LANDSCAPER && heldUnit.getTeam() == rc.getTeam().opponent()){
                         for (Direction g : directions) {
                             if (rc.canDropUnit(g) && at.add(g).isAdjacentTo(HQ)) {
                                 rc.dropUnit(g);
