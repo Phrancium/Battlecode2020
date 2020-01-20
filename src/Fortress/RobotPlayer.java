@@ -276,8 +276,8 @@ public strictfp class RobotPlayer {
         else {
             if (soup.isEmpty()){
                 //scout in an expanding circle starting at HQ
-                //scoutMiner(curr);
-                scout(curr);
+                scoutMiner(curr);
+                //scout(curr);
             }
             else{
                 souploc= getClosestSoup(curr);
