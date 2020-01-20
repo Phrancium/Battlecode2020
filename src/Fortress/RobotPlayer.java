@@ -1427,9 +1427,12 @@ public strictfp class RobotPlayer {
         //Find general direction of destination
         MapLocation loc = rc.getLocation();
         Direction moveDirection = loc.directionTo(dest);
-
-
-        Direction[] nonoDirections = {Direction.NORTHEAST, Direction.NORTHWEST, Direction.SOUTHEAST, Direction.SOUTHWEST, path};
+        Direction[] nonoDirections;
+        if(loc.distanceSquaredTo(HQ) < 64) {
+            nonoDirections = new Direction[]{path};
+        }else {
+            nonoDirections = new Direction[]{Direction.NORTHEAST, Direction.NORTHWEST, Direction.SOUTHEAST, Direction.SOUTHWEST, path};
+        }
         ArrayList<Direction> ew = new ArrayList<>();
         for( Direction d : nonoDirections){
             ew.add(d);
