@@ -590,7 +590,7 @@ public strictfp class RobotPlayer {
 
     //Builds Landscapers
     static void runDesignSchool() throws GameActionException {
-        if(robotsBuilt < 3 && rc.getRoundNum() < 250) {
+        if(robotsBuilt < 3 && rc.getRoundNum() < 250 && rc.getTeamSoup() > 200) {
             for (Direction dir : directions)
                 if (tryBuild(RobotType.LANDSCAPER, dir)) {
                     robotsBuilt++;
@@ -605,7 +605,7 @@ public strictfp class RobotPlayer {
     }
     //Builds Drones
     static void runFulfillmentCenter() throws GameActionException {
-        if(robotsBuilt < 1 && rc.getRoundNum() < 200) {
+        if(robotsBuilt < 1 && rc.getRoundNum() < 200 && rc.getTeamSoup() > 200) {
             for (Direction dir : randomDirections())
                 if (rc.canBuildRobot(RobotType.DELIVERY_DRONE, dir)) {
 //                    broadcastQueue.add(new Information(0,1,1));
