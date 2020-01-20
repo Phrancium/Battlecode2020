@@ -246,10 +246,15 @@ public strictfp class RobotPlayer {
                 }
             }
         }
-        if(rc.getRoundNum() > 400 && rc.getTeamSoup() > 499){
-            for (Direction dir : directions){
-                if(rc.canBuildRobot(RobotType.VAPORATOR, dir) && curr.add(dir).distanceSquaredTo(HQ) > 8){
-                    rc.buildRobot(RobotType.VAPORATOR, dir);
+        if(rc.getRoundNum() > 200 && rc.getTeamSoup() > 499) {
+            if (curr.distanceSquaredTo(HQ) > 144) {
+                moveTo(HQ);
+            } else {
+
+                for (Direction dir : directions) {
+                    if (rc.canBuildRobot(RobotType.VAPORATOR, dir) && curr.add(dir).distanceSquaredTo(HQ) > 8 && curr.add(dir).distanceSquaredTo(HQ) < 81) {
+                        rc.buildRobot(RobotType.VAPORATOR, dir);
+                    }
                 }
             }
         }
@@ -268,7 +273,7 @@ public strictfp class RobotPlayer {
                     rc.depositSoup(dir, rc.getSoupCarrying());
                 }
             }
-            if(!stay || curr.distanceSquaredTo(HQ) < 81) {
+            if(!stay || curr.distanceSquaredTo(HQ) < 144) {
                 moveTo(getClosestRefine(curr));
             }
         }
@@ -320,7 +325,7 @@ public strictfp class RobotPlayer {
                 factoriesBuilt++;
             }
         }
-        if ((refineries.isEmpty() && totS > 1) || (totS > 200 && loc.distanceSquaredTo(getClosestRefine(loc)) > 121)) {
+        if ((refineries.isEmpty() && totS > 1) || (totS > 200 && loc.distanceSquaredTo(getClosestRefine(loc)) >= 196)) {
             for (Direction d : directions) {
                 if (rc.canBuildRobot(RobotType.REFINERY, d) && loc.add(d).distanceSquaredTo(HQ) > 8) {
                     refineries.add(loc.add(d));
@@ -602,12 +607,12 @@ public strictfp class RobotPlayer {
 
     //Builds Landscapers
     static void runDesignSchool() throws GameActionException {
-        if(robotsBuilt < 3 && rc.getRoundNum() < 250 && rc.getTeamSoup() > 155) {
+        if(robotsBuilt < 4 && rc.getRoundNum() < 400 && rc.getTeamSoup() > 155) {
             for (Direction dir : directions)
                 if (tryBuild(RobotType.LANDSCAPER, dir)) {
                     robotsBuilt++;
                 }
-        }else if(robotsBuilt < 10 && rc.getRoundNum() > 200 && rc.getTeamSoup() > 200){
+        }else if(robotsBuilt < 12 && rc.getRoundNum() >= 400 && rc.getTeamSoup() > 200){
             for (Direction dir : directions)
 
                 if (tryBuild(RobotType.LANDSCAPER, dir)) {
@@ -626,21 +631,21 @@ public strictfp class RobotPlayer {
                     rc.buildRobot(RobotType.DELIVERY_DRONE,dir);
 //                    break;
                 }
-        }else if(rc.getRoundNum() < 300 && rc.getRoundNum() > 150 && robotsBuilt < 2 && rc.getTeamSoup() > 200){
+        }else if(rc.getRoundNum() < 500 && rc.getRoundNum() > 150 && robotsBuilt < 4 && rc.getTeamSoup() > 200){
             for (Direction dir : randomDirections()) {
                 if (rc.canBuildRobot(RobotType.DELIVERY_DRONE, dir)) {
                     robotsBuilt++;
                     rc.buildRobot(RobotType.DELIVERY_DRONE, dir);
                 }
             }
-        }else if(rc.getRoundNum() > 300  && rc.getTeamSoup() > 200 && robotsBuilt < 8){
+        }/**else if(rc.getRoundNum() > 300  && rc.getTeamSoup() > 200 && robotsBuilt < 8){
             for (Direction dir : randomDirections()) {
                 if (rc.canBuildRobot(RobotType.DELIVERY_DRONE, dir)) {
                     robotsBuilt++;
                     rc.buildRobot(RobotType.DELIVERY_DRONE, dir);
                 }
             }
-        }else if(rc.getRoundNum() > 800){
+        }**/else if(rc.getRoundNum() > 800){
             for (Direction dir : randomDirections()) {
                 if (rc.canBuildRobot(RobotType.DELIVERY_DRONE, dir)) {
                     robotsBuilt++;
