@@ -773,7 +773,7 @@ public strictfp class RobotPlayer {
         }
         else if (at.distanceSquaredTo(home) > 2){
         	for(int i = 0; i < 8; i++) {
-        		if(!rc.isLocationOccupied(build[i]) && rc.onTheMap(build[i])) {
+        		if(rc.onTheMap(build[i]) && !rc.isLocationOccupied(build[i])) {
         			moveTo(build[i]);
         			break;
         		}
@@ -788,7 +788,7 @@ public strictfp class RobotPlayer {
         else if (at.distanceSquaredTo(home) > 1) {	
         	MapLocation left = at.add(dir.rotateLeft());
         	MapLocation right = at.add(dir.rotateRight());
-        	if (rc.senseElevation(left) < rc.senseElevation(at) && rc.onTheMap(left) && (rc.senseRobotAtLocation(left).getType().name() == "LANDSCAPER" || rc.getRoundNum() > 600)) {
+        	if (rc.onTheMap(left) && rc.senseElevation(left) < rc.senseElevation(at)  && (rc.senseRobotAtLocation(left).getType().name() == "LANDSCAPER" || rc.getRoundNum() > 600)) {
         		if(rc.getDirtCarrying() > 0)
                     rc.depositDirt(at.directionTo(left));
         		else if(rc.canDigDirt(dir.opposite()))
@@ -798,7 +798,7 @@ public strictfp class RobotPlayer {
         		else if(rc.canDigDirt(dir.opposite().rotateRight()))
                     rc.digDirt(dir.opposite().rotateRight());
         	}
-        	else if(rc.senseElevation(right) < rc.senseElevation(at) && rc.onTheMap(right) && (rc.senseRobotAtLocation(right).getType().name() == "LANDSCAPER" || rc.getRoundNum() > 600)) {
+        	else if(rc.onTheMap(right) && rc.senseElevation(right) < rc.senseElevation(at) && (rc.senseRobotAtLocation(right).getType().name() == "LANDSCAPER" || rc.getRoundNum() > 600)) {
         		if(rc.getDirtCarrying() > 0)
                     rc.depositDirt(at.directionTo(right));
         		else if(rc.canDigDirt(dir.opposite()))
@@ -822,7 +822,7 @@ public strictfp class RobotPlayer {
         else if (at.distanceSquaredTo(home) == 1) {	
         	MapLocation left = at.add(dir.rotateLeft().rotateLeft());
         	MapLocation right = at.add(dir.rotateRight().rotateRight());
-        	if (rc.senseElevation(left) < rc.senseElevation(at) && rc.onTheMap(left) && (rc.senseRobotAtLocation(left).getType().name() == "LANDSCAPER" || rc.getRoundNum() > 600)) {
+        	if (rc.onTheMap(left) && rc.senseElevation(left) < rc.senseElevation(at) && (rc.senseRobotAtLocation(left).getType().name() == "LANDSCAPER" || rc.getRoundNum() > 600)) {
         		if(rc.getDirtCarrying() > 0)
                     rc.depositDirt(at.directionTo(left));
         		else if(rc.canDigDirt(dir.opposite()))
@@ -832,7 +832,7 @@ public strictfp class RobotPlayer {
         		else if(rc.canDigDirt(dir.opposite().rotateRight()))
                     rc.digDirt(dir.opposite().rotateRight());
         	}
-        	else if(rc.senseElevation(right) < rc.senseElevation(at) && rc.onTheMap(right) && (rc.senseRobotAtLocation(right).getType().name() == "LANDSCAPER" || rc.getRoundNum() > 600)) {
+        	else if(rc.onTheMap(right) && rc.senseElevation(right) < rc.senseElevation(at) && (rc.senseRobotAtLocation(right).getType().name() == "LANDSCAPER" || rc.getRoundNum() > 600)) {
         		if(rc.getDirtCarrying() > 0)
                     rc.depositDirt(at.directionTo(right));
         		else if(rc.canDigDirt(dir.opposite()))
