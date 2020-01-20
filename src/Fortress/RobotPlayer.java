@@ -1606,7 +1606,7 @@ public strictfp class RobotPlayer {
     }
     static void moveToDroneHover(MapLocation dest) throws GameActionException{
 
-        if (!dest.equals(prevdest)){
+        if (!dest.equals(prevdest) || (dest==HQ && dest.distanceSquaredTo(rc.getLocation())>30)){
             prevdest=dest;
             prevLocations.clear();
         }
