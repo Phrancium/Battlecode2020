@@ -187,7 +187,7 @@ public strictfp class RobotPlayer {
                     robotsBuilt++;
                 }
             }
-        }else if(robotsBuilt < 6 && rc.getRoundNum() > 150){
+        }else if(robotsBuilt < 6 && rc.getRoundNum() > 150 && rc.getTeamSoup()>204){
             for (Direction dir : randomDirections()) {
                 if(tryBuild(RobotType.MINER, dir)) {
                     robotsBuilt++;
