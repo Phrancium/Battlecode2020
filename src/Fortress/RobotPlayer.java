@@ -92,6 +92,11 @@ public strictfp class RobotPlayer {
         if(rc.getType() == RobotType.LANDSCAPER){
                 task = "castle";
         }
+        if(rc.getType() == RobotType.MINER){
+            if (rc.getRoundNum()<=150){
+                task="first3";
+            }
+        }
         //drone task determiner
         if(rc.getType() == RobotType.DELIVERY_DRONE){
             if(rc.getRoundNum() < 150){
@@ -99,8 +104,10 @@ public strictfp class RobotPlayer {
             }else if(rc.getRoundNum() < 200 && rc.getRoundNum() > 150) {
                 task = "hover";
             }
-            else{
+            else if(rc.getRoundNum() < 600 && rc.getRoundNum() > 199){
                 task = "killEnemy";
+            }else{
+                task = "defend";
             }
 //            task = "crunch";
 //            task = "defend";
@@ -227,7 +234,7 @@ public strictfp class RobotPlayer {
         if(rc.getTeamSoup() > 200 && curr.isAdjacentTo(HQ)){
             moveTo(curr.add(curr.directionTo(HQ).opposite()));
         }
-        if (schoolsBuilt < 1) {
+        if (schoolsBuilt < 1 && task=="first3") {
         	for(Direction d : directions) {
                 if (rc.canBuildRobot(RobotType.DESIGN_SCHOOL, d) && curr.add(d).distanceSquaredTo(HQ) > 8 && curr.add(d).distanceSquaredTo(HQ) < 16) {
                     schoolsBuilt++;
@@ -237,7 +244,7 @@ public strictfp class RobotPlayer {
             }
         }
 
-        if (factoriesBuilt < 1) {
+        if (factoriesBuilt < 1 && task=="first3") {
             for(Direction d : directions) {
                 if (rc.canBuildRobot(RobotType.FULFILLMENT_CENTER, d) && curr.add(d).distanceSquaredTo(HQ) > 8 && curr.add(d).distanceSquaredTo(HQ) < 64) {
                     factoriesBuilt++;
@@ -306,7 +313,7 @@ public strictfp class RobotPlayer {
         MapLocation[] miso = rc.senseNearbySoup();
         int totS = rc.getSoupCarrying();
         for(MapLocation m : miso) {
-            if (!soup.contains(m)) {
+            if (!soup.contains(m) && soup.size() < 6) {
                     soup.add(m);
                     news.get(2).add(m);
             }
@@ -365,7 +372,11 @@ public strictfp class RobotPlayer {
             if(ned < diss){
                 diss = ned;
                 o = n;
+                if (diss<25){
+                    return o;
+                }
             }
+
         }
         return o;
     }
@@ -612,7 +623,7 @@ public strictfp class RobotPlayer {
                 if (tryBuild(RobotType.LANDSCAPER, dir)) {
                     robotsBuilt++;
                 }
-        }else if(robotsBuilt < 8 && rc.getRoundNum() >= 400 && rc.getTeamSoup() > 150){
+        }else if(robotsBuilt < 8 && rc.getRoundNum() >= 300 && rc.getTeamSoup() > 150){
             for (Direction dir : directions)
 
                 if (tryBuild(RobotType.LANDSCAPER, dir)) {
@@ -622,7 +633,7 @@ public strictfp class RobotPlayer {
     }
     //Builds Drones
     static void runFulfillmentCenter() throws GameActionException {
-        if(robotsBuilt < 1 && rc.getRoundNum() < 150) {
+        if(robotsBuilt < 1 && rc.getRoundNum() < 125) {
             for (Direction dir : randomDirections())
                 if (rc.canBuildRobot(RobotType.DELIVERY_DRONE, dir)) {
 //                    broadcastQueue.add(new Information(0,1,1));
@@ -631,7 +642,7 @@ public strictfp class RobotPlayer {
                     rc.buildRobot(RobotType.DELIVERY_DRONE,dir);
 //                    break;
                 }
-        }else if(rc.getRoundNum() < 250 && rc.getRoundNum() > 150 && robotsBuilt < 4 && rc.getTeamSoup() > 200){
+        }else if(rc.getRoundNum() < 200 && rc.getRoundNum() > 124 && robotsBuilt < 4 && rc.getTeamSoup() > 200){
             for (Direction dir : randomDirections()) {
                 if (rc.canBuildRobot(RobotType.DELIVERY_DRONE, dir)) {
                     robotsBuilt++;
@@ -924,7 +935,7 @@ public strictfp class RobotPlayer {
     static void runDeliveryDrone() throws GameActionException {
         if(rc.getRoundNum() > 1500 && !task.equals("defend")){
             task = "crunch";
-        }if(rc.getRoundNum() > 800 && !task.equals("hover")){
+        }if(rc.getRoundNum() > 800 && task.equals("hover")){
             task = "defend";
         }
         if(task.equals("scout")){
