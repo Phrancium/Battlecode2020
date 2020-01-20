@@ -320,7 +320,7 @@ public strictfp class RobotPlayer {
                 factoriesBuilt++;
             }
         }
-        if ((refineries.isEmpty() && totS > 1) || (totS > 200 && loc.distanceSquaredTo(getClosestRefine(loc)) > 81)) {
+        if ((refineries.isEmpty() && totS > 1) || (totS > 200 && loc.distanceSquaredTo(getClosestRefine(loc)) > 121)) {
             for (Direction d : directions) {
                 if (rc.canBuildRobot(RobotType.REFINERY, d) && loc.add(d).distanceSquaredTo(HQ) > 8) {
                     refineries.add(loc.add(d));
