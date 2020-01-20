@@ -60,6 +60,7 @@ public strictfp class RobotPlayer {
     static ArrayList<MapLocation> irWater = new ArrayList<>();
     static ArrayList<MapLocation> irSoup = new ArrayList<>();
     static boolean checkHQ = true;
+    static int initialRound;
 
     //__________________________________________________________________________________________________________________
     //RUN CODE BELOW
@@ -108,6 +109,7 @@ public strictfp class RobotPlayer {
 //        }
 
         initialLoc = rc.getLocation();
+        initialRound=rc.getRoundNum();
         randomInitialDirection=randomDirection();
 //        System.out.println("INITIAL LOCATION IS: " + initialLoc);
 
@@ -117,6 +119,9 @@ public strictfp class RobotPlayer {
         }
         //System.out.println(dirHash);
 
+        for (int i = 0; i < 11; i++) {
+            receiveBroadcast(initialRound - i);
+        }
         //System.out.println("I'm a " + rc.getType() + " and I just got created!");
         while (true) {
             turnCount += 1;
@@ -649,8 +654,12 @@ public strictfp class RobotPlayer {
     static void runFulfillmentCenter() throws GameActionException {
         if(robotsBuilt < 8 && rc.getTeamSoup() > 201) {
             for (Direction dir : directions)
-                if (tryBuild(RobotType.DELIVERY_DRONE, dir)) {
+                if (rc.canBuildRobot(RobotType.DELIVERY_DRONE, dir)) {
+                    broadcastQueue.add(new Information(0,1,1));
+                    tryBroadcast(1);
                     robotsBuilt++;
+                    rc.buildRobot(RobotType.DELIVERY_DRONE,dir);
+                    break;
                 }
         }
 //        if(robotsBuilt < 20) {
@@ -1705,7 +1714,11 @@ public strictfp class RobotPlayer {
                         if(x==0 && y==0 && rc.getType()==RobotType.DELIVERY_DRONE) {
                             task="crunch";
                         }
-                        break;
+                        else if (round-initialRound <= 10 &&  x==1 && y==1 && rc.getType()==RobotType.DELIVERY_DRONE) {
+                            task="scout";
+                        }
+                            break;
+
                     case 1:
                         EnemyHQ=next;
                         break;
