@@ -101,7 +101,7 @@ public strictfp class RobotPlayer {
         if(rc.getType() == RobotType.DELIVERY_DRONE){
             if(rc.getRoundNum() < 150){
                 task = "scout";
-            }else if(rc.getRoundNum() < 200 && rc.getRoundNum() > 150) {
+            }else if(rc.getRoundNum() < 300 && rc.getRoundNum() > 150) {
                 task = "hover";
             }
             else if(rc.getRoundNum() < 600 && rc.getRoundNum() > 199){
