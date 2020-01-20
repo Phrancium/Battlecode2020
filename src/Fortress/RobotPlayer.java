@@ -969,7 +969,7 @@ public strictfp class RobotPlayer {
                             }
                         }
                         moveToDrone(at.add(at.directionTo(HQ).opposite()));
-                    }else if(heldUnit.getType() == RobotType.LANDSCAPER && heldUnit.getTeam() == rc.getTeam().opponent()){
+                    }else if(heldUnit.getType() == RobotType.LANDSCAPER && heldUnit.getTeam() == rc.getTeam()){
                         for (Direction g : directions) {
                             if (rc.canDropUnit(g) && at.add(g).isAdjacentTo(HQ)) {
                                 rc.dropUnit(g);
@@ -978,7 +978,7 @@ public strictfp class RobotPlayer {
                         moveToDroneHover(at.add(at.directionTo(HQ)));
                     }else
                     if (water != null) {
-                        if (at.isAdjacentTo(water) && rc.canDropUnit(at.directionTo(water))) {
+                        if (at.isAdjacentTo(water) && rc.canDropUnit(at.directionTo(water)) && heldUnit.getTeam() != rc.getTeam()) {
                             rc.dropUnit(at.directionTo(water));
                         }
                         if (rc.senseFlooding(at) && rc.canDropUnit(Direction.CENTER)) {
