@@ -1581,7 +1581,7 @@ public strictfp class RobotPlayer {
     static boolean hQInRange(MapLocation move){
 //        System.out.println(oppNet);
 //        System.out.println(EnemyHQ);
-            if(move.distanceSquaredTo(HQ) < 9) {
+            if(move.distanceSquaredTo(HQ) < 4) {
                 return true;
             }
         return false;
