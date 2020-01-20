@@ -92,6 +92,11 @@ public strictfp class RobotPlayer {
         if(rc.getType() == RobotType.LANDSCAPER){
                 task = "castle";
         }
+        if(rc.getType() == RobotType.MINER){
+            if (rc.getRoundNum()<=150){
+                task="first3";
+            }
+        }
         //drone task determiner
         if(rc.getType() == RobotType.DELIVERY_DRONE){
             if(rc.getRoundNum() < 150){
@@ -227,7 +232,7 @@ public strictfp class RobotPlayer {
         if(rc.getTeamSoup() > 200 && curr.isAdjacentTo(HQ)){
             moveTo(curr.add(curr.directionTo(HQ).opposite()));
         }
-        if (schoolsBuilt < 1) {
+        if (schoolsBuilt < 1 && task=="first3") {
         	for(Direction d : directions) {
                 if (rc.canBuildRobot(RobotType.DESIGN_SCHOOL, d) && curr.add(d).distanceSquaredTo(HQ) > 8 && curr.add(d).distanceSquaredTo(HQ) < 16) {
                     schoolsBuilt++;
@@ -237,7 +242,7 @@ public strictfp class RobotPlayer {
             }
         }
 
-        if (factoriesBuilt < 1) {
+        if (factoriesBuilt < 1 && task=="first3") {
             for(Direction d : directions) {
                 if (rc.canBuildRobot(RobotType.FULFILLMENT_CENTER, d) && curr.add(d).distanceSquaredTo(HQ) > 8 && curr.add(d).distanceSquaredTo(HQ) < 64) {
                     factoriesBuilt++;
