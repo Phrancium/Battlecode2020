@@ -100,7 +100,7 @@ public strictfp class RobotPlayer {
                 task = "hover";
             }
             else{
-                task = "dropCow";
+                task = "killEnemy";
             }
 //            task = "crunch";
 //            task = "defend";
