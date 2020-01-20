@@ -210,7 +210,7 @@ public strictfp class RobotPlayer {
         MapLocation curr = rc.getLocation();
         if(HQ == null){
             HQ = getHQLocation();
-            refineries.add(HQ);
+//            refineries.add(HQ);
         }
         openEyes(curr);
         //build design school
@@ -308,20 +308,19 @@ public strictfp class RobotPlayer {
                 factoriesBuilt++;
             }
         }
-
-        if((totS > 200 && loc.distanceSquaredTo(getClosestRefine(loc)) > 81) || (refineries.size() == 1 && totS > 1)){
-            for(Direction d : directions) {
-                if(rc.canBuildRobot(RobotType.REFINERY, d) && loc.add(d).distanceSquaredTo(HQ) > 15) {
-                    refineries.add(loc.add(d));
-                    rc.buildRobot(RobotType.REFINERY, d);
+            if ((refineries.isEmpty() && totS > 1) || (totS > 200 && loc.distanceSquaredTo(getClosestRefine(loc)) > 81)) {
+                for (Direction d : directions) {
+                    if (rc.canBuildRobot(RobotType.REFINERY, d) && loc.add(d).distanceSquaredTo(HQ) > 15) {
+                        refineries.add(loc.add(d));
+                        rc.buildRobot(RobotType.REFINERY, d);
+                    }
                 }
             }
-        }
     }
 
     static MapLocation getClosestRefine( MapLocation m){
         if(refineries.isEmpty()){
-            return null;
+            return HQ;
         }else {
             MapLocation o = null;
             int diss = 1000000;
