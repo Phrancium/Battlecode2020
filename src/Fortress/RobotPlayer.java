@@ -1375,10 +1375,10 @@ public strictfp class RobotPlayer {
     static MapLocation prevdest=null;
     static HashSet<MapLocation> prevLocations = new HashSet<>();
     static void moveTo(MapLocation dest) throws GameActionException{
-//        if (!dest.equals(prevdest)){
-//            prevdest=dest;
-//            prevLocations.clear();
-//        }
+        if (!dest.equals(prevdest)){
+            prevdest=dest;
+            prevLocations.clear();
+        }
 
         //Find general direction of destination
         MapLocation loc = rc.getLocation();
@@ -1386,7 +1386,7 @@ public strictfp class RobotPlayer {
         rc.setIndicatorLine(loc, dest, 0, 0, 0);
         //See if general direction is valid
 
-        //prevLocations.add(loc);
+        prevLocations.add(loc);
 
         if(canMoveTo(loc, moveDirection)){
             path = moveDirection.opposite();
@@ -1413,14 +1413,14 @@ public strictfp class RobotPlayer {
             path = moveDirection;
             tryMove(moveDirection.opposite());
         } else{
-            //prevLocations.remove(loc.add(path));
+            prevLocations.remove(loc.add(path));
             tryMove(path);
 
         }
     }
 
     static boolean canMoveTo(MapLocation m, Direction dir) throws GameActionException{
-        return (rc.canMove(dir) && !rc.senseFlooding(m.add(dir)) && dir != path);
+        return (rc.canMove(dir) && !rc.senseFlooding(m.add(dir)) && dir != path && !prevLocations.contains(m.add(dir)));
     }
 
     static void moveToDrone(MapLocation dest) throws GameActionException{
