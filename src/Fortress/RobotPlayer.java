@@ -272,7 +272,7 @@ public strictfp class RobotPlayer {
             if (soup.isEmpty()){
                 //scout in an expanding circle starting at HQ
                 //scoutMiner(curr);
-                tryMove(randomInitialDirection);
+                moveTo(curr.add(randomInitialDirection));
 
             }
             else{
