@@ -104,8 +104,10 @@ public strictfp class RobotPlayer {
             }else if(rc.getRoundNum() < 200 && rc.getRoundNum() > 150) {
                 task = "hover";
             }
-            else{
+            else if(rc.getRoundNum() < 600 && rc.getRoundNum() > 199){
                 task = "killEnemy";
+            }else{
+                task = "defend";
             }
 //            task = "crunch";
 //            task = "defend";
@@ -311,7 +313,7 @@ public strictfp class RobotPlayer {
         MapLocation[] miso = rc.senseNearbySoup();
         int totS = rc.getSoupCarrying();
         for(MapLocation m : miso) {
-            if (!soup.contains(m)) {
+            if (!soup.contains(m) && soup.size() < 6) {
                     soup.add(m);
                     news.get(2).add(m);
             }
@@ -617,7 +619,7 @@ public strictfp class RobotPlayer {
                 if (tryBuild(RobotType.LANDSCAPER, dir)) {
                     robotsBuilt++;
                 }
-        }else if(robotsBuilt < 8 && rc.getRoundNum() >= 400 && rc.getTeamSoup() > 150){
+        }else if(robotsBuilt < 8 && rc.getRoundNum() >= 300 && rc.getTeamSoup() > 150){
             for (Direction dir : directions)
 
                 if (tryBuild(RobotType.LANDSCAPER, dir)) {
@@ -627,7 +629,7 @@ public strictfp class RobotPlayer {
     }
     //Builds Drones
     static void runFulfillmentCenter() throws GameActionException {
-        if(robotsBuilt < 1 && rc.getRoundNum() < 150) {
+        if(robotsBuilt < 1 && rc.getRoundNum() < 125) {
             for (Direction dir : randomDirections())
                 if (rc.canBuildRobot(RobotType.DELIVERY_DRONE, dir)) {
 //                    broadcastQueue.add(new Information(0,1,1));
@@ -636,7 +638,7 @@ public strictfp class RobotPlayer {
                     rc.buildRobot(RobotType.DELIVERY_DRONE,dir);
 //                    break;
                 }
-        }else if(rc.getRoundNum() < 250 && rc.getRoundNum() > 150 && robotsBuilt < 4 && rc.getTeamSoup() > 200){
+        }else if(rc.getRoundNum() < 200 && rc.getRoundNum() > 124 && robotsBuilt < 4 && rc.getTeamSoup() > 200){
             for (Direction dir : randomDirections()) {
                 if (rc.canBuildRobot(RobotType.DELIVERY_DRONE, dir)) {
                     robotsBuilt++;
@@ -929,7 +931,7 @@ public strictfp class RobotPlayer {
     static void runDeliveryDrone() throws GameActionException {
         if(rc.getRoundNum() > 1500 && !task.equals("defend")){
             task = "crunch";
-        }if(rc.getRoundNum() > 800 && !task.equals("hover")){
+        }if(rc.getRoundNum() > 800 && task.equals("hover")){
             task = "defend";
         }
         if(task.equals("scout")){
