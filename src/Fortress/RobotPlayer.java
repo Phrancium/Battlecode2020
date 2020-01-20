@@ -219,6 +219,7 @@ public strictfp class RobotPlayer {
         	for(Direction d : directions) {
                 if (rc.canBuildRobot(RobotType.DESIGN_SCHOOL, d) && curr.add(d).distanceSquaredTo(HQ) > 8 && curr.add(d).distanceSquaredTo(HQ) < 64) {
                     schoolsBuilt++;
+                    addAndBroadcast(new Information(0,3,3));
                     tryBuild(RobotType.DESIGN_SCHOOL, d);
                 }
             }
@@ -228,6 +229,7 @@ public strictfp class RobotPlayer {
             for(Direction d : directions) {
                 if (rc.canBuildRobot(RobotType.FULFILLMENT_CENTER, d) && curr.add(d).distanceSquaredTo(HQ) > 8 && curr.add(d).distanceSquaredTo(HQ) < 64) {
                     factoriesBuilt++;
+                    addAndBroadcast(new Information(0,4,4));
                     tryBuild(RobotType.FULFILLMENT_CENTER, d);
                 }
             }
@@ -1768,6 +1770,12 @@ public strictfp class RobotPlayer {
                         else if (round-initialRound <= 10 &&  x==1 && y==1 && rc.getType()==RobotType.DELIVERY_DRONE) {
                             task="scout";
                         }
+                        else if (x==3 && y==3 && rc.getType()==RobotType.MINER) {
+                            schoolsBuilt++;
+                        }
+                        else if (x==4 && y==4 && rc.getType()==RobotType.MINER) {
+                            factoriesBuilt++;
+                        }
                             break;
 
                     case 1:
@@ -1831,6 +1839,10 @@ public strictfp class RobotPlayer {
     static void commandDroneAttack(int cost) throws GameActionException{
         broadcastQueue.add(new Information(0, 0,0));
         tryBroadcast(cost);
+    }
+    static void addAndBroadcast(Information i) throws  GameActionException{
+        broadcastQueue.add(i);
+        tryBroadcast(1);
     }
     //__________________________________________________________________________________________________________________
 }
