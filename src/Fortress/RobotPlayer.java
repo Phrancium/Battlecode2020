@@ -4,6 +4,7 @@ import battlecode.common.*;
 import com.sun.org.apache.xml.internal.utils.res.XResourceBundle;
 
 
+import java.awt.*;
 import java.lang.reflect.Array;
 import java.util.*;
 
@@ -89,7 +90,7 @@ public strictfp class RobotPlayer {
         }
         //drone task determiner
         if(rc.getType() == RobotType.DELIVERY_DRONE){
-            if(rc.getRoundNum() < 4){
+            if(rc.getRoundNum() < 100){
                 task = "scout";
             }else{
                 task = "killEnemy";
@@ -146,8 +147,9 @@ public strictfp class RobotPlayer {
     //__________________________________________________________________________________________________________________
     //HQ CODE BELOW
     static void runHQ() throws GameActionException {
-    	if(rc.getRoundNum() == 1) {
-    		postLocation(1, rc.getLocation().x, rc.getLocation().y, 1);
+    	MapLocation base = rc.getLocation();
+        if(rc.getRoundNum() == 1) {
+    		postLocation(1, base.x, base.y, 1);
     	}
     	RobotInfo[] r = rc.senseNearbyRobots();
     	for(RobotInfo s : r){
@@ -162,7 +164,7 @@ public strictfp class RobotPlayer {
                 }
             }
         }
-        if(robotsBuilt < 8 && turnCount < 300){
+        if(robotsBuilt < 8 && turnCount < 300 && defenseUp(base)){
             for (Direction dir : directions) {
                 if(tryBuild(RobotType.MINER, dir)) {
                     robotsBuilt++;
@@ -173,6 +175,19 @@ public strictfp class RobotPlayer {
     	//updateEnemyHQLocation();
         //}
     }
+
+    static boolean defenseUp(MapLocation m) throws GameActionException{
+        int numL = 0;
+        for(Direction d : directions){
+            MapLocation nex = m.add(d);
+            RobotInfo rob =rc.senseRobotAtLocation(nex);
+            if(rob != null && rob.getType() == RobotType.LANDSCAPER){
+                numL++;
+            }
+        }
+        return numL > 3;
+    }
+
     //__________________________________________________________________________________________________________________
     //MINER CODE BELOW
     static void runMiner() throws GameActionException {
@@ -190,54 +205,25 @@ public strictfp class RobotPlayer {
             HQ = getHQLocation();
             refineries.add(HQ);
         }
-        //scanForSoup(curr);
-        //souploc = getSoupLocation();
+        openEyes(curr);
         //build design school
-//        System.out.println("robots built: "+ robotsBuilt);
-//        if (schoolsBuilt < 1 && !scanForDesignSchool()) {
-//        	MapLocation loc = getHQLocation();
-//        	Direction away = curr.directionTo(loc).opposite();
-//        	if(rc.canBuildRobot(RobotType.DESIGN_SCHOOL, away)){
-//        	    schoolsBuilt++;
-//                tryBuild(RobotType.DESIGN_SCHOOL, away);
-//            }else if(rc.canBuildRobot(RobotType.DESIGN_SCHOOL, away.rotateLeft())) {
-//                schoolsBuilt++;
-//                tryBuild(RobotType.DESIGN_SCHOOL, away.rotateLeft());
-//            }else if(rc.canBuildRobot(RobotType.DESIGN_SCHOOL, away.rotateRight())){
-//                schoolsBuilt++;
-//                tryBuild(RobotType.DESIGN_SCHOOL, away.rotateRight());
-//            }
-//        }
-//        if (factoriesBuilt < 1 && !scanForDroneFactory()) {
-//            MapLocation loc = getHQLocation();
-//            Direction away = curr.directionTo(loc).opposite();
-//            if(rc.canBuildRobot(RobotType.FULFILLMENT_CENTER, away)){
-//                factoriesBuilt++;
-//                tryBuild(RobotType.FULFILLMENT_CENTER, away);
-//            }else if(rc.canBuildRobot(RobotType.FULFILLMENT_CENTER, away.rotateLeft())) {
-//                factoriesBuilt++;
-//                tryBuild(RobotType.FULFILLMENT_CENTER, away.rotateLeft());
-//            }else if(rc.canBuildRobot(RobotType.FULFILLMENT_CENTER, away.rotateRight())){
-//                factoriesBuilt++;
-//                tryBuild(RobotType.FULFILLMENT_CENTER, away.rotateRight());
-//            }
-//        }
-//        System.out.println("robots built: "+ robotsBuilt);
-//        if (schoolsBuilt < 1 && !scanForDesignSchool()) {
-//        	MapLocation loc = getHQLocation();
-//        	Direction away = curr.directionTo(loc).opposite();
-//        	if(rc.canBuildRobot(RobotType.DESIGN_SCHOOL, away)){
-//        	    schoolsBuilt++;
-//                tryBuild(RobotType.DESIGN_SCHOOL, away);
-//            }else if(rc.canBuildRobot(RobotType.DESIGN_SCHOOL, away.rotateLeft())) {
-//                schoolsBuilt++;
-//                tryBuild(RobotType.DESIGN_SCHOOL, away.rotateLeft());
-//            }else if(rc.canBuildRobot(RobotType.DESIGN_SCHOOL, away.rotateRight())){
-//                schoolsBuilt++;
-//                tryBuild(RobotType.DESIGN_SCHOOL, away.rotateRight());
-//            }
-//        }
-        if (factoriesBuilt < 1 && !scanForDroneFactory()) {
+        System.out.println("robots built: "+ robotsBuilt);
+        if (schoolsBuilt < 1) {
+        	MapLocation loc = getHQLocation();
+        	Direction away = curr.directionTo(loc).opposite();
+        	if(rc.canBuildRobot(RobotType.DESIGN_SCHOOL, away)){
+        	    schoolsBuilt++;
+                tryBuild(RobotType.DESIGN_SCHOOL, away);
+            }else if(rc.canBuildRobot(RobotType.DESIGN_SCHOOL, away.rotateLeft())) {
+                schoolsBuilt++;
+                tryBuild(RobotType.DESIGN_SCHOOL, away.rotateLeft());
+            }else if(rc.canBuildRobot(RobotType.DESIGN_SCHOOL, away.rotateRight())){
+                schoolsBuilt++;
+                tryBuild(RobotType.DESIGN_SCHOOL, away.rotateRight());
+            }
+        }
+
+        if (factoriesBuilt < 1) {
             MapLocation loc = getHQLocation();
             Direction away = curr.directionTo(loc).opposite();
             if(rc.canBuildRobot(RobotType.FULFILLMENT_CENTER, away)){
@@ -251,11 +237,18 @@ public strictfp class RobotPlayer {
                 tryBuild(RobotType.FULFILLMENT_CENTER, away.rotateRight());
             }
         }
+        if(rc.getRoundNum() > 400 && rc.getTeamSoup() > 499){
+            for (Direction dir : directions){
+                if(rc.canBuildRobot(RobotType.VAPORATOR, dir)){
+                    rc.buildRobot(RobotType.VAPORATOR, dir);
+                }
+            }
+        }
         //System.out.println("SCHOOLS BUILT: " + schoolsBuilt);
 
         //NOTE: schoolsBuilt is saved per miner, meaning each miner will want to make its own design school
         //MINE SOUP
-        openEyes(curr);
+
         if (souploc != null && rc.getSoupCarrying() < 96){
             mineSoup();
         }
@@ -312,6 +305,11 @@ public strictfp class RobotPlayer {
         for(RobotInfo i : r2d2){
             if(i.getType() == RobotType.REFINERY){
                 refineries.add(i.getLocation());
+            }else if(i.getType() == RobotType.DESIGN_SCHOOL){
+                schoolsBuilt++;
+            }
+            else if(i.getType() == RobotType.FULFILLMENT_CENTER){
+                factoriesBuilt++;
             }
         }
 
@@ -631,19 +629,26 @@ public strictfp class RobotPlayer {
 
     //Builds Landscapers
     static void runDesignSchool() throws GameActionException {
-        if(robotsBuilt < 16) {
-    	for (Direction dir : directions)
-            if (tryBuild(RobotType.LANDSCAPER, dir)) {
-                robotsBuilt++;
+        if(robotsBuilt < 2 && rc.getRoundNum() < 300) {
+    	    for (Direction dir : directions)
+                if (tryBuild(RobotType.LANDSCAPER, dir)) {
+                    robotsBuilt++;
             }
-    	}
+    	}else if(robotsBuilt < 8 && rc.getRoundNum() > 300 && rc.getTeamSoup() > 201){
+            for (Direction dir : directions)
+                if (tryBuild(RobotType.LANDSCAPER, dir)) {
+                    robotsBuilt++;
+                }
+        }
     }
     //Builds Drones
     static void runFulfillmentCenter() throws GameActionException {
-        for (Direction dir : directions)
-            if (tryBuild(RobotType.DELIVERY_DRONE, dir)) {
-                robotsBuilt++;
-            }
+        if(robotsBuilt < 8 && rc.getTeamSoup() > 201) {
+            for (Direction dir : directions)
+                if (tryBuild(RobotType.DELIVERY_DRONE, dir)) {
+                    robotsBuilt++;
+                }
+        }
 //        if(robotsBuilt < 20) {
 //            for (Direction dir : directions)
 //                if (tryBuild(RobotType.DELIVERY_DRONE, dir)) {
@@ -913,6 +918,9 @@ public strictfp class RobotPlayer {
     //__________________________________________________________________________________________________________________
     //DELIVERY DRONE CODE BELOW
     static void runDeliveryDrone() throws GameActionException {
+        if(rc.getRoundNum() > 1500){
+            task = "crunch";
+        }
         if(task.equals("scout")){
             if(rc.getRoundNum()%4 == 0){
                 tryBroadcast(1);
@@ -964,6 +972,7 @@ public strictfp class RobotPlayer {
             if(checkHQ){
                 moveToDrone(HQ);
             }
+            System.out.println(EnemyHQ);
             if (!rc.isCurrentlyHoldingUnit()) {
 //                System.out.println("NOT CARRYING ROBOT");
                 RobotInfo[] nearbyEnemies = rc.senseNearbyRobots(rc.getCurrentSensorRadiusSquared(), enemy);
