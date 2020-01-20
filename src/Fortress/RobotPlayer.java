@@ -969,7 +969,7 @@ public strictfp class RobotPlayer {
                             }
                         }
                         moveToDrone(at.add(at.directionTo(HQ).opposite()));
-                    }else if(heldUnit.getType() == RobotType.LANDSCAPER){
+                    }else if(heldUnit.getType() == RobotType.LANDSCAPER && heldUnit.getTeam() == rc.getTeam().opponent()){
                         for (Direction g : directions) {
                             if (rc.canDropUnit(g) && at.add(g).isAdjacentTo(HQ)) {
                                 rc.dropUnit(g);
@@ -1466,27 +1466,30 @@ public strictfp class RobotPlayer {
         }
         prevLocations.add(loc);
         //See if general direction is valid
-        if(rc.canMove(moveDirection) && !ew.contains(moveDirection) && !netGunInRange(loc.add(moveDirection))){
+        if(rc.canMove(moveDirection) && !ew.contains(moveDirection) && !netGunInRange(loc.add(moveDirection))&& !prevLocations.contains(loc.add(moveDirection))){
             path = moveDirection.opposite();
             tryMoveD(moveDirection);
-        }else if(rc.canMove(moveDirection.rotateLeft()) && !ew.contains(moveDirection.rotateLeft()) && !netGunInRange(loc.add(moveDirection.rotateLeft()))){
+        }else if(rc.canMove(moveDirection.rotateLeft()) && !ew.contains(moveDirection.rotateLeft()) && !netGunInRange(loc.add(moveDirection.rotateLeft()))&& !prevLocations.contains(loc.add(moveDirection.rotateLeft()))){
             path = moveDirection.rotateLeft().opposite();
             tryMoveD(moveDirection.rotateLeft());
-        }else if(rc.canMove(moveDirection.rotateRight()) && !ew.contains(moveDirection.rotateRight()) && !netGunInRange(loc.add(moveDirection.rotateRight()))) {
+        }else if(rc.canMove(moveDirection.rotateRight()) && !ew.contains(moveDirection.rotateRight()) && !netGunInRange(loc.add(moveDirection.rotateRight()))&& !prevLocations.contains(loc.add(moveDirection.rotateRight()))) {
             path = moveDirection.rotateRight().opposite();
             tryMoveD(moveDirection.rotateRight());
-        }else if(rc.canMove(moveDirection.rotateLeft().rotateLeft()) && !ew.contains(moveDirection.rotateLeft().rotateLeft()) && !netGunInRange(loc.add(moveDirection.rotateLeft().rotateLeft()))){
+        }else if(rc.canMove(moveDirection.rotateLeft().rotateLeft()) && !ew.contains(moveDirection.rotateLeft().rotateLeft()) && !netGunInRange(loc.add(moveDirection.rotateLeft().rotateLeft()))&& !prevLocations.contains(loc.add(moveDirection.rotateLeft().rotateLeft()))){
             path = moveDirection.rotateLeft().rotateLeft().opposite();
             tryMoveD(moveDirection.rotateLeft().rotateLeft());
-        }else if(rc.canMove(moveDirection.rotateRight().rotateRight()) && !ew.contains(moveDirection.rotateRight().rotateRight()) && !netGunInRange(loc.add(moveDirection.rotateRight().rotateRight()))) {
+        }else if(rc.canMove(moveDirection.rotateRight().rotateRight()) && !ew.contains(moveDirection.rotateRight().rotateRight()) && !netGunInRange(loc.add(moveDirection.rotateRight().rotateRight()))&& !prevLocations.contains(loc.add(moveDirection.rotateRight().rotateRight()))) {
             path = moveDirection.rotateRight().rotateRight().opposite();
             tryMoveD(moveDirection.rotateRight().rotateRight());
-        }else if(rc.canMove(moveDirection.rotateLeft().rotateLeft().rotateLeft()) && !ew.contains(moveDirection.rotateLeft().rotateLeft().rotateLeft()) && !netGunInRange(loc.add(moveDirection.rotateLeft().rotateLeft().rotateLeft()))) {
+        }else if(rc.canMove(moveDirection.rotateLeft().rotateLeft().rotateLeft()) && !ew.contains(moveDirection.rotateLeft().rotateLeft().rotateLeft()) && !netGunInRange(loc.add(moveDirection.rotateLeft().rotateLeft().rotateLeft()))&& !prevLocations.contains(loc.add(moveDirection.rotateLeft().rotateLeft().rotateLeft()))) {
             path = moveDirection.rotateLeft().rotateLeft().rotateLeft().opposite();
             tryMoveD(moveDirection.rotateLeft().rotateLeft().rotateLeft());
-        }else if(rc.canMove(moveDirection.rotateRight().rotateRight().rotateRight()) && !ew.contains(moveDirection.rotateRight().rotateRight().rotateRight()) && !netGunInRange(loc.add(moveDirection.rotateRight().rotateRight().rotateRight()))){
+        }else if(rc.canMove(moveDirection.rotateRight().rotateRight().rotateRight()) && !ew.contains(moveDirection.rotateRight().rotateRight().rotateRight()) && !netGunInRange(loc.add(moveDirection.rotateRight().rotateRight().rotateRight()))&& !prevLocations.contains(loc.add(moveDirection.rotateRight().rotateRight().rotateRight()))){
             path = moveDirection.rotateRight().rotateRight().rotateRight().opposite();
             tryMoveD(moveDirection.rotateRight().rotateRight().rotateRight());
+        }else if(rc.canMove(moveDirection.opposite()) && !ew.contains(moveDirection.opposite()) && !netGunInRange(loc.add(moveDirection.opposite()))&& !prevLocations.contains(loc.add(moveDirection.opposite()))) {
+            path = moveDirection;
+            tryMoveD(moveDirection.opposite());
         } else{
             tryMoveD(path);
         }
@@ -1539,27 +1542,30 @@ public strictfp class RobotPlayer {
         Direction moveDirection = loc.directionTo(dest);
         prevLocations.add(loc);
         //See if general direction is valid
-        if(rc.canMove(moveDirection) && !hQInRange(loc.add(moveDirection))){
+        if(rc.canMove(moveDirection) && !hQInRange(loc.add(moveDirection))&& !prevLocations.contains(loc.add(moveDirection))){
             path = moveDirection.opposite();
             tryMoveD(moveDirection);
-        }else if(rc.canMove(moveDirection.rotateLeft()) && !hQInRange(loc.add(moveDirection.rotateLeft()))){
+        }else if(rc.canMove(moveDirection.rotateLeft()) && !hQInRange(loc.add(moveDirection.rotateLeft()))&& !prevLocations.contains(loc.add(moveDirection.rotateLeft()))){
             path = moveDirection.rotateLeft().opposite();
             tryMoveD(moveDirection.rotateLeft());
-        }else if(rc.canMove(moveDirection.rotateRight()) && !hQInRange(loc.add(moveDirection.rotateRight()))) {
+        }else if(rc.canMove(moveDirection.rotateRight()) && !hQInRange(loc.add(moveDirection.rotateRight()))&& !prevLocations.contains(loc.add(moveDirection.rotateRight()))) {
             path = moveDirection.rotateRight().opposite();
             tryMoveD(moveDirection.rotateRight());
-        }else if(rc.canMove(moveDirection.rotateLeft().rotateLeft()) && !hQInRange(loc.add(moveDirection.rotateLeft().rotateLeft()))){
+        }else if(rc.canMove(moveDirection.rotateLeft().rotateLeft()) && !hQInRange(loc.add(moveDirection.rotateLeft().rotateLeft()))&& !prevLocations.contains(loc.add(moveDirection.rotateLeft().rotateLeft()))){
             path = moveDirection.rotateLeft().rotateLeft().opposite();
             tryMoveD(moveDirection.rotateLeft().rotateLeft());
-        }else if(rc.canMove(moveDirection.rotateRight().rotateRight()) && !hQInRange(loc.add(moveDirection.rotateRight().rotateRight()))) {
+        }else if(rc.canMove(moveDirection.rotateRight().rotateRight()) && !hQInRange(loc.add(moveDirection.rotateRight().rotateRight()))&& !prevLocations.contains(loc.add(moveDirection.rotateRight().rotateRight()))) {
             path = moveDirection.rotateRight().rotateRight().opposite();
             tryMoveD(moveDirection.rotateRight().rotateRight());
-        }else if(rc.canMove(moveDirection.rotateLeft().rotateLeft().rotateLeft()) && !hQInRange(loc.add(moveDirection.rotateLeft().rotateLeft().rotateLeft()))) {
+        }else if(rc.canMove(moveDirection.rotateLeft().rotateLeft().rotateLeft()) && !hQInRange(loc.add(moveDirection.rotateLeft().rotateLeft().rotateLeft()))&& !prevLocations.contains(loc.add(moveDirection.rotateLeft().rotateLeft().rotateLeft()))) {
             path = moveDirection.rotateLeft().rotateLeft().rotateLeft().opposite();
             tryMoveD(moveDirection.rotateLeft().rotateLeft().rotateLeft());
-        }else if(rc.canMove(moveDirection.rotateRight().rotateRight().rotateRight()) && !hQInRange(loc.add(moveDirection.rotateRight().rotateRight().rotateRight()))){
+        }else if(rc.canMove(moveDirection.rotateRight().rotateRight().rotateRight()) && !hQInRange(loc.add(moveDirection.rotateRight().rotateRight().rotateRight()))&& !prevLocations.contains(loc.add(moveDirection.rotateRight().rotateRight().rotateRight()))){
             path = moveDirection.rotateRight().rotateRight().rotateRight().opposite();
             tryMoveD(moveDirection.rotateRight().rotateRight().rotateRight());
+        }else if(rc.canMove(moveDirection.opposite()) && !prevLocations.contains(loc.add(moveDirection.opposite()))) {
+            path = moveDirection;
+            tryMoveD(moveDirection.opposite());
         } else{
             tryMoveD(path);
         }
