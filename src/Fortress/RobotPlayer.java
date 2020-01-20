@@ -591,13 +591,12 @@ public strictfp class RobotPlayer {
 
     //Builds Landscapers
     static void runDesignSchool() throws GameActionException {
-
-        if(robotsBuilt < 8 && rc.getRoundNum() < 200) {
+        if(robotsBuilt < 3 && rc.getRoundNum() < 250) {
             for (Direction dir : directions)
                 if (tryBuild(RobotType.LANDSCAPER, dir)) {
                     robotsBuilt++;
                 }
-        }else if(rc.getRoundNum() > 200){
+        }else if(robotsBuilt < 12 && rc.getRoundNum() > 200){
             for (Direction dir : directions)
 
                 if (tryBuild(RobotType.LANDSCAPER, dir)) {
