@@ -950,8 +950,26 @@ public strictfp class RobotPlayer {
         }
         if(task.equals("defend")){
             MapLocation at = rc.getLocation();
+            scan(at);
             if(at.distanceSquaredTo(HQ) > 8){
                 moveToDrone(HQ);
+            }
+            if(rc.isCurrentlyHoldingUnit()){
+                if(at.isAdjacentTo(water)){
+                    rc.dropUnit(at.directionTo(water));
+                }
+                for(Direction g : directions){
+                    if(rc.senseFlooding(at.add(g))){
+                        rc.dropUnit(g);
+                    }
+                }
+                moveToDrone(water);
+            }
+            RobotInfo[] attackers = rc.senseNearbyRobots(rc.getCurrentSensorRadiusSquared(), rc.getTeam().opponent());
+            for(RobotInfo i: attackers){
+                if(rc.canPickUpUnit(i.getID())){
+                    rc.pickUpUnit(i.getID());
+                }
             }
         }
         if(task.equals(("crunch"))){
@@ -1061,9 +1079,7 @@ public strictfp class RobotPlayer {
             if(checkHQ){
                 moveToDrone(HQ);
             }
-//            System.out.println(EnemyHQ);
             if (!rc.isCurrentlyHoldingUnit()) {
-//                System.out.println("NOT CARRYING ROBOT");
                 RobotInfo[] nearbyEnemies = rc.senseNearbyRobots(rc.getCurrentSensorRadiusSquared(), enemy);
                 RobotInfo[] nearbyCows = rc.senseNearbyRobots(rc.getCurrentSensorRadiusSquared(), Team.NEUTRAL);
                 ArrayList<RobotInfo> nearbyRobots = new ArrayList<>();
@@ -1111,13 +1127,6 @@ public strictfp class RobotPlayer {
                     if(rc.senseFlooding(at) && rc.canDropUnit(Direction.CENTER)){
                         rc.dropUnit(Direction.CENTER);
                     }
-                    /*
-                    for (Direction g : directions) {
-                        if (rc.senseFlooding(at.add(g)) && rc.canDropUnit(g)) {
-                            rc.dropUnit(g);
-                        }
-                    }
-                    */
                     moveToDrone(water);
                 }else{
                     scout(at);
@@ -1301,6 +1310,7 @@ public strictfp class RobotPlayer {
         }
         return true;
     }
+
     static void scout(MapLocation at) throws GameActionException {
         if(scoutDest ==  null){
             scoutDest = mapCenter;
