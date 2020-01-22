@@ -1693,7 +1693,7 @@ public strictfp class RobotPlayer {
          * 3 : Enemy HQ
          */
         int[] message = new int[7];
-        message[1] = 998997;
+        message[1] = 8888888;
         message[2] = code;
         message[3] = x;
         message[4] = y;
@@ -1709,7 +1709,7 @@ public strictfp class RobotPlayer {
             if(block.length != 0) {
                 for(int i = 0; i < block.length; i++) {
                     int[] message = block[i].getMessage();
-                    if(message[1] == 998997 && message[2] == 1) {
+                    if(message[1] == 8888888 && message[2] == 1) {
                         location = new MapLocation(message[3], message[4]);
                         return location;
                     }
@@ -1728,7 +1728,7 @@ public strictfp class RobotPlayer {
                 if(block.length != 0) {
                     for(int i = 0; i < block.length; i++) {
                         int[] message = block[i].getMessage();
-                        if(message[1] == 998997 && message[2] == 2) {
+                        if(message[1] == 8888888 && message[2] == 2) {
                             location = new MapLocation(message[3], message[4]);
 //                            System.out.println(location);
                             return location;
@@ -1750,7 +1750,7 @@ public strictfp class RobotPlayer {
                 if(block.length != 0) {
                     for(int i = 0; i < block.length; i++) {
                         int[] message = block[i].getMessage();
-                        if(message[1] == 998997 && message[2] == 3) {
+                        if(message[1] == 8888888 && message[2] == 3) {
                             location = new MapLocation(message[3], message[4]);
 //                            System.out.println(location);
                             return location;
@@ -1772,7 +1772,7 @@ public strictfp class RobotPlayer {
 //                if(block.length != 0) {
 //                    for(int i = 0; i < block.length; i++) {
 //                        int[] message = block[i].getMessage();
-//                        if(message[1] == 998997 && message[2] == 3) {
+//                        if(message[1] == 8888888 && message[2] == 3) {
 //                            location = new MapLocation(message[3], message[4]);
 //                            System.out.println(location);
 //                            return location;
@@ -1792,7 +1792,7 @@ public strictfp class RobotPlayer {
 //                if(block.length != 0) {
 //                    for(int i = 0; i < block.length; i++) {
 //                        int[] message = block[i].getMessage();
-//                        if(message[1] == 998997 && message[2] == 3) {
+//                        if(message[1] == 8888888 && message[2] == 3) {
 //                            postLocation(3, message[3], message[4], 2);
 //                        }
 //                    }
@@ -1871,7 +1871,7 @@ public strictfp class RobotPlayer {
                 infocount++;
             }
             bitSet.set(0 * 20, true);
-            //bitSet.set(1*20,true);
+            bitSet.set(1*20,true);
             bitSet.set(2 * 20, true);
             bitSet.set(3 * 20, true);
             bitSet.set(4 * 20, true);
@@ -1913,7 +1913,7 @@ public strictfp class RobotPlayer {
             longs[3] = (long) curr[6] & 0xFFFFFFFFL;
             BitSet bitSet=BitSet.valueOf(longs);
             if (    bitSet.get(0 * 20)&&
-                    !bitSet.get(1 * 20)&&
+                    bitSet.get(1 * 20)&&
                     bitSet.get(2 * 20)&&
                     bitSet.get(3 * 20)&&
                     bitSet.get(4 * 20)&&
