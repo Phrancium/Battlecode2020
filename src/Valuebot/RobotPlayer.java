@@ -2143,6 +2143,9 @@ public strictfp class RobotPlayer {
         broadcastQueue.add(i);
         tryBroadcast(1);
     }
+    static void reBroadcast() throws GameActionException{
+
+    }
     //__________________________________________________________________________________________________________________
 }
 
