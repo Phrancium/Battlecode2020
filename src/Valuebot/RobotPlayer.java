@@ -1108,9 +1108,13 @@ public strictfp class RobotPlayer {
             }
         }
         if (task.equals("killEnemy")){
+            if(rc.getRoundNum() > 10) {
+                receiveBroadcast(rc.getRoundNum() - 1);
+            }
             MapLocation at = rc.getLocation();
             scan(at);
             Team enemy = rc.getTeam().opponent();
+
 
             if(at.distanceSquaredTo(HQ) < 16){
                 checkHQ = false;
@@ -1218,7 +1222,7 @@ public strictfp class RobotPlayer {
         RobotInfo[] nearbyEnemies = rc.senseNearbyRobots(rc.getCurrentSensorRadiusSquared(), enemy);
         RobotInfo[] nearbyFriendlies = rc.senseNearbyRobots(rc.getCurrentSensorRadiusSquared(), rc.getTeam());
         ArrayList<RobotInfo> nearbyRobots = new ArrayList<>();
-        if (!isHQFull(at) && rc.getRoundNum() > 800) {
+        if (!isHQFull(at) && rc.getRoundNum() > 600) {
             ArrayList<RobotInfo> nearbyLandscapers = new ArrayList<>();
             for(RobotInfo r : nearbyFriendlies){
                 if(r.getType() == RobotType.LANDSCAPER && !r.getLocation().isAdjacentTo(HQ)){
@@ -1235,7 +1239,7 @@ public strictfp class RobotPlayer {
         }
 
         for (RobotInfo r : nearbyEnemies) {
-            if (r.getType() == RobotType.MINER && quadrantIn(r.getLocation()) == quadrantIn(HQ)) {
+            if ((r.getType() == RobotType.MINER || r.getType() == RobotType.LANDSCAPER) && quadrantIn(r.getLocation()) == quadrantIn(HQ)) {
                 nearbyRobots.add(r);
             }
         }
@@ -1247,9 +1251,9 @@ public strictfp class RobotPlayer {
         if (nearbyRobots.size() > 0) {
             for (RobotInfo targetEnemy : nearbyRobots) {
                 int enemyID = targetEnemy.getID();
-                if (rc.canPickUpUnit(targetEnemy.getID())) {
+                if (rc.canPickUpUnit(enemyID)) {
                     heldUnit = targetEnemy;
-                    rc.pickUpUnit(targetEnemy.getID());
+                    rc.pickUpUnit(enemyID);
                 }
             }
             moveToDrone(closestEnemyRobot(at, nearbyRobots));
@@ -1292,6 +1296,7 @@ public strictfp class RobotPlayer {
             if(i.getType() == RobotType.MINER) {
                 minors.add(i);
                 if (rc.canPickUpUnit(i.getID())) {
+                    heldUnit = i;
                     rc.pickUpUnit(i.getID());
                 }
             }
