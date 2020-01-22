@@ -31,6 +31,7 @@ public strictfp class RobotPlayer {
     static int numBuilt;
     static int mapQuadrant;
     static int schoolsBuilt;
+
     static MapLocation enHQDest;
     static int factoriesBuilt;
     static  MapLocation HQ;
@@ -51,6 +52,7 @@ public strictfp class RobotPlayer {
     static ArrayList<MapLocation> refineries = new ArrayList<>();
     static ArrayList<MapLocation> oppNet = new ArrayList<>();
     static ArrayList<MapLocation> offensiveEnemyBuildings = new ArrayList<>();
+    static ArrayList<MapLocation> vaps = new ArrayList<>();
     static MapLocation EnemyHQ;
 
     static ArrayList<MapLocation> digLoc = new ArrayList<>();
@@ -258,6 +260,7 @@ public strictfp class RobotPlayer {
 
                 for (Direction dir : directions) {
                     if (rc.canBuildRobot(RobotType.VAPORATOR, dir) && curr.add(dir).distanceSquaredTo(HQ) > 8 && curr.add(dir).distanceSquaredTo(HQ) < 81) {
+//                        vaps.add(curr.add(dir));
                         rc.buildRobot(RobotType.VAPORATOR, dir);
                     }
                 }
@@ -330,6 +333,8 @@ public strictfp class RobotPlayer {
             }
             else if(i.getType() == RobotType.FULFILLMENT_CENTER){
                 factoriesBuilt++;
+            }else if(i.getType() == RobotType.VAPORATOR && !vaps.contains(i.getLocation())){
+                vaps.add(i.getLocation());
             }
         }
         if ((refineries.isEmpty() && totS > 1) || (totS > 200 && loc.distanceSquaredTo(getClosestRefine(loc)) >= 196)) {
@@ -642,7 +647,7 @@ public strictfp class RobotPlayer {
                     rc.buildRobot(RobotType.DELIVERY_DRONE, dir);
 //                    break;
                 }
-        } else if (rc.getRoundNum() < 800 && rc.getRoundNum() > 124 && robotsBuilt < 3 && rc.getTeamSoup() > 505) {
+        } else if (rc.getRoundNum() < 800 && rc.getRoundNum() > 124 && robotsBuilt < 7 && rc.getTeamSoup() > 505) {
             for (Direction dir : randomDirections()) {
                 if (rc.canBuildRobot(RobotType.DELIVERY_DRONE, dir)) {
                     robotsBuilt++;
@@ -1033,8 +1038,39 @@ public strictfp class RobotPlayer {
             moveToCrunch(EnemyHQ);
         }
         if(task.equals("hover")){
+            if(rc.getRoundNum() > 10) {
+                receiveBroadcast(rc.getRoundNum() - 1);
+            }
             MapLocation at = rc.getLocation();
             scan(at);
+            if(rc.getRoundNum() > 250){
+                if(rc.isCurrentlyHoldingUnit() && heldUnit.getType() == RobotType.MINER){
+                    for(MapLocation m : soup){
+                        if(m.isWithinDistanceSquared(at, 25)){
+                            Direction tos = at.directionTo(m);
+                            if(rc.canDropUnit(tos)) {
+                                rc.dropUnit(tos);
+                            }else if(rc.canDropUnit(tos.rotateRight())){
+                                rc.dropUnit(tos.rotateRight());
+                            }else{
+                                rc.dropUnit(tos.rotateLeft());
+                            }
+                        }
+                    }
+                    moveToDrone(souploc);
+                }else {
+                    if (at.distanceSquaredTo(HQ) > 64){
+                        moveToDrone(HQ);
+                    }else {
+                        for (MapLocation m : soup) {
+                            if (m.distanceSquaredTo(HQ) > 121) {
+                                souploc = m;
+                                pickUpMiner(at);
+                            }
+                        }
+                    }
+                }
+            }
             if(rc.isCurrentlyHoldingUnit()) {
                 dropHeldUnit(at);
                 scout(at);
@@ -1218,6 +1254,21 @@ public strictfp class RobotPlayer {
             }
             moveToDrone(water);
         }
+    }
+
+    static void pickUpMiner(MapLocation at) throws GameActionException{
+        RobotInfo[] friend = rc.senseNearbyRobots(rc.getCurrentSensorRadiusSquared(), rc.getTeam());
+        ArrayList<RobotInfo> minors = new ArrayList<>();
+
+        for(RobotInfo i : friend){
+            if(i.getType() == RobotType.MINER) {
+                minors.add(i);
+                if (rc.canPickUpUnit(i.getID())) {
+                    rc.pickUpUnit(i.getID());
+                }
+            }
+        }
+        moveToDrone(closestEnemyRobot(at, minors));
     }
 
     static MapLocation closestEnemyRobot(MapLocation at, ArrayList<RobotInfo> m){
