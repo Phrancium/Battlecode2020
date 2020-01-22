@@ -2,6 +2,7 @@ package Valuebot;
 
 import Fortress.Information;
 import battlecode.common.*;
+import com.sun.xml.internal.ws.api.pipe.NextAction;
 
 import java.util.*;
 
@@ -647,7 +648,7 @@ public strictfp class RobotPlayer {
                     rc.buildRobot(RobotType.DELIVERY_DRONE, dir);
 //                    break;
                 }
-        } else if (rc.getRoundNum() < 800 && rc.getRoundNum() > 124 && robotsBuilt < 7 && rc.getTeamSoup() > 505) {
+        } else if (rc.getRoundNum() < 800 && rc.getRoundNum() > 124 && robotsBuilt < 17 && rc.getTeamSoup() > 505) {
             for (Direction dir : randomDirections()) {
                 if (rc.canBuildRobot(RobotType.DELIVERY_DRONE, dir)) {
                     robotsBuilt++;
@@ -964,22 +965,11 @@ public strictfp class RobotPlayer {
     }
 
     static boolean isHQFull(MapLocation at) throws GameActionException{
-        if(rc.onTheMap(HQ.add(Direction.NORTH)) && rc.canSenseLocation(HQ.add(Direction.NORTH)) &&!rc.isLocationOccupied(HQ.add(Direction.NORTH))){
-            return false;
-        }else if(rc.onTheMap(HQ.add(Direction.NORTHEAST)) && rc.canSenseLocation(HQ.add(Direction.NORTHEAST)) && !rc.isLocationOccupied(HQ.add(Direction.NORTHEAST))){
-            return false;
-        }else if(rc.onTheMap(HQ.add(Direction.NORTHWEST)) && rc.canSenseLocation(HQ.add(Direction.NORTHWEST)) &&!rc.isLocationOccupied(HQ.add(Direction.NORTHWEST))){
-            return false;
-        }else if(rc.onTheMap(HQ.add(Direction.SOUTH)) && rc.canSenseLocation(HQ.add(Direction.SOUTH)) &&!rc.isLocationOccupied(HQ.add(Direction.SOUTH))){
-            return false;
-        }else if(rc.onTheMap(HQ.add(Direction.SOUTHEAST)) && rc.canSenseLocation(HQ.add(Direction.SOUTHEAST)) &&!rc.isLocationOccupied(HQ.add(Direction.SOUTHEAST))){
-            return false;
-        }else if(rc.onTheMap(HQ.add(Direction.SOUTHWEST)) && rc.canSenseLocation(HQ.add(Direction.SOUTHWEST)) &&!rc.isLocationOccupied(HQ.add(Direction.SOUTHWEST))){
-            return false;
-        }else if(rc.onTheMap(HQ.add(Direction.WEST)) && rc.canSenseLocation(HQ.add(Direction.WEST)) &&!rc.isLocationOccupied(HQ.add(Direction.WEST))){
-            return false;
-        }else if(rc.onTheMap(HQ.add(Direction.EAST)) && rc.canSenseLocation(HQ.add(Direction.EAST)) &&!rc.isLocationOccupied(HQ.add(Direction.EAST))){
-            return false;
+        for(Direction d : directions) {
+            MapLocation nextTo = HQ.add(d);
+            if (rc.onTheMap(nextTo) && rc.canSenseLocation(nextTo) && !rc.isLocationOccupied(nextTo)) {
+                return false;
+            }
         }
         return true;
     }
@@ -1069,22 +1059,20 @@ public strictfp class RobotPlayer {
             scan(at);
             if(rc.getRoundNum() > 250){
                 if(rc.isCurrentlyHoldingUnit() && heldUnit.getType() == RobotType.MINER){
-                    for(MapLocation m : soup){
-                        if(m.isWithinDistanceSquared(at, 25)){
-                            Direction tos = at.directionTo(m);
-                            if(rc.canDropUnit(tos)) {
-                                rc.dropUnit(tos);
-                            }else if(rc.canDropUnit(tos.rotateRight())){
-                                rc.dropUnit(tos.rotateRight());
-                            }else{
-                                rc.dropUnit(tos.rotateLeft());
-                            }
+                    if(at.isWithinDistanceSquared(souploc, 24)){
+                        Direction tos = at.directionTo(souploc);
+                        if(rc.canDropUnit(tos) && rc.canSenseLocation(at.add(tos)) && (rc.senseElevation(at.add(tos)) - rc.senseElevation(souploc) > 3 || rc.senseElevation(at.add(tos)) - rc.senseElevation(souploc) < 3)) {
+                            rc.dropUnit(tos);
+                        }else if(rc.canDropUnit(tos.rotateRight()) && rc.canSenseLocation(at.add(tos.rotateRight())) && (rc.senseElevation(at.add(tos.rotateRight())) - rc.senseElevation(souploc) > 3 || rc.senseElevation(at.add(tos.rotateRight())) - rc.senseElevation(souploc) < 3)){
+                            rc.dropUnit(tos.rotateRight());
+                        }else if (rc.canDropUnit(tos.rotateLeft()) && rc.canSenseLocation(at.add(tos.rotateLeft())) && (rc.senseElevation(at.add(tos.rotateLeft())) - rc.senseElevation(souploc) > 3 || rc.senseElevation(at.add(tos.rotateLeft())) - rc.senseElevation(souploc) < 3)){
+                            rc.dropUnit(tos.rotateLeft());
                         }
                     }
                     moveToDrone(souploc);
                 }else {
                     if (at.distanceSquaredTo(HQ) > 64){
-                        moveToDrone(HQ);
+                        moveToDroneHover(HQ);
                     }else {
                         for (MapLocation m : soup) {
                             if (m.distanceSquaredTo(HQ) > 121) {
@@ -1100,7 +1088,7 @@ public strictfp class RobotPlayer {
                 scout(at);
             }else {
                 findUnit(at);
-                moveToDrone(HQ);
+                moveToDroneHover(HQ);
             }
         }
         if (task.equals("killEnemy")){
@@ -1267,6 +1255,13 @@ public strictfp class RobotPlayer {
             }
             moveToDrone(at.add(at.directionTo(HQ).opposite()));
         }else if(heldUnit.getType() == RobotType.LANDSCAPER && heldUnit.getTeam() == rc.getTeam()){
+            if(isHQFull(at)){
+                for (Direction g : directions) {
+                    if (rc.canDropUnit(g)) {
+                        rc.dropUnit(g);
+                    }
+                }
+            }
             for (Direction g : directions) {
                 if (rc.canDropUnit(g) && at.add(g).isAdjacentTo(HQ)) {
                     rc.dropUnit(g);
