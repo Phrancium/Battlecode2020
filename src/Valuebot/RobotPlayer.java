@@ -994,7 +994,8 @@ public strictfp class RobotPlayer {
 
             if(rc.isCurrentlyHoldingUnit()){
                 for(Direction g : directions){
-                    if(rc.senseFlooding(loc.add(g))){
+                    MapLocation check= loc.add(g);
+                    if(rc.onTheMap(check) && rc.senseFlooding(check) && rc.canDropUnit(g)){
                         rc.dropUnit(g);
                     }
                 }
@@ -1039,9 +1040,12 @@ public strictfp class RobotPlayer {
                 if(loc.isAdjacentTo(water)){
                     rc.dropUnit(loc.directionTo(water));
                 }
-                for(Direction g : directions){
-                    if(rc.senseFlooding(loc.add(g))){
-                        rc.dropUnit(g);
+                if(rc.isCurrentlyHoldingUnit()){
+                    for(Direction g : directions){
+                        MapLocation check= loc.add(g);
+                        if(rc.onTheMap(check) && rc.senseFlooding(check)&& rc.canDropUnit(g)){
+                            rc.dropUnit(g);
+                        }
                     }
                 }
                 moveToDrone(water);
@@ -1277,7 +1281,7 @@ public strictfp class RobotPlayer {
         }else
         if (water != null) {
             for (Direction g : directions) {
-                if (rc.senseFlooding(at.add(g)) && rc.canDropUnit(g)) {
+                if (rc.onTheMap(at.add(g)) && rc.senseFlooding(at.add(g)) && rc.canDropUnit(g)) {
                     rc.dropUnit(g);
                 }
             }
