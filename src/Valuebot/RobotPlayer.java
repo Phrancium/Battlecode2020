@@ -197,13 +197,7 @@ public strictfp class RobotPlayer {
                 }
             }
         }
-        if(robotsBuilt < 3 && rc.getRoundNum() < 150){
-            for (Direction dir : randomDirections()) {
-                if(tryBuild(RobotType.MINER, dir)) {
-                    robotsBuilt++;
-                }
-            }
-        }else if(robotsBuilt < 6 && rc.getRoundNum() > 150 && rc.getTeamSoup()>204){
+    	if(robotsBuilt < 6 && rc.getRoundNum() > 100 && rc.getTeamSoup()>204){
             for (Direction dir : randomDirections()) {
                 if(tryBuild(RobotType.MINER, dir)) {
                     robotsBuilt++;
@@ -273,12 +267,11 @@ public strictfp class RobotPlayer {
             }
         }
         if(rc.getRoundNum() > 200 && rc.getTeamSoup() > 499) {
-            if (curr.distanceSquaredTo(HQ) > 144) {
+            if (curr.distanceSquaredTo(HQ) > 81) {
                 moveTo(HQ);
             } else {
-
                 for (Direction dir : directions) {
-                    if (rc.canBuildRobot(RobotType.VAPORATOR, dir) && curr.add(dir).distanceSquaredTo(HQ) > 8 && curr.add(dir).distanceSquaredTo(HQ) < 81) {
+                    if (rc.canBuildRobot(RobotType.VAPORATOR, dir) && curr.add(dir).distanceSquaredTo(HQ) > 8 && curr.add(dir).distanceSquaredTo(HQ) <= 81) {
 //                        vaps.add(curr.add(dir));
                         rc.buildRobot(RobotType.VAPORATOR, dir);
                     }
@@ -291,7 +284,7 @@ public strictfp class RobotPlayer {
         //MINE SOUP
 
         if (souploc != null && rc.getSoupCarrying() < 96){
-            mineSoup();
+            mineSoup(curr);
         }
         //MOVE BACK TO HQ AND DEPOSIT SOUP
         else if (rc.getSoupCarrying() > 95){
@@ -430,85 +423,21 @@ public strictfp class RobotPlayer {
         return false;
     }
 
-    static void mineSoup() throws GameActionException{
+    static void mineSoup(MapLocation at) throws GameActionException{
         for (Direction l : directions) {
             if (rc.canMineSoup(l)) {
                 rc.mineSoup(l);
+            }
+        }
+        for(MapLocation k : rc.senseNearbySoup()){
+            if(at.distanceSquaredTo(k) < at.distanceSquaredTo(souploc)){
+                moveTo(k);
             }
         }
         moveTo(souploc);
     }
 
     static void scoutMiner(MapLocation at) throws GameActionException {
-//        if (scoutDest == null) {
-//            int q = quadrantIn(HQ);
-//            if(q == 1){
-//                scoutDest = new MapLocation(rc.getMapWidth(), rc.getMapHeight());
-//            }else if(q == 2){
-//                scoutDest = new MapLocation(1, rc.getMapHeight());
-//            }else if(q == 3){
-//                scoutDest = new MapLocation(1, 1);
-//            }else if(q == 4){
-//                scoutDest = new MapLocation(rc.getMapWidth(), 1);
-//            }
-//        }
-//        int xAdd = rc.getMapWidth() / 6;
-//        int yAdd = rc.getMapHeight() / 6;
-//        if (at.distanceSquaredTo(scoutDest) < 16) {
-//            int q = quadrantIn(scoutDest);
-//            if (q == 1) {
-//                MapLocation newDest = new MapLocation(at.x, rc.getMapHeight() - at.y);
-//                if (!scouted.contains(newDest)) {
-//                    scoutDest = new MapLocation(at.x, rc.getMapHeight() - at.y + yAdd);
-//                    if (rc.onTheMap(scoutDest)) {
-//                        scouted.add(scoutDest);
-//                    } else {
-//                        scoutDest = HQ;
-//                        scouted = new ArrayList<>();
-//                    }
-//                }
-//            } else if (q == 2) {
-//                MapLocation newDest = new MapLocation(rc.getMapWidth() - at.x, at.y);
-//                if (!scouted.contains(newDest)) {
-//                    scoutDest = new MapLocation(rc.getMapWidth() - at.x - xAdd, at.y);
-//                    if (rc.onTheMap(scoutDest)) {
-//                        scouted.add(scoutDest);
-//                    } else {
-//                        scoutDest = HQ;
-//                        scouted = new ArrayList<>();
-//                    }
-//                }
-//            } else if (q == 3) {
-//                MapLocation newDest = new MapLocation(at.x, rc.getMapHeight() - at.y);
-//                if (!scouted.contains(newDest)) {
-//                    scoutDest = new MapLocation(at.x, rc.getMapHeight() - at.y - yAdd);
-//                    if (rc.onTheMap(scoutDest)) {
-//                        scouted.add(scoutDest);
-//                    } else {
-//                        scoutDest = HQ;
-//                        scouted = new ArrayList<>();
-//                    }
-//                }
-//            } else if (q == 4) {
-//                MapLocation newDest = new MapLocation(rc.getMapWidth() - at.x, at.y);
-//                if (!scouted.contains(newDest)) {
-//                    scoutDest = new MapLocation(rc.getMapWidth() - at.x + xAdd, at.y);
-//                    if (rc.onTheMap(scoutDest)) {
-//                        scouted.add(scoutDest);
-//                    } else {
-//                        scoutDest = HQ;
-//                        scouted = new ArrayList<>();
-//                    }
-//                }
-//            }
-//        }
-//        if(isPath(at, scoutDest)) {
-//            moveTo(scoutDest);
-//        }else{
-//            scoutDest = HQ;
-//            scouted.add(scoutDest);
-//            moveTo(scoutDest);
-//        }
         moveTo(at.add(randomInitialDirection));
 
     }
@@ -647,9 +576,13 @@ public strictfp class RobotPlayer {
                 if (tryBuild(RobotType.LANDSCAPER, dir)) {
                     robotsBuilt++;
                 }
-        }else if(robotsBuilt < 10 && rc.getRoundNum() >= 150 && rc.getTeamSoup() > 510){
+        }else if(robotsBuilt < 8 && rc.getRoundNum() >= 150 && rc.getTeamSoup() > 210){
             for (Direction dir : directions)
-
+                if (tryBuild(RobotType.LANDSCAPER, dir)) {
+                    robotsBuilt++;
+                }
+        }else if(rc.getRoundNum() >= 800 && rc.getTeamSoup() > 510){
+            for (Direction dir : directions)
                 if (tryBuild(RobotType.LANDSCAPER, dir)) {
                     robotsBuilt++;
                 }
@@ -666,7 +599,7 @@ public strictfp class RobotPlayer {
                     rc.buildRobot(RobotType.DELIVERY_DRONE, dir);
 //                    break;
                 }
-        } else if (rc.getRoundNum() < 500 && rc.getRoundNum() > 149 && robotsBuilt < 5 && rc.getTeamSoup() > 505) {
+        } else if (rc.getRoundNum() < 650 && rc.getRoundNum() > 149 && robotsBuilt < 5 && rc.getTeamSoup() > 505) {
             for (Direction dir : randomDirections()) {
                 if (rc.canBuildRobot(RobotType.DELIVERY_DRONE, dir)) {
                     robotsBuilt++;
@@ -681,7 +614,7 @@ public strictfp class RobotPlayer {
          }
          }
          }**/
-        else if (rc.getRoundNum() > 500 && rc.getTeamSoup() > 210) {
+        else if (rc.getRoundNum() > 650 && rc.getTeamSoup() > 210) {
             for (Direction dir : randomDirections()) {
                 if (rc.canBuildRobot(RobotType.DELIVERY_DRONE, dir)) {
                     robotsBuilt++;
@@ -873,8 +806,8 @@ public strictfp class RobotPlayer {
         	rc.digDirt(dir);
         }
         else if (at.distanceSquaredTo(home) > 1) {
-            MapLocation left = at.add(dir.rotateLeft().rotateLeft());
-            MapLocation right = at.add(dir.rotateRight().rotateRight());
+            MapLocation left = at.add(dir.rotateLeft());
+            MapLocation right = at.add(dir.rotateRight());
 
             MapLocation[] dirs = {left, right};
             MapLocation lowest = at;
@@ -1014,13 +947,13 @@ public strictfp class RobotPlayer {
     //__________________________________________________________________________________________________________________
     //DELIVERY DRONE CODE BELOW
     static void runDeliveryDrone() throws GameActionException {
-
-        if(rc.getRoundNum() > 1500 && !task.equals("defend")){
-            task = "crunch";
-        }
         if(rc.getRoundNum() > 1000 && task.equals("hover")){
             task = "defend";
         }
+        if(rc.getRoundNum() > 1500 && !task.equals("defend")){
+            task = "crunch";
+        }
+
         if(task.equals("scout")){
             if(rc.getRoundNum()%10 == 0 || broadcastQueue.size()>11){
                 tryBroadcast(1);
@@ -1097,16 +1030,16 @@ public strictfp class RobotPlayer {
             scan(at);
             if(rc.getRoundNum() > 250){
                 if(rc.isCurrentlyHoldingUnit() && heldUnit.getType() == RobotType.MINER){
-                    if(at.distanceSquaredTo(HQ) > 64){
+                    if(at.distanceSquaredTo(HQ) > 64 || souploc == null){
                         souploc = getClosestSoup(at);
                     }
-                    if(at.isWithinDistanceSquared(souploc, 24)){
+                    if(at.isWithinDistanceSquared(souploc, 8)){
                         Direction tos = at.directionTo(souploc);
-                        if(rc.canDropUnit(tos) && rc.canSenseLocation(at.add(tos)) && !rc.senseFlooding(at.add(tos)) && (rc.senseElevation(at.add(tos)) - rc.senseElevation(souploc) > 3 || rc.senseElevation(at.add(tos)) - rc.senseElevation(souploc) < 3)) {
+                        if(rc.canDropUnit(tos) && rc.canSenseLocation(at.add(tos)) && at.add(tos).isAdjacentTo(souploc) && !rc.senseFlooding(at.add(tos)) && (rc.senseElevation(at.add(tos)) - rc.senseElevation(souploc) > 3 || rc.senseElevation(at.add(tos)) - rc.senseElevation(souploc) < 3)) {
                             rc.dropUnit(tos);
-                        }else if(rc.canDropUnit(tos.rotateRight()) && rc.canSenseLocation(at.add(tos.rotateRight())) && !rc.senseFlooding(at.add(tos.rotateLeft())) && (rc.senseElevation(at.add(tos.rotateRight())) - rc.senseElevation(souploc) > 3 || rc.senseElevation(at.add(tos.rotateRight())) - rc.senseElevation(souploc) < 3)){
+                        }else if(rc.canDropUnit(tos.rotateRight()) && rc.canSenseLocation(at.add(tos.rotateRight())) && at.add(tos).isAdjacentTo(souploc) && !rc.senseFlooding(at.add(tos.rotateLeft())) && (rc.senseElevation(at.add(tos.rotateRight())) - rc.senseElevation(souploc) > 3 || rc.senseElevation(at.add(tos.rotateRight())) - rc.senseElevation(souploc) < 3)){
                             rc.dropUnit(tos.rotateRight());
-                        }else if (rc.canDropUnit(tos.rotateLeft()) && rc.canSenseLocation(at.add(tos.rotateLeft())) && !rc.senseFlooding(at.add(tos.rotateRight())) && (rc.senseElevation(at.add(tos.rotateLeft())) - rc.senseElevation(souploc) > 3 || rc.senseElevation(at.add(tos.rotateLeft())) - rc.senseElevation(souploc) < 3)){
+                        }else if (rc.canDropUnit(tos.rotateLeft()) && rc.canSenseLocation(at.add(tos.rotateLeft())) && at.add(tos).isAdjacentTo(souploc) && !rc.senseFlooding(at.add(tos.rotateRight())) && (rc.senseElevation(at.add(tos.rotateLeft())) - rc.senseElevation(souploc) > 3 || rc.senseElevation(at.add(tos.rotateLeft())) - rc.senseElevation(souploc) < 3)){
                             rc.dropUnit(tos.rotateLeft());
                         }
                     }
@@ -1246,8 +1179,9 @@ public strictfp class RobotPlayer {
         Team enemy = rc.getTeam().opponent();
         RobotInfo[] nearbyEnemies = rc.senseNearbyRobots(rc.getCurrentSensorRadiusSquared(), enemy);
         RobotInfo[] nearbyFriendlies = rc.senseNearbyRobots(rc.getCurrentSensorRadiusSquared(), rc.getTeam());
+        RobotInfo[] nearbyCows = rc.senseNearbyRobots(rc.getCurrentSensorRadiusSquared(), Team.NEUTRAL);
         ArrayList<RobotInfo> nearbyRobots = new ArrayList<>();
-        if (!isHQFull(at) && rc.getRoundNum() > 600) {
+        if (!isHQFull(at) && rc.getRoundNum() > 500) {
             ArrayList<RobotInfo> nearbyLandscapers = new ArrayList<>();
             for(RobotInfo r : nearbyFriendlies){
                 if(r.getType() == RobotType.LANDSCAPER && !r.getLocation().isAdjacentTo(HQ)){
@@ -1264,12 +1198,17 @@ public strictfp class RobotPlayer {
         }
 
         for (RobotInfo r : nearbyEnemies) {
-            if ((r.getType() == RobotType.MINER || r.getType() == RobotType.LANDSCAPER) && quadrantIn(r.getLocation()) == quadrantIn(HQ)) {
+            if ((r.getType() == RobotType.MINER || r.getType() == RobotType.LANDSCAPER) && (quadrantIn(r.getLocation()) == quadrantIn(HQ) || task == "killEnemy")) {
                 nearbyRobots.add(r);
             }
         }
         for (RobotInfo r : nearbyFriendlies) {
             if (rc.getRoundNum() > 300 && r.getType() == RobotType.MINER && r.getLocation().isAdjacentTo(HQ)) {
+                nearbyRobots.add(r);
+            }
+        }
+        for (RobotInfo r : nearbyCows) {
+            if (quadrantIn(r.getLocation()) == quadrantIn(HQ) || r.getLocation().isWithinDistanceSquared(HQ, 16)) {
                 nearbyRobots.add(r);
             }
         }
