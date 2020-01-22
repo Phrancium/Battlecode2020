@@ -1,10 +1,13 @@
 package Valuebot;
 
-import Fortress.Information;
 import battlecode.common.*;
-//import com.sun.xml.internal.ws.api.pipe.NextAction;
+import com.sun.org.apache.xml.internal.utils.res.XResourceBundle;
 
+
+import java.awt.*;
+import java.lang.reflect.Array;
 import java.util.*;
+import java.util.List;
 
 public strictfp class RobotPlayer {
     static RobotController rc;
@@ -98,16 +101,18 @@ public strictfp class RobotPlayer {
         if(rc.getType() == RobotType.MINER){
             if (rc.getRoundNum()<=150){
                 task="first3";
+            }else{
+                task = "the other guys";
             }
         }
         //drone task determiner
         if(rc.getType() == RobotType.DELIVERY_DRONE){
             if(rc.getRoundNum() < 125){
                 task = "scout";
-            }else if(rc.getRoundNum() < 500 && rc.getRoundNum() > 124) {
+            }else if(rc.getRoundNum() < 800 && rc.getRoundNum() > 124) {
                 task = "hover";
             }
-            else if(rc.getRoundNum() > 499){
+            else if(rc.getRoundNum() > 799){
                 task = "killEnemy";
             }
 //            task = "crunch";
@@ -632,7 +637,7 @@ public strictfp class RobotPlayer {
                 if (tryBuild(RobotType.LANDSCAPER, dir)) {
                     robotsBuilt++;
                 }
-        }else if(rc.getRoundNum() >= 150 && rc.getTeamSoup() > 505){
+        }else if(rc.getRoundNum() >= 150 && rc.getTeamSoup() > 510){
             for (Direction dir : directions)
 
                 if (tryBuild(RobotType.LANDSCAPER, dir)) {
@@ -858,38 +863,58 @@ public strictfp class RobotPlayer {
         	rc.digDirt(dir);
         }
         else if (at.distanceSquaredTo(home) > 1) {
-        	MapLocation left = at.add(dir.rotateLeft());
-        	MapLocation right = at.add(dir.rotateRight());
-        	if (rc.onTheMap(left) && (rc.senseElevation(left) < rc.senseElevation(at)) && rc.onTheMap(right) && rc.senseElevation(left) < rc.senseElevation(right) && ((rc.getRoundNum() > 650) || rc.senseElevation(left)<3)) {
-        		if(rc.getDirtCarrying() > 0)
-                    rc.depositDirt(at.directionTo(left));
-        		else if(rc.canDigDirt(dir.opposite().rotateLeft().rotateLeft()))
+            MapLocation left = at.add(dir.rotateLeft().rotateLeft());
+            MapLocation right = at.add(dir.rotateRight().rotateRight());
+
+            MapLocation[] dirs = {left, right};
+            MapLocation lowest = at;
+            for(MapLocation m : dirs){
+                if(rc.onTheMap(lowest) && rc.onTheMap(m) && rc.senseElevation(m) < rc.senseElevation(lowest) && rc.getRoundNum() > 300){
+                    lowest = m;
+                }
+            }
+            if(rc.getDirtCarrying() > 0)
+                rc.depositDirt(at.directionTo(lowest));
+            else if(rc.canDigDirt(dir.opposite().rotateLeft().rotateLeft()))
                     rc.digDirt(dir.opposite().rotateLeft().rotateLeft());
-        		else if(rc.canDigDirt(dir.opposite().rotateRight().rotateRight()))
-                    rc.digDirt(dir.opposite().rotateRight().rotateRight());
-        		else if(rc.canDigDirt(dir.opposite().rotateLeft()))
-                    rc.digDirt(dir.opposite().rotateLeft());
-        	}
-        	else if(rc.onTheMap(right) && rc.senseElevation(right) < rc.senseElevation(at) && ((rc.getRoundNum() > 650) || rc.senseElevation(right)<3)) {
-        		if(rc.getDirtCarrying() > 0)
-                    rc.depositDirt(at.directionTo(right));
-        		else if(rc.canDigDirt(dir.opposite().rotateLeft().rotateLeft()))
-                    rc.digDirt(dir.opposite().rotateLeft().rotateLeft());
-        		else if(rc.canDigDirt(dir.opposite().rotateRight().rotateRight()))
-                    rc.digDirt(dir.opposite().rotateRight().rotateRight());
-        		else if(rc.canDigDirt(dir.opposite().rotateLeft()))
-                    rc.digDirt(dir.opposite().rotateLeft());
-        	}
-        	else {
-        		if(rc.getDirtCarrying() > 0)
-                    rc.depositDirt(Direction.CENTER);
-        		else if(rc.canDigDirt(dir.opposite().rotateLeft().rotateLeft()))
-                    rc.digDirt(dir.opposite().rotateLeft().rotateLeft());
-        		else if(rc.canDigDirt(dir.opposite().rotateRight().rotateRight()))
-                    rc.digDirt(dir.opposite().rotateRight().rotateRight());
-        		else if(rc.canDigDirt(dir.opposite().rotateLeft()))
-                    rc.digDirt(dir.opposite().rotateLeft());
-        	}
+            else if(rc.canDigDirt(dir.opposite().rotateRight().rotateRight()))
+                rc.digDirt(dir.opposite().rotateRight().rotateRight());
+            else if(rc.canDigDirt(dir.opposite().rotateLeft()))
+                rc.digDirt(dir.opposite().rotateLeft());
+
+
+//            MapLocation left = at.add(dir.rotateLeft());
+//        	MapLocation right = at.add(dir.rotateRight());
+//        	if (rc.onTheMap(left) && (rc.senseElevation(left) < rc.senseElevation(at)) && rc.onTheMap(right) && rc.senseElevation(left) < rc.senseElevation(right) && ((rc.getRoundNum() > 650) || rc.senseElevation(left)<3)) {
+//        		if(rc.getDirtCarrying() > 0)
+//                    rc.depositDirt(at.directionTo(left));
+//        		else if(rc.canDigDirt(dir.opposite().rotateLeft().rotateLeft()))
+//                    rc.digDirt(dir.opposite().rotateLeft().rotateLeft());
+//        		else if(rc.canDigDirt(dir.opposite().rotateRight().rotateRight()))
+//                    rc.digDirt(dir.opposite().rotateRight().rotateRight());
+//        		else if(rc.canDigDirt(dir.opposite().rotateLeft()))
+//                    rc.digDirt(dir.opposite().rotateLeft());
+//        	}
+//        	else if(rc.onTheMap(right) && rc.senseElevation(right) < rc.senseElevation(at) && ((rc.getRoundNum() > 650) || rc.senseElevation(right)<3)) {
+//        		if(rc.getDirtCarrying() > 0)
+//                    rc.depositDirt(at.directionTo(right));
+//        		else if(rc.canDigDirt(dir.opposite().rotateLeft().rotateLeft()))
+//                    rc.digDirt(dir.opposite().rotateLeft().rotateLeft());
+//        		else if(rc.canDigDirt(dir.opposite().rotateRight().rotateRight()))
+//                    rc.digDirt(dir.opposite().rotateRight().rotateRight());
+//        		else if(rc.canDigDirt(dir.opposite().rotateLeft()))
+//                    rc.digDirt(dir.opposite().rotateLeft());
+//        	}
+//        	else {
+//        		if(rc.getDirtCarrying() > 0)
+//                    rc.depositDirt(Direction.CENTER);
+//        		else if(rc.canDigDirt(dir.opposite().rotateLeft().rotateLeft()))
+//                    rc.digDirt(dir.opposite().rotateLeft().rotateLeft());
+//        		else if(rc.canDigDirt(dir.opposite().rotateRight().rotateRight()))
+//                    rc.digDirt(dir.opposite().rotateRight().rotateRight());
+//        		else if(rc.canDigDirt(dir.opposite().rotateLeft()))
+//                    rc.digDirt(dir.opposite().rotateLeft());
+//        	}
         }
         else if (at.distanceSquaredTo(home) == 1) {
         	MapLocation left = at.add(dir.rotateLeft().rotateLeft());
@@ -900,17 +925,17 @@ public strictfp class RobotPlayer {
         	MapLocation[] dirs = {left, right, dleft, dright};
         	MapLocation lowest = at;
         	for(MapLocation m : dirs){
-        	    if(rc.onTheMap(lowest) && rc.onTheMap(m) && rc.senseElevation(m) < rc.senseElevation(lowest)){
+        	    if(rc.onTheMap(m) && rc.senseElevation(m) < rc.senseElevation(lowest) && rc.getRoundNum() > 300){
         	        lowest = m;
                 }
             }
             if(rc.getDirtCarrying() > 0)
                 rc.depositDirt(at.directionTo(lowest));
-            else if(rc.canDigDirt(dir.opposite()))
+            else if(rc.canDigDirt(dir.opposite()) && !HQ.isAdjacentTo(at.add(dir.opposite())))
                 rc.digDirt(dir.opposite());
-            else if(rc.canDigDirt(dir.opposite().rotateLeft()))
+            else if(rc.canDigDirt(dir.opposite().rotateLeft()) && !HQ.isAdjacentTo(at.add(dir.opposite().rotateLeft())))
                 rc.digDirt(dir.opposite().rotateLeft());
-            else if(rc.canDigDirt(dir.opposite().rotateRight()))
+            else if(rc.canDigDirt(dir.opposite().rotateRight()) && !HQ.isAdjacentTo(at.add(dir.opposite().rotateRight())))
                 rc.digDirt(dir.opposite().rotateRight());
 
 
@@ -1037,17 +1062,12 @@ public strictfp class RobotPlayer {
             MapLocation loc = rc.getLocation();
             scan(loc);
             if(rc.isCurrentlyHoldingUnit()){
-                if(loc.isAdjacentTo(water)){
-                    rc.dropUnit(loc.directionTo(water));
-                }
-                if(rc.isCurrentlyHoldingUnit()){
                     for(Direction g : directions){
                         MapLocation check= loc.add(g);
                         if(rc.onTheMap(check) && rc.senseFlooding(check)&& rc.canDropUnit(g)){
                             rc.dropUnit(g);
                         }
                     }
-                }
                 moveToDrone(water);
             }
             RobotInfo[] C3PO = rc.senseNearbyRobots(rc.getCurrentSensorRadiusSquared(), rc.getTeam().opponent());
