@@ -35,8 +35,11 @@ public strictfp class RobotPlayer {
     static int numBuilt;
     static int mapQuadrant;
     static int schoolsBuilt;
-
+    static boolean initialRun;
     static MapLocation enHQDest;
+    static MapLocation pos1;
+    static MapLocation pos2;
+    static MapLocation pos3;
     static int factoriesBuilt;
     static  MapLocation HQ;
     static MapLocation scoutDest;
@@ -84,11 +87,18 @@ public strictfp class RobotPlayer {
         factoriesBuilt = 0;
         souploc = null;
         enHQDest = null;
+        initialRun = false;
         EnemyHQ = null;
         path = Direction.CENTER;
         HQ = getHQLocation();
+        if(rc.getType() == RobotType.DELIVERY_DRONE) {
+            pos1 = new MapLocation(rc.getMapWidth() - HQ.x - 1, HQ.y);
+            pos2 = new MapLocation(rc.getMapWidth() - HQ.x - 1, rc.getMapHeight() - HQ.y - 1);
+            pos3 = new MapLocation(HQ.x, rc.getMapHeight() - HQ.y - 1);
+        }
         scoutDest = null;
         mapCenter = new MapLocation(rc.getMapWidth()/2, rc.getMapHeight()/2);
+
 
         //landscaper task determiner
         if(rc.getType() == RobotType.LANDSCAPER){
@@ -107,12 +117,12 @@ public strictfp class RobotPlayer {
         }
         //drone task determiner
         if(rc.getType() == RobotType.DELIVERY_DRONE){
-            if(rc.getRoundNum() < 125){
+            if(rc.getRoundNum() < 150){
                 task = "scout";
-            }else if(rc.getRoundNum() < 800 && rc.getRoundNum() > 124) {
+            }else if(rc.getRoundNum() < 500 && rc.getRoundNum() > 149) {
                 task = "hover";
             }
-            else if(rc.getRoundNum() > 799){
+            else if(rc.getRoundNum() > 499){
                 task = "killEnemy";
             }
 //            task = "crunch";
@@ -637,7 +647,7 @@ public strictfp class RobotPlayer {
                 if (tryBuild(RobotType.LANDSCAPER, dir)) {
                     robotsBuilt++;
                 }
-        }else if(rc.getRoundNum() >= 150 && rc.getTeamSoup() > 510){
+        }else if(robotsBuilt < 10 && rc.getRoundNum() >= 150 && rc.getTeamSoup() > 510){
             for (Direction dir : directions)
 
                 if (tryBuild(RobotType.LANDSCAPER, dir)) {
@@ -647,7 +657,7 @@ public strictfp class RobotPlayer {
     }
     //Builds Drones
     static void runFulfillmentCenter() throws GameActionException {
-        if (robotsBuilt < 1 && rc.getRoundNum() < 125) {
+        if (robotsBuilt < 1 && rc.getRoundNum() < 150) {
             for (Direction dir : randomDirections())
                 if (rc.canBuildRobot(RobotType.DELIVERY_DRONE, dir)) {
 //                    broadcastQueue.add(new Information(0,1,1));
@@ -656,7 +666,7 @@ public strictfp class RobotPlayer {
                     rc.buildRobot(RobotType.DELIVERY_DRONE, dir);
 //                    break;
                 }
-        } else if (rc.getRoundNum() < 500 && rc.getRoundNum() > 124 && robotsBuilt < 7 && rc.getTeamSoup() > 505) {
+        } else if (rc.getRoundNum() < 500 && rc.getRoundNum() > 149 && robotsBuilt < 5 && rc.getTeamSoup() > 505) {
             for (Direction dir : randomDirections()) {
                 if (rc.canBuildRobot(RobotType.DELIVERY_DRONE, dir)) {
                     robotsBuilt++;
@@ -1004,6 +1014,7 @@ public strictfp class RobotPlayer {
     //__________________________________________________________________________________________________________________
     //DELIVERY DRONE CODE BELOW
     static void runDeliveryDrone() throws GameActionException {
+
         if(rc.getRoundNum() > 1500 && !task.equals("defend")){
             task = "crunch";
         }
@@ -1258,7 +1269,7 @@ public strictfp class RobotPlayer {
             }
         }
         for (RobotInfo r : nearbyFriendlies) {
-            if (quadrantIn(r.getLocation()) == quadrantIn(HQ) && r.getType() == RobotType.MINER && r.getLocation().isAdjacentTo(HQ)) {
+            if (rc.getRoundNum() > 300 && r.getType() == RobotType.MINER && r.getLocation().isAdjacentTo(HQ)) {
                 nearbyRobots.add(r);
             }
         }
@@ -1424,60 +1435,72 @@ public strictfp class RobotPlayer {
     }
 
     static void scout(MapLocation at) throws GameActionException {
-        if(scoutDest ==  null){
+        if(scoutDest == null){
+            scoutDest = pos1;
+            scouted.add(pos1);
+        }
+        if(at.isWithinDistanceSquared(pos1, 25)){
+            scoutDest = pos3;
+            scouted.add(pos3);
+        }
+        if(at.isWithinDistanceSquared(pos3, 25) && scouted.contains(pos1)){
             scoutDest = mapCenter;
+            initialRun = true;
             scouted.add(scoutDest);
         }
-        int xAdd = rc.getMapWidth()/6;
-        int yAdd = rc.getMapHeight()/6;
-        if (at.distanceSquaredTo(scoutDest) < 16) {
-            int q = quadrantIn(scoutDest);
-            if(q == 1){
-                MapLocation newDest = new MapLocation( at.x ,rc.getMapHeight() - at.y);
-                if(!scouted.contains(newDest)){
-                    scoutDest = new MapLocation(at.x ,rc.getMapHeight() - at.y - yAdd);
-                    if(rc.onTheMap(scoutDest)) {
-                        scouted.add(scoutDest);
-                    }else{
-                        scoutDest = mapCenter;
-                        scouted = new ArrayList<>();
+        if(initialRun) {
+            int xAdd = rc.getMapWidth() / 6;
+            int yAdd = rc.getMapHeight() / 6;
+            if (at.distanceSquaredTo(scoutDest) < 16) {
+                int q = quadrantIn(scoutDest);
+                if (q == 1) {
+                    MapLocation newDest = new MapLocation(at.x, rc.getMapHeight() - at.y);
+                    if (!scouted.contains(newDest)) {
+                        scoutDest = new MapLocation(at.x, rc.getMapHeight() - at.y - yAdd);
+                        if (rc.onTheMap(scoutDest)) {
+                            scouted.add(scoutDest);
+                        } else {
+                            scoutDest = mapCenter;
+                            scouted = new ArrayList<>();
+                        }
                     }
-                }
-            } else if(q == 2){
-                MapLocation newDest = new MapLocation( rc.getMapWidth() - at.x ,at.y);
-                if(!scouted.contains(newDest)){
-                    scoutDest = new MapLocation(rc.getMapWidth() - at.x + xAdd, at.y);
-                    if(rc.onTheMap(scoutDest)) {
-                        scouted.add(scoutDest);
-                    }else{
-                        scoutDest = mapCenter;
-                        scouted = new ArrayList<>();
+                } else if (q == 2) {
+                    MapLocation newDest = new MapLocation(rc.getMapWidth() - at.x, at.y);
+                    if (!scouted.contains(newDest)) {
+                        scoutDest = new MapLocation(rc.getMapWidth() - at.x + xAdd, at.y);
+                        if (rc.onTheMap(scoutDest)) {
+                            scouted.add(scoutDest);
+                        } else {
+                            scoutDest = mapCenter;
+                            scouted = new ArrayList<>();
+                        }
                     }
-                }
-            }else if(q == 3){
-                MapLocation newDest = new MapLocation( at.x ,rc.getMapHeight() - at.y);
-                if(!scouted.contains(newDest)){
-                    scoutDest = new MapLocation(at.x ,rc.getMapHeight() - at.y + yAdd);
-                    if(rc.onTheMap(scoutDest)) {
-                        scouted.add(scoutDest);
-                    }else{
-                        scoutDest = mapCenter;
-                        scouted = new ArrayList<>();
+                } else if (q == 3) {
+                    MapLocation newDest = new MapLocation(at.x, rc.getMapHeight() - at.y);
+                    if (!scouted.contains(newDest)) {
+                        scoutDest = new MapLocation(at.x, rc.getMapHeight() - at.y + yAdd);
+                        if (rc.onTheMap(scoutDest)) {
+                            scouted.add(scoutDest);
+                        } else {
+                            scoutDest = mapCenter;
+                            scouted = new ArrayList<>();
+                        }
                     }
-                }
-            }else if(q == 4){
-                MapLocation newDest = new MapLocation( rc.getMapWidth() - at.x ,at.y);
-                if(!scouted.contains(newDest)){
-                    scoutDest = new MapLocation(rc.getMapWidth() - at.x - xAdd, at.y);
-                    if(rc.onTheMap(scoutDest)) {
-                        scouted.add(scoutDest);
-                    }else{
-                        scoutDest = mapCenter;
-                        scouted = new ArrayList<>();
+                } else if (q == 4) {
+                    MapLocation newDest = new MapLocation(rc.getMapWidth() - at.x, at.y);
+                    if (!scouted.contains(newDest)) {
+                        scoutDest = new MapLocation(rc.getMapWidth() - at.x - xAdd, at.y);
+                        if (rc.onTheMap(scoutDest)) {
+                            scouted.add(scoutDest);
+                        } else {
+                            scoutDest = mapCenter;
+                            scouted = new ArrayList<>();
+                        }
                     }
                 }
             }
         }
+
 
         moveToDrone(scoutDest);
     }
@@ -1649,28 +1672,28 @@ public strictfp class RobotPlayer {
         }
 //        prevLocations.add(loc);
         //See if general direction is valid
-        if(rc.canMove(moveDirection) && !ew.contains(moveDirection) && !netGunInRange(loc.add(moveDirection))&& !prevLocations.contains(loc.add(moveDirection))){
+        if(rc.canMove(moveDirection) && !ew.contains(moveDirection) && !avoidEnHQ(loc.add(moveDirection)) && !netGunInRange(loc.add(moveDirection))&& !prevLocations.contains(loc.add(moveDirection))){
             path = moveDirection.opposite();
             tryMoveD(moveDirection);
-        }else if(rc.canMove(moveDirection.rotateLeft()) && !ew.contains(moveDirection.rotateLeft()) && !netGunInRange(loc.add(moveDirection.rotateLeft()))&& !prevLocations.contains(loc.add(moveDirection.rotateLeft()))){
+        }else if(rc.canMove(moveDirection.rotateLeft()) && !avoidEnHQ(loc.add(moveDirection)) && !ew.contains(moveDirection.rotateLeft()) && !netGunInRange(loc.add(moveDirection.rotateLeft()))&& !prevLocations.contains(loc.add(moveDirection.rotateLeft()))){
             path = moveDirection.rotateLeft().opposite();
             tryMoveD(moveDirection.rotateLeft());
-        }else if(rc.canMove(moveDirection.rotateRight()) && !ew.contains(moveDirection.rotateRight()) && !netGunInRange(loc.add(moveDirection.rotateRight()))&& !prevLocations.contains(loc.add(moveDirection.rotateRight()))) {
+        }else if(rc.canMove(moveDirection.rotateRight()) && !avoidEnHQ(loc.add(moveDirection)) && !ew.contains(moveDirection.rotateRight()) && !netGunInRange(loc.add(moveDirection.rotateRight()))&& !prevLocations.contains(loc.add(moveDirection.rotateRight()))) {
             path = moveDirection.rotateRight().opposite();
             tryMoveD(moveDirection.rotateRight());
-        }else if(rc.canMove(moveDirection.rotateLeft().rotateLeft()) && !ew.contains(moveDirection.rotateLeft().rotateLeft()) && !netGunInRange(loc.add(moveDirection.rotateLeft().rotateLeft()))&& !prevLocations.contains(loc.add(moveDirection.rotateLeft().rotateLeft()))){
+        }else if(rc.canMove(moveDirection.rotateLeft().rotateLeft()) && !avoidEnHQ(loc.add(moveDirection)) && !ew.contains(moveDirection.rotateLeft().rotateLeft()) && !netGunInRange(loc.add(moveDirection.rotateLeft().rotateLeft()))&& !prevLocations.contains(loc.add(moveDirection.rotateLeft().rotateLeft()))){
             path = moveDirection.rotateLeft().rotateLeft().opposite();
             tryMoveD(moveDirection.rotateLeft().rotateLeft());
-        }else if(rc.canMove(moveDirection.rotateRight().rotateRight()) && !ew.contains(moveDirection.rotateRight().rotateRight()) && !netGunInRange(loc.add(moveDirection.rotateRight().rotateRight()))&& !prevLocations.contains(loc.add(moveDirection.rotateRight().rotateRight()))) {
+        }else if(rc.canMove(moveDirection.rotateRight().rotateRight()) && !avoidEnHQ(loc.add(moveDirection)) && !ew.contains(moveDirection.rotateRight().rotateRight()) && !netGunInRange(loc.add(moveDirection.rotateRight().rotateRight()))&& !prevLocations.contains(loc.add(moveDirection.rotateRight().rotateRight()))) {
             path = moveDirection.rotateRight().rotateRight().opposite();
             tryMoveD(moveDirection.rotateRight().rotateRight());
-        }else if(rc.canMove(moveDirection.rotateLeft().rotateLeft().rotateLeft()) && !ew.contains(moveDirection.rotateLeft().rotateLeft().rotateLeft()) && !netGunInRange(loc.add(moveDirection.rotateLeft().rotateLeft().rotateLeft()))&& !prevLocations.contains(loc.add(moveDirection.rotateLeft().rotateLeft().rotateLeft()))) {
+        }else if(rc.canMove(moveDirection.rotateLeft().rotateLeft().rotateLeft()) && !avoidEnHQ(loc.add(moveDirection)) && !ew.contains(moveDirection.rotateLeft().rotateLeft().rotateLeft()) && !netGunInRange(loc.add(moveDirection.rotateLeft().rotateLeft().rotateLeft()))&& !prevLocations.contains(loc.add(moveDirection.rotateLeft().rotateLeft().rotateLeft()))) {
             path = moveDirection.rotateLeft().rotateLeft().rotateLeft().opposite();
             tryMoveD(moveDirection.rotateLeft().rotateLeft().rotateLeft());
-        }else if(rc.canMove(moveDirection.rotateRight().rotateRight().rotateRight()) && !ew.contains(moveDirection.rotateRight().rotateRight().rotateRight()) && !netGunInRange(loc.add(moveDirection.rotateRight().rotateRight().rotateRight()))&& !prevLocations.contains(loc.add(moveDirection.rotateRight().rotateRight().rotateRight()))){
+        }else if(rc.canMove(moveDirection.rotateRight().rotateRight().rotateRight()) && !avoidEnHQ(loc.add(moveDirection)) && !ew.contains(moveDirection.rotateRight().rotateRight().rotateRight()) && !netGunInRange(loc.add(moveDirection.rotateRight().rotateRight().rotateRight()))&& !prevLocations.contains(loc.add(moveDirection.rotateRight().rotateRight().rotateRight()))){
             path = moveDirection.rotateRight().rotateRight().rotateRight().opposite();
             tryMoveD(moveDirection.rotateRight().rotateRight().rotateRight());
-        }else if(rc.canMove(moveDirection.opposite()) && !ew.contains(moveDirection.opposite()) && !netGunInRange(loc.add(moveDirection.opposite()))&& !prevLocations.contains(loc.add(moveDirection.opposite()))) {
+        }else if(rc.canMove(moveDirection.opposite()) && !ew.contains(moveDirection.opposite()) && !avoidEnHQ(loc.add(moveDirection)) && !netGunInRange(loc.add(moveDirection.opposite()))&& !prevLocations.contains(loc.add(moveDirection.opposite()))) {
             path = moveDirection;
             tryMoveD(moveDirection.opposite());
         } else{
@@ -1687,7 +1710,7 @@ public strictfp class RobotPlayer {
         //Find general direction of destination
         MapLocation loc = rc.getLocation();
         Direction moveDirection = loc.directionTo(dest);
-        prevLocations.add(loc);
+//        prevLocations.add(loc);
         //See if general direction is valid
         if(rc.canMove(moveDirection)){
             path = moveDirection.opposite();
@@ -1767,6 +1790,23 @@ public strictfp class RobotPlayer {
             if(move.distanceSquaredTo(m) < 16){
                 return true;
             }
+        }
+        return false;
+    }
+    static boolean avoidEnHQ(MapLocation move){
+        if(EnemyHQ != null){
+            return false;
+        }
+//        System.out.println(oppNet);
+//        System.out.println(EnemyHQ);
+        if(move.distanceSquaredTo(pos1) < 16){
+            return true;
+        }
+        if(move.distanceSquaredTo(pos2) < 16){
+            return true;
+        }
+        if(move.distanceSquaredTo(pos3) < 16){
+            return true;
         }
         return false;
     }
@@ -1913,18 +1953,18 @@ public strictfp class RobotPlayer {
         int mapW = rc.getMapWidth();
         int mapH = rc.getMapHeight();
         //straight across
-        MapLocation dest1 = new MapLocation(mapW - hqX, hqY);
+        MapLocation dest1 = new MapLocation(mapW - hqX - 1, hqY);
         //straight down and straight across
-        MapLocation dest2 = new MapLocation(mapW-hqX, mapH-hqY);
+        MapLocation dest2 = new MapLocation(mapW-hqX - 1, mapH-hqY - 1);
 
-        if(at.x == dest2.x && at.y==dest2.y){
-            EnemyHQ = new MapLocation( hqX, mapH - hqY);
+        if(at.isWithinDistanceSquared(dest2, 16)){
+            EnemyHQ = new MapLocation( hqX, mapH - hqY - 1);
             oppNet.add(EnemyHQ);
         }
         if(enHQDest == null){
             enHQDest = dest1;
         }
-        if(at.distanceSquaredTo(dest1) < 16){
+        if(at.distanceSquaredTo(dest1) < 25){
             enHQDest = dest2;
         }
         moveToDrone(enHQDest);
