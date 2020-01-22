@@ -1288,6 +1288,7 @@ public strictfp class RobotPlayer {
             if(i.getType() == RobotType.MINER) {
                 minors.add(i);
                 if (rc.canPickUpUnit(i.getID())) {
+                    heldUnit = i;
                     rc.pickUpUnit(i.getID());
                 }
             }
