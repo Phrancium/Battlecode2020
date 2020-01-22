@@ -101,9 +101,9 @@ public strictfp class RobotPlayer {
         }
         //drone task determiner
         if(rc.getType() == RobotType.DELIVERY_DRONE){
-            if(rc.getRoundNum() < 150){
+            if(rc.getRoundNum() < 125){
                 task = "scout";
-            }else if(rc.getRoundNum() < 801 && rc.getRoundNum() > 150) {
+            }else if(rc.getRoundNum() < 801 && rc.getRoundNum() > 124) {
                 task = "hover";
             }
             else if(rc.getRoundNum() > 800){
@@ -826,11 +826,18 @@ public strictfp class RobotPlayer {
         MapLocation at = rc.getLocation();
         Direction dir = at.directionTo(home);
         MapLocation[] build = new MapLocation[8];
+        MapLocation hRight = home.add(Direction.WEST);
+        MapLocation hLeft = home.add(Direction.EAST);
         for(int i = 0; i < 8; i++) {
         	build[i] = home.add(direction[i]);
         }
         if(at.distanceSquaredTo(home) > 16){
             zergRush(home);
+        }else if(rc.onTheMap(hLeft) && rc.canSenseLocation(hLeft) && !rc.isLocationOccupied(hLeft)){
+            moveTo(hLeft);
+        }
+        else if(rc.onTheMap(hRight) && rc.canSenseLocation(hRight) && !rc.isLocationOccupied(hRight)){
+            moveTo(hRight);
         }
         else if (at.distanceSquaredTo(home) > 2){
         	for(int i = 0; i < 8; i++) {
@@ -886,56 +893,73 @@ public strictfp class RobotPlayer {
         	MapLocation dleft = at.add(dir.rotateLeft());
         	MapLocation dright = at.add(dir.rotateRight());
 
-        	if (rc.onTheMap(dleft) && (rc.getRoundNum() > 650) || rc.senseElevation(dleft)<3) {
-        		if(rc.getDirtCarrying() > 0)
-                    rc.depositDirt(at.directionTo(dleft));
-        		else if(rc.canDigDirt(dir.opposite()))
-                    rc.digDirt(dir.opposite());
-        		else if(rc.canDigDirt(dir.opposite().rotateLeft()))
-                    rc.digDirt(dir.opposite().rotateLeft());
-        		else if(rc.canDigDirt(dir.opposite().rotateRight()))
-                    rc.digDirt(dir.opposite().rotateRight());
-        	}
-        	else if(rc.onTheMap(dright) && (rc.getRoundNum() > 650) || rc.senseElevation(dright)<3) {
-        		if(rc.getDirtCarrying() > 0)
-                    rc.depositDirt(at.directionTo(dright));
-        		else if(rc.canDigDirt(dir.opposite()))
-                    rc.digDirt(dir.opposite());
-        		else if(rc.canDigDirt(dir.opposite().rotateLeft()))
-                    rc.digDirt(dir.opposite().rotateLeft());
-        		else if(rc.canDigDirt(dir.opposite().rotateRight()))
-                    rc.digDirt(dir.opposite().rotateRight());
-        	}
-        	if (rc.onTheMap(left) && rc.senseElevation(left) < rc.senseElevation(at) && rc.onTheMap(right) && rc.senseElevation(left) < rc.senseElevation(right) && ((rc.getRoundNum() > 650) || rc.senseElevation(left)<3)) {
-        		if(rc.getDirtCarrying() > 0)
-                    rc.depositDirt(at.directionTo(left));
-        		else if(rc.canDigDirt(dir.opposite()))
-                    rc.digDirt(dir.opposite());
-        		else if(rc.canDigDirt(dir.opposite().rotateLeft()))
-                    rc.digDirt(dir.opposite().rotateLeft());
-        		else if(rc.canDigDirt(dir.opposite().rotateRight()))
-                    rc.digDirt(dir.opposite().rotateRight());
-        	}
-        	else if(rc.onTheMap(right) && rc.senseElevation(right) < rc.senseElevation(at) && ((rc.getRoundNum() > 650) || rc.senseElevation(right)<3)) {
-        		if(rc.getDirtCarrying() > 0)
-                    rc.depositDirt(at.directionTo(right));
-        		else if(rc.canDigDirt(dir.opposite()))
-                    rc.digDirt(dir.opposite());
-        		else if(rc.canDigDirt(dir.opposite().rotateLeft()))
-                    rc.digDirt(dir.opposite().rotateLeft());
-        		else if(rc.canDigDirt(dir.opposite().rotateRight()))
-                    rc.digDirt(dir.opposite().rotateRight());
-        	}
-        	else {
-        		if(rc.getDirtCarrying() > 0)
-                    rc.depositDirt(Direction.CENTER);
-        		else if(rc.canDigDirt(dir.opposite()))
-                    rc.digDirt(dir.opposite());
-        		else if(rc.canDigDirt(dir.opposite().rotateLeft()))
-                    rc.digDirt(dir.opposite().rotateLeft());
-        		else if(rc.canDigDirt(dir.opposite().rotateRight()))
-                    rc.digDirt(dir.opposite().rotateRight());
-        	}
+        	MapLocation[] dirs = {left, right, dleft, dright};
+        	MapLocation lowest = at;
+        	for(MapLocation m : dirs){
+        	    if(rc.onTheMap(lowest) && rc.senseElevation(m) < rc.senseElevation(lowest)){
+        	        lowest = m;
+                }
+            }
+            if(rc.getDirtCarrying() > 0)
+                rc.depositDirt(at.directionTo(lowest));
+            else if(rc.canDigDirt(dir.opposite()))
+                rc.digDirt(dir.opposite());
+            else if(rc.canDigDirt(dir.opposite().rotateLeft()))
+                rc.digDirt(dir.opposite().rotateLeft());
+            else if(rc.canDigDirt(dir.opposite().rotateRight()))
+                rc.digDirt(dir.opposite().rotateRight());
+
+
+//        	if (rc.onTheMap(dleft) && (rc.getRoundNum() > 650) || rc.senseElevation(dleft)<3) {
+//        		if(rc.getDirtCarrying() > 0)
+//                    rc.depositDirt(at.directionTo(dleft));
+//        		else if(rc.canDigDirt(dir.opposite()))
+//                    rc.digDirt(dir.opposite());
+//        		else if(rc.canDigDirt(dir.opposite().rotateLeft()))
+//                    rc.digDirt(dir.opposite().rotateLeft());
+//        		else if(rc.canDigDirt(dir.opposite().rotateRight()))
+//                    rc.digDirt(dir.opposite().rotateRight());
+//        	}
+//        	else if(rc.onTheMap(dright) && (rc.getRoundNum() > 650) || rc.senseElevation(dright)<3) {
+//        		if(rc.getDirtCarrying() > 0)
+//                    rc.depositDirt(at.directionTo(dright));
+//        		else if(rc.canDigDirt(dir.opposite()))
+//                    rc.digDirt(dir.opposite());
+//        		else if(rc.canDigDirt(dir.opposite().rotateLeft()))
+//                    rc.digDirt(dir.opposite().rotateLeft());
+//        		else if(rc.canDigDirt(dir.opposite().rotateRight()))
+//                    rc.digDirt(dir.opposite().rotateRight());
+//        	}
+//        	if (rc.onTheMap(left) && rc.senseElevation(left) < rc.senseElevation(at) && rc.onTheMap(right) && rc.senseElevation(left) < rc.senseElevation(right) && ((rc.getRoundNum() > 650) || rc.senseElevation(left)<3)) {
+//        		if(rc.getDirtCarrying() > 0)
+//                    rc.depositDirt(at.directionTo(left));
+//        		else if(rc.canDigDirt(dir.opposite()))
+//                    rc.digDirt(dir.opposite());
+//        		else if(rc.canDigDirt(dir.opposite().rotateLeft()))
+//                    rc.digDirt(dir.opposite().rotateLeft());
+//        		else if(rc.canDigDirt(dir.opposite().rotateRight()))
+//                    rc.digDirt(dir.opposite().rotateRight());
+//        	}
+//        	else if(rc.onTheMap(right) && rc.senseElevation(right) < rc.senseElevation(at) && ((rc.getRoundNum() > 650) || rc.senseElevation(right)<3)) {
+//        		if(rc.getDirtCarrying() > 0)
+//                    rc.depositDirt(at.directionTo(right));
+//        		else if(rc.canDigDirt(dir.opposite()))
+//                    rc.digDirt(dir.opposite());
+//        		else if(rc.canDigDirt(dir.opposite().rotateLeft()))
+//                    rc.digDirt(dir.opposite().rotateLeft());
+//        		else if(rc.canDigDirt(dir.opposite().rotateRight()))
+//                    rc.digDirt(dir.opposite().rotateRight());
+//        	}
+//        	else {
+//        		if(rc.getDirtCarrying() > 0)
+//                    rc.depositDirt(Direction.CENTER);
+//        		else if(rc.canDigDirt(dir.opposite()))
+//                    rc.digDirt(dir.opposite());
+//        		else if(rc.canDigDirt(dir.opposite().rotateLeft()))
+//                    rc.digDirt(dir.opposite().rotateLeft());
+//        		else if(rc.canDigDirt(dir.opposite().rotateRight()))
+//                    rc.digDirt(dir.opposite().rotateRight());
+//        	}
         }
     }
 
