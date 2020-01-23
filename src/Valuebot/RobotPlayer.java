@@ -79,6 +79,7 @@ public strictfp class RobotPlayer {
     static int initialRound;
 
     static final int STATUSFREQ=50;
+    static final int SUPERSECRET=274321;
     //__________________________________________________________________________________________________________________
     //RUN CODE BELOW
     /**
@@ -260,7 +261,7 @@ public strictfp class RobotPlayer {
     //HQ CODE BELOW
     static void runHQ() throws GameActionException {
     	MapLocation base = rc.getLocation();
-        if(rc.getRoundNum() == 1) {
+        if(rc.getRoundNum() == 11) {
     		postLocation(1, base.x, base.y, 1);
     	}
     	RobotInfo[] r = rc.senseNearbyRobots();
@@ -314,8 +315,9 @@ public strictfp class RobotPlayer {
         if(HQ == null){
             HQ = getHQLocation();
         }
+        boolean stay=false;
         if(rc.getRoundNum() > 10) {
-            boolean stay = openEyes(curr);
+            stay = openEyes(curr);
         }
         if(rc.getTeamSoup() > 200 && curr.isAdjacentTo(HQ)){
             moveTo(curr.add(curr.directionTo(HQ).opposite()));
@@ -1772,7 +1774,7 @@ public strictfp class RobotPlayer {
          * 3 : Enemy HQ
          */
         int[] message = new int[7];
-        message[1] = 998997;
+        message[1] = SUPERSECRET;
         message[2] = code;
         message[3] = x;
         message[4] = y;
@@ -1782,20 +1784,22 @@ public strictfp class RobotPlayer {
 
     static MapLocation getHQLocation() throws GameActionException {
         //returns the location of HQ
-        MapLocation location = null;
-        for(int k = 1; k < rc.getRoundNum()-1; k++) {
-            Transaction[] block = rc.getBlock(k);
-            if(block.length != 0) {
-                for(int i = 0; i < block.length; i++) {
+        if (rc.getRoundNum()>11) {
+            MapLocation location = null;
+            Transaction[] block = rc.getBlock(11);
+            if (block.length != 0) {
+                for (int i = 0; i < block.length; i++) {
                     int[] message = block[i].getMessage();
-                    if(message[1] == 998997 && message[2] == 1) {
+                    if (message[1] == SUPERSECRET && message[2] == 1) {
                         location = new MapLocation(message[3], message[4]);
                         return location;
                     }
                 }
             }
+
+            return null;
         }
-        return location;
+        return null;
     }
 
     static MapLocation getSoupLocation() throws GameActionException {
@@ -1807,7 +1811,7 @@ public strictfp class RobotPlayer {
                 if(block.length != 0) {
                     for(int i = 0; i < block.length; i++) {
                         int[] message = block[i].getMessage();
-                        if(message[1] == 998997 && message[2] == 2) {
+                        if(message[1] == SUPERSECRET && message[2] == 2) {
                             location = new MapLocation(message[3], message[4]);
 //                            System.out.println(location);
                             return location;
@@ -1829,7 +1833,7 @@ public strictfp class RobotPlayer {
                 if(block.length != 0) {
                     for(int i = 0; i < block.length; i++) {
                         int[] message = block[i].getMessage();
-                        if(message[1] == 998997 && message[2] == 3) {
+                        if(message[1] == SUPERSECRET && message[2] == 3) {
                             location = new MapLocation(message[3], message[4]);
 //                            System.out.println(location);
                             return location;
