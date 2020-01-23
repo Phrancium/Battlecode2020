@@ -22,6 +22,17 @@ public strictfp class RobotPlayer {
         Direction.WEST,
         Direction.NORTHWEST
     };
+    static Direction[] directionsc = {
+            Direction.NORTH,
+            Direction.NORTHEAST,
+            Direction.EAST,
+            Direction.SOUTHEAST,
+            Direction.SOUTH,
+            Direction.SOUTHWEST,
+            Direction.WEST,
+            Direction.NORTHWEST,
+            Direction.CENTER,
+    };
     static RobotType[] spawnedByMiner = {RobotType.REFINERY, RobotType.VAPORATOR, RobotType.DESIGN_SCHOOL,
             RobotType.FULFILLMENT_CENTER, RobotType.NET_GUN};
 
@@ -31,7 +42,7 @@ public strictfp class RobotPlayer {
     static MapLocation initialLoc;
     static MapLocation souploc;
     static Direction path;
-    static String task;
+    static String task="";
     static int numBuilt;
     static int mapQuadrant;
     static int schoolsBuilt;
@@ -128,17 +139,17 @@ public strictfp class RobotPlayer {
                 task = "the other guys";
             }
         }
-        //drone task determiner
-        if(rc.getType() == RobotType.DELIVERY_DRONE){
-            if(rc.getRoundNum() < 150){
-                task = "scout";
-            }else if(rc.getRoundNum() < 500 && rc.getRoundNum() > 149) {
-                task = "hover";
-            }
-            else if(rc.getRoundNum() > 499){
-                task = "killEnemy";
-            }
-        }
+        //drone task determiner // we got new one based on broadcast
+//        if(rc.getType() == RobotType.DELIVERY_DRONE){
+//            if(rc.getRoundNum() < 150){
+//                task = "scout";
+//            }else if(rc.getRoundNum() < 500 && rc.getRoundNum() > 149) {
+//                task = "hover";
+//            }
+//            else if(rc.getRoundNum() > 499){
+//                task = "killEnemy";
+//            }
+//        }
         if(rc.getRoundNum() > 20){
             if(HQ.x < 7){
                 baseX1 = -1;
@@ -236,6 +247,10 @@ public strictfp class RobotPlayer {
         //fill up dirHash 1:Direction.NORTH, etc
         for (int i = 0; i < directions.length; i++){
             dirHash.put(i+1, directions[i]);
+        }
+
+        if(rc.getRoundNum() > 20) {
+            receiveBroadcast(rc.getRoundNum() - 1);
         }
 
 
@@ -549,7 +564,7 @@ public strictfp class RobotPlayer {
     }
 
     static void mineSoup(MapLocation at) throws GameActionException{
-        for (Direction l : directions) {
+        for (Direction l : directionsc) {
             if (rc.canMineSoup(l)) {
                 rc.mineSoup(l);
             }
@@ -680,16 +695,30 @@ public strictfp class RobotPlayer {
     //Builds Drones
     static void runFulfillmentCenter() throws GameActionException {
         if(!closeEnemyNetGun()) {
-            if (robotsBuilt < 1 && rc.getRoundNum() < 150) {
+            if (robotsBuilt < 1) {
                 for (Direction dir : randomDirections())
                     if (rc.canBuildRobot(RobotType.DELIVERY_DRONE, dir)) {
                         robotsBuilt++;
+                        addAndBroadcast(new Information(0,1,0));//scout
                         rc.buildRobot(RobotType.DELIVERY_DRONE, dir);
                     }
-            } else if (rc.getRoundNum() < 650 && rc.getRoundNum() > 149 && robotsBuilt < 5 && rc.getTeamSoup() > 505) {
+
+            } else if (rc.getRoundNum() < 650 && rc.getRoundNum() > 149 && robotsBuilt < 5) {
                 for (Direction dir : randomDirections()) {
                     if (rc.canBuildRobot(RobotType.DELIVERY_DRONE, dir)) {
                         robotsBuilt++;
+                        if (robotsBuilt==2) {
+                            addAndBroadcast(new Information(0, 1, 1));//hover
+                        }
+                        else if (robotsBuilt==3){
+                            addAndBroadcast(new Information(0,1,2));//killEnemy
+                        }
+                        else if (robotsBuilt==4){
+                            addAndBroadcast(new Information(0,1,2));
+                        }
+                        else if (robotsBuilt==5){
+                            addAndBroadcast(new Information(0,1,1));
+                        }
                         rc.buildRobot(RobotType.DELIVERY_DRONE, dir);
                     }
                 }
@@ -697,6 +726,7 @@ public strictfp class RobotPlayer {
                 for (Direction dir : randomDirections()) {
                     if (rc.canBuildRobot(RobotType.DELIVERY_DRONE, dir)) {
                         robotsBuilt++;
+                        addAndBroadcast(new Information(0,1,2));//killEnemy
                         rc.buildRobot(RobotType.DELIVERY_DRONE, dir);
                     }
                 }
@@ -2094,8 +2124,19 @@ public strictfp class RobotPlayer {
                         if(x==0 && y==0 && rc.getType()==RobotType.DELIVERY_DRONE) { //never use this
                             task="crunch";
                         }
-                        else if (round-initialRound <= 10 &&  x==1 && y==1 && rc.getType()==RobotType.DELIVERY_DRONE) {
-                            task="scout";
+                        else if ( x==1 && rc.getType()==RobotType.DELIVERY_DRONE && task=="") {
+                            if (y==0) {
+                                task = "scout";
+                            }
+                            else if (y==1){
+                                task="hover";
+                            }
+                            else if (y==2){
+                                task="killEnemy";
+                            }
+                            else if (y==3){
+                                task="defend";
+                            }
                         }
                         else if (x==3 && y==3 && rc.getType()==RobotType.MINER) {
                             schoolsBuilt++;
@@ -2103,6 +2144,7 @@ public strictfp class RobotPlayer {
                         else if (x==4 && y==4 && rc.getType()==RobotType.MINER) {
                             factoriesBuilt++;
                         }
+
                             break;
 
                     case 1:
