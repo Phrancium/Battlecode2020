@@ -125,15 +125,15 @@ public strictfp class RobotPlayer {
 
 
         //landscaper task determiner
-        if(rc.getType() == RobotType.LANDSCAPER){
-            if(rc.getRoundNum() < 150) {
-                task = "castle";
-            }else{
-                task = "terraform";
-            }
-        }
+//        if(rc.getType() == RobotType.LANDSCAPER){
+//            if(rc.getRoundNum() < 150) {
+//                task = "castle";
+//            }else{
+//                task = "terraform";
+//            }
+//        }
         if(rc.getType() == RobotType.MINER){
-            if (rc.getRoundNum()<=150){
+            if (rc.getRoundNum()<=20){
                 task="first3";
             }else{
                 task = "the other guys";
@@ -678,12 +678,20 @@ public strictfp class RobotPlayer {
         if(robotsBuilt < 2 && rc.getRoundNum() < 150) {
             for (Direction dir : directions)
                 if (tryBuild(RobotType.LANDSCAPER, dir)) {
+                    addAndBroadcast(new Information(0,2,0));
                     robotsBuilt++;
                 }
         }else if(robotsBuilt < 8 && rc.getRoundNum() >= 150 && rc.getTeamSoup() > 210){
             for (Direction dir : directions)
                 if (tryBuild(RobotType.LANDSCAPER, dir)) {
                     robotsBuilt++;
+                    if (robotsBuilt==3 || robotsBuilt==4){
+                        addAndBroadcast(new Information(0,2,1));
+                    }
+                    else {
+                        addAndBroadcast(new Information(0,2,0));
+                    }
+
                 }
         }else if(rc.getRoundNum() >= 800 && rc.getTeamSoup() > 510){
             for (Direction dir : directions)
@@ -760,6 +768,10 @@ public strictfp class RobotPlayer {
     //__________________________________________________________________________________________________________________
     //LANDSCAPER CODE BELOW
     static void runLandscaper() throws GameActionException {
+
+        if(rc.getRoundNum() > 20) {
+            receiveBroadcast(rc.getRoundNum() - 1);
+        }
     	if(task.equals("castle")) {
             buildCastle();
         }
@@ -2128,12 +2140,12 @@ public strictfp class RobotPlayer {
                 }
 
                 MapLocation next= new MapLocation(x,y);
-                switch (type){
+                switch (type){//only edit this section
                     case 0:
                         if(x==0 && y==0 && rc.getType()==RobotType.DELIVERY_DRONE) { //never use this
                             task="crunch";
                         }
-                        else if ( x==1 && rc.getType()==RobotType.DELIVERY_DRONE && task=="") {
+                        else if ( x==1 && rc.getType()==RobotType.DELIVERY_DRONE && task.equals("")) {
                             if (y==0) {
                                 task = "scout";
                             }
@@ -2145,6 +2157,14 @@ public strictfp class RobotPlayer {
                             }
                             else if (y==3){
                                 task="defend";
+                            }
+                        }
+                        else if ( x==2 && rc.getType()==RobotType.LANDSCAPER && task.equals("")) {
+                            if (y==0) {
+                                task = "castle";
+                            }
+                            else if (y==1){
+                                task="terraform";
                             }
                         }
                         else if (x==3 && y==3 && rc.getType()==RobotType.MINER) {
@@ -2170,9 +2190,7 @@ public strictfp class RobotPlayer {
                         }
                         break;
                     case 4:
-                        if(!offensiveEnemyBuildings.contains(next)) {
-                            offensiveEnemyBuildings.add(next);
-                        }
+
                         if(!refineries.contains(next)) {
                             refineries.add(next);
                         }
