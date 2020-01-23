@@ -413,19 +413,17 @@ public strictfp class RobotPlayer {
                 }
             }
         }
-        if(rc.getRoundNum() > 200 && rc.getTeamSoup() > 499) {
-            if (curr.distanceSquaredTo(HQ) > 81) {
-                moveTo(HQ);
-            } else {
-                for (Direction dir : directions) {
-                    if (rc.canBuildRobot(RobotType.VAPORATOR, dir) && curr.add(dir).distanceSquaredTo(HQ) > 8 && curr.add(dir).distanceSquaredTo(HQ) <= 81) {
-                        rc.buildRobot(RobotType.VAPORATOR, dir);
-                    }
-                }
-            }
-        }
-
-        //NOTE: schoolsBuilt is saved per miner, meaning each miner will want to make its own design school
+//        if(rc.getRoundNum() > 200 && rc.getTeamSoup() > 499) {
+//            if (curr.distanceSquaredTo(HQ) > 81) {
+//                moveTo(HQ);
+//            } else {
+//                for (Direction dir : directions) {
+//                    if (rc.canBuildRobot(RobotType.VAPORATOR, dir) && curr.add(dir).distanceSquaredTo(HQ) > 8 && curr.add(dir).distanceSquaredTo(HQ) <= 81) {
+//                        rc.buildRobot(RobotType.VAPORATOR, dir);
+//                    }
+//                }
+//            }
+//        }
         //MINE SOUP
 
         if (souploc != null && rc.getSoupCarrying() < 96){
@@ -493,6 +491,7 @@ public strictfp class RobotPlayer {
             for (Direction d : directions) {
                 if (rc.canBuildRobot(RobotType.REFINERY, d) && loc.add(d).distanceSquaredTo(HQ) > 8) {
                     refineries.add(loc.add(d));
+                    addAndBroadcast(new Information(4,loc.add(d).x,loc.add(d).y));
                     rc.buildRobot(RobotType.REFINERY, d);
                 }
             }
@@ -578,7 +577,7 @@ public strictfp class RobotPlayer {
     }
 
     static void scoutMiner(MapLocation at) throws GameActionException {
-        moveTo(at.add(randomInitialDirection));
+//        moveTo(at.add(randomInitialDirection));
 
     }
 
