@@ -259,8 +259,59 @@ public strictfp class RobotPlayer {
     }
     //__________________________________________________________________________________________________________________
     //HQ CODE BELOW
+    static Direction[] hqdirections;
     static void runHQ() throws GameActionException {
     	MapLocation base = rc.getLocation();
+    	HQ=base;
+
+        if (rc.getRoundNum() == 1){
+            MapLocation[] s=rc.senseNearbySoup(8);
+            if (s.length!=0){
+                Direction d=base.directionTo(s[0]);
+                hqdirections= new Direction[]{
+                        d, d.rotateLeft(), d.rotateRight(), d.rotateLeft().rotateLeft(), d.rotateRight().rotateRight(), d.rotateLeft().rotateLeft().rotateLeft(), d.rotateRight().rotateRight().rotateRight(), d.opposite()
+                };
+            }
+            else {
+                s=rc.senseNearbySoup(18);
+                if (s.length!=0){
+                    Direction d=base.directionTo(s[0]);
+                    hqdirections= new Direction[]{
+                            d, d.rotateLeft(), d.rotateRight(), d.rotateLeft().rotateLeft(), d.rotateRight().rotateRight(), d.rotateLeft().rotateLeft().rotateLeft(), d.rotateRight().rotateRight().rotateRight(), d.opposite()
+                    };
+                }
+                else {
+                    s=rc.senseNearbySoup(32);
+                    if (s.length!=0){
+                        Direction d=base.directionTo(s[0]);
+                        hqdirections= new Direction[]{
+                                d, d.rotateLeft(), d.rotateRight(), d.rotateLeft().rotateLeft(), d.rotateRight().rotateRight(), d.rotateLeft().rotateLeft().rotateLeft(), d.rotateRight().rotateRight().rotateRight(), d.opposite()
+                        };
+                    }
+                    else {
+                        s=rc.senseNearbySoup();
+                        if (s.length!=0){
+                            Direction d=base.directionTo(s[0]);
+                            hqdirections= new Direction[]{
+                                    d, d.rotateLeft(), d.rotateRight(), d.rotateLeft().rotateLeft(), d.rotateRight().rotateRight(), d.rotateLeft().rotateLeft().rotateLeft(), d.rotateRight().rotateRight().rotateRight(), d.opposite()
+                            };
+                        }
+                        else {
+                            hqdirections=randomDirections();
+                        }
+                    }
+                }
+            }
+        }
+
+        if (rc.getRoundNum() < 20) {
+            for (Direction dir : hqdirections) {
+                if(tryBuild(RobotType.MINER, dir)) {
+                    robotsBuilt++;
+                }
+            }
+        }
+
         if(rc.getRoundNum() == 11) {
     		postLocation(1, base.x, base.y, 1);
     	}
@@ -270,13 +321,7 @@ public strictfp class RobotPlayer {
     	        rc.shootUnit(s.getID());
             }
         }
-    	if (rc.getRoundNum() < 20) {
-            for (Direction dir : randomDirections()) {
-                if(tryBuild(RobotType.MINER, dir)) {
-                    robotsBuilt++;
-                }
-            }
-        }
+
     	if(robotsBuilt < 6 && rc.getRoundNum() > 100 && rc.getTeamSoup()>204){
             for (Direction dir : randomDirections()) {
                 if(tryBuild(RobotType.MINER, dir)) {
