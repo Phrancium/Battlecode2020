@@ -353,7 +353,7 @@ public strictfp class RobotPlayer {
     //__________________________________________________________________________________________________________________
     //MINER CODE BELOW
     static void runMiner() throws GameActionException {
-        if(rc.getRoundNum() > 10) {
+        if(rc.getRoundNum() > 20) {
             receiveBroadcast(rc.getRoundNum() - 1);
         }
         MapLocation curr = rc.getLocation();
@@ -361,7 +361,7 @@ public strictfp class RobotPlayer {
             HQ = getHQLocation();
         }
 
-           boolean stay = openEyes(curr);
+        boolean stay = openEyes(curr);
 
         if(rc.getTeamSoup() > 200 && curr.isAdjacentTo(HQ)){
             moveTo(curr.add(curr.directionTo(HQ).opposite()));
