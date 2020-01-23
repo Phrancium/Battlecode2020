@@ -696,11 +696,18 @@ public strictfp class RobotPlayer {
         enRush(at);
         if((rc.getDirtCarrying() < 25 && !nextToWall(at)) || rc.getDirtCarrying() == 0){
             for(Direction d : directions){
-                if((rc.senseElevation(at.add(d)) > 3 && !onTheWall(at.add(d))) || isWell(at.add(d))){
+                MapLocation m = at.add(d);
+                if((rc.senseElevation(m) > 3 && rc.senseElevation(m) < 101 && !onTheWall(m) && !rc.isLocationOccupied(m)) || isWell(m)){
                     rc.digDirt(d);
                 }
             }
             findPile(at);
+        }
+        for(Direction d : directions){
+            MapLocation m = at.add(d);
+            if(rc.senseElevation(m) < 3 && rc.senseElevation(m) > -50 && !rc.isLocationOccupied(m)){
+                rc.depositDirt(d);
+            }
         }
         if(!nextToWall(at)){
             moveToWall(at);
