@@ -111,11 +111,11 @@ public strictfp class RobotPlayer {
 
         //landscaper task determiner
         if(rc.getType() == RobotType.LANDSCAPER){
-//            if(rc.getRoundNum() < 150) {
-//                task = "castle";
-//            }else{
+            if(rc.getRoundNum() < 150) {
+                task = "castle";
+            }else{
                 task = "terraform";
-//            }
+            }
         }
         if(rc.getType() == RobotType.MINER){
             if (rc.getRoundNum()<=150){
@@ -697,11 +697,18 @@ public strictfp class RobotPlayer {
         enRush(at);
         if((rc.getDirtCarrying() < 25 && !nextToWall(at)) || rc.getDirtCarrying() == 0){
             for(Direction d : directions){
-                if(rc.senseElevation(at.add(d)) > 3 && !onTheWall(at.add(d))){
+                MapLocation m = at.add(d);
+                if((rc.senseElevation(m) > 3 && rc.senseElevation(m) < 101 && !onTheWall(m) && !rc.isLocationOccupied(m)) || isWell(m)){
                     rc.digDirt(d);
                 }
             }
             findPile(at);
+        }
+        for(Direction d : directions){
+            MapLocation m = at.add(d);
+            if(rc.senseElevation(m) < 3 && rc.senseElevation(m) > -50 && !rc.isLocationOccupied(m)){
+                rc.depositDirt(d);
+            }
         }
         if(!nextToWall(at)){
             moveToWall(at);
@@ -804,6 +811,22 @@ public strictfp class RobotPlayer {
 //        }
     }
 
+    static boolean isWell(MapLocation m){
+        if(m.equals(well1)){
+            return true;
+        }
+        if(m.equals(well2)){
+            return true;
+        }
+        if(m.equals(well3)){
+            return true;
+        }
+        if(m.equals(well4)){
+            return true;
+        }
+        return false;
+    }
+
     static void enRush(MapLocation at) throws  GameActionException{
         for(RobotInfo r : rc.senseNearbyRobots(rc.getCurrentSensorRadiusSquared(), rc.getTeam().opponent())){
             if(withinWalls(r.getLocation()) && (r.getType() == RobotType.NET_GUN || r.getType() == RobotType.DESIGN_SCHOOL)){
@@ -854,6 +877,7 @@ public strictfp class RobotPlayer {
         return false;
     }
     static void findPile(MapLocation at) throws GameActionException{
+
         for(int i = 0; i < 7; i++){
             for(int l = 0; l < 7; l++){
                 MapLocation dirt = new MapLocation(i, l);
@@ -1028,7 +1052,7 @@ public strictfp class RobotPlayer {
         }
 
         if(task.equals("scout")){
-            if(rc.getRoundNum()%10 == 0 || broadcastQueue.size()>11){
+            if(rc.getRoundNum()%10 == 0 || broadcastQueue.size()>14){
                 tryBroadcast(1);
             }
             MapLocation loc = rc.getLocation();
@@ -1853,7 +1877,7 @@ public strictfp class RobotPlayer {
             BitSet bitSet=new BitSet(224);
             int infocount=0;
             int index=0;
-            while(infocount<11 && !broadcastQueue.isEmpty()) {
+            while(infocount<14 && !broadcastQueue.isEmpty()) {
                 Information next = broadcastQueue.poll();
                 index++;
                 int type = next.getType();
@@ -1864,14 +1888,14 @@ public strictfp class RobotPlayer {
                     type = type>>>1;
                 }
                 int x = next.getX();
-                for (int i = 0; i < 8; i++) {
+                for (int i = 0; i < 6; i++) {
 
                     bitSet.set(index, x % 2 != 0);
                     index++;
                     x = x >>>1;
                 }
                 int y = next.getY();
-                for (int i = 0; i < 8; i++) {
+                for (int i = 0; i < 6; i++) {
 
                     bitSet.set(index, y % 2 != 0);
                     index++;
@@ -1879,19 +1903,19 @@ public strictfp class RobotPlayer {
                 }
                 infocount++;
             }
-            bitSet.set(0 * 20, true);
-            //bitSet.set(1*20,true);
-            bitSet.set(2 * 20, true);
-            bitSet.set(3 * 20, true);
-            bitSet.set(4 * 20, true);
-            //bitSet.set(5*20,true);
-            bitSet.set(6 * 20, true);
-            //bitSet.set(7*20,true);
-            //bitSet.set(8*20,true);
-            bitSet.set(9 * 20, true);
-            bitSet.set(10 * 20, true);
-            for (int i = 220; i < 224; i++) {
-                bitSet.set(i, infocount % 2 != 0);
+            bitSet.set(0 * 16, true);
+            //bitSet.set(1*16,true);
+            bitSet.set(2 * 16, true);
+            bitSet.set(3 * 16, true);
+            bitSet.set(4 * 16, true);
+            //bitSet.set(5*16,true);
+            bitSet.set(6 * 16, true);
+            //bitSet.set(7*16,true);
+            //bitSet.set(8*16,true);
+            //bitSet.set(9 * 16, true);
+
+            for (int i = 0; i < 4; i++) {
+                bitSet.set((16*(i+10)), infocount % 2 != 0);
                 infocount = infocount>>> 1;
             }
             long[] longs=bitSet.toLongArray();
@@ -1899,9 +1923,21 @@ public strictfp class RobotPlayer {
             message[1]= ((int)(longs[0]>>>32));
             message[2]= ((int)longs[1]);
             message[3]= ((int)(longs[1]>>>32));
-            message[4]= ((int)longs[2]);
-            message[5]= ((int)(longs[2]>>>32));
-            message[6]= ((int)longs[3]);
+            if (longs.length>=2) {
+                message[4]= ((int)longs[2]);
+                message[5]= ((int)(longs[2]>>>32));
+            }
+            else {
+                message[4]= 0;
+                message[5]= 0;
+            }
+
+            if (longs.length==3) {
+                message[6] = ((int) longs[3]);
+            }
+            else{
+                message[6]=0;
+            }
 
             rc.submitTransaction(message, cost);
             return true;
@@ -1921,17 +1957,19 @@ public strictfp class RobotPlayer {
             longs[2] = (long) curr[5] << 32 | curr[4] & 0xFFFFFFFFL;
             longs[3] = (long) curr[6] & 0xFFFFFFFFL;
             BitSet bitSet=BitSet.valueOf(longs);
-            if (    bitSet.get(0 * 20)&&
-                    !bitSet.get(1 * 20)&&
-                    bitSet.get(2 * 20)&&
-                    bitSet.get(3 * 20)&&
-                    bitSet.get(4 * 20)&&
-                    !bitSet.get(5 * 20)&&
-                    bitSet.get(6 * 20)&&
-                    !bitSet.get(7 * 20)&&
-                    !bitSet.get(8 * 20)&&
-                    bitSet.get(9 * 20)&&
-                    bitSet.get(10 * 20)){
+            if (    bitSet.get(0 * 16) &&
+                    !bitSet.get(1*16) &&
+                    bitSet.get(2 * 16) &&
+                    bitSet.get(3 * 16) &&
+                    bitSet.get(4 * 16) &&
+                    !bitSet.get(5*16) &&
+                    bitSet.get(6 * 16) &&
+                    !bitSet.get(7*16) &&
+                    !bitSet.get(8*16) &&
+                    !bitSet.get(9 * 16)
+
+
+            ) {
                 out.add(bitSet);
             }
         }
@@ -1945,24 +1983,24 @@ public strictfp class RobotPlayer {
         for (BitSet ours :
                 ourlist) {
             int count=0;
-            for (int i = 220; i < 224; i++) {
-                if (ours.get(i)) count+=1L<<(i-220);
+            for (int i = 0; i < 4; i++) {
+                if (ours.get(16*(i+10))) count+=1L<<(i);
             }
-            if (count>11){
+            if (count>14){
                 break;
             }
             for (int i = 0; i < count; i++) {
                 int type=0;
                 for (int j = 0; j < 3; j++) {
-                    if (ours.get(i*20+j+1)) type+=1L<<j;
+                    if (ours.get(i*16+j+1)) type+=1L<<j;
                 }
                 int x=0;
-                for (int j = 3; j < 11; j++) {
-                    if (ours.get(i*20+j+1)) x+=1L<<(j-3);
+                for (int j = 3; j < 9; j++) {
+                    if (ours.get(i*16+j+1)) x+=1L<<(j-3);
                 }
                 int y=0;
-                for (int j = 11; j < 19; j++) {
-                    if (ours.get(i*20+j+1)) y+=1L<<(j-11);
+                for (int j = 9; j < 15; j++) {
+                    if (ours.get(i*16+j+1)) y+=1L<<(j-9);
                 }
                 MapLocation next= new MapLocation(x,y);
                 switch (type){
