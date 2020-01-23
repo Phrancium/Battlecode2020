@@ -36,6 +36,7 @@ public strictfp class RobotPlayer {
     static int mapQuadrant;
     static int schoolsBuilt;
     static boolean initialRun;
+    static boolean carryingteammate = false;
     static MapLocation enHQDest;
     static MapLocation pos1;
     static MapLocation pos2;
@@ -1065,7 +1066,26 @@ public strictfp class RobotPlayer {
         if(task.equals(("crunch"))){
             MapLocation loc = rc.getLocation();
             scan(loc);
-            if(rc.isCurrentlyHoldingUnit()){
+            if(loc.distanceSquaredTo(HQ) < 46 && loc.distanceSquaredTo(HQ) > 8 && loc.distanceSquaredTo(EnemyHQ) > 24){
+                RobotInfo[] R2D2 = rc.senseNearbyRobots(rc.getCurrentSensorRadiusSquared(), rc.getTeam());
+                for(RobotInfo x : R2D2){
+                    if(rc.canPickUpUnit(x.getID()) && x.getType().name() == "LANDSCAPER"){
+                        rc.pickUpUnit(x.getID());
+                        carryingteammate = true;
+                    }
+                }
+                moveToCrunch(EnemyHQ);
+            }
+            if(rc.isCurrentlyHoldingUnit() && carryingteammate == true){
+                for(Direction g : directions){
+                    MapLocation check= loc.add(g);
+                    if(rc.onTheMap(check) && check.distanceSquaredTo(EnemyHQ) < 9 && !rc.senseFlooding(check) && rc.canDropUnit(g)){
+                        rc.dropUnit(g);
+                    }
+                }
+                moveToCrunch(EnemyHQ);
+            }
+            if(rc.isCurrentlyHoldingUnit() && carryingteammate == false){
                     for(Direction g : directions){
                         MapLocation check= loc.add(g);
                         if(rc.onTheMap(check) && rc.senseFlooding(check)&& rc.canDropUnit(g)){
