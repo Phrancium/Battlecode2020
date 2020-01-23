@@ -1150,15 +1150,25 @@ public strictfp class RobotPlayer {
             MapLocation loc = rc.getLocation();
             updateBroadcast(scan(loc));
 
+            if(initialRun && souploc != null){
+                pickUpMiner(loc);
+                moveTo(HQ);
+            }
             if(rc.isCurrentlyHoldingUnit()){
-                for(Direction g : directions){
-                    MapLocation check= loc.add(g);
-                    if(rc.onTheMap(check) && rc.senseFlooding(check) && rc.canDropUnit(g)){
-                        rc.dropUnit(g);
+                if(loc.isAdjacentTo(souploc)){
+                    if(rc.canDropUnit(loc.directionTo(souploc)) && !rc.senseFlooding(souploc)){
+                        rc.dropUnit(loc.directionTo(souploc));
+                        souploc = null;
+                    }else if(rc.canSenseLocation(loc.add(loc.directionTo(souploc).rotateLeft())) && rc.canDropUnit(loc.directionTo(souploc).rotateLeft()) && !rc.senseFlooding(loc.add(loc.directionTo(souploc).rotateLeft()))){
+                        rc.dropUnit(loc.directionTo(souploc).rotateLeft());
+                        souploc = null;
+                    }else if(rc.canSenseLocation(loc.add(loc.directionTo(souploc).rotateRight())) && rc.canDropUnit(loc.directionTo(souploc).rotateRight()) && !rc.senseFlooding(loc.add(loc.directionTo(souploc).rotateRight()))){
+                        rc.dropUnit(loc.directionTo(souploc).rotateRight());
+                        souploc = null;
                     }
                 }
+                moveTo(souploc);
             }
-
             scout(loc);
 
         }
@@ -1183,7 +1193,7 @@ public strictfp class RobotPlayer {
             MapLocation loc = rc.getLocation();
             scan(loc);
 
-            if(rc.isCurrentlyHoldingUnit() && carryingteammate == true){
+            if(rc.isCurrentlyHoldingUnit() && carryingteammate){
                 for(Direction g : directions){
                     MapLocation check= loc.add(g);
                     if(rc.onTheMap(check) && check.distanceSquaredTo(EnemyHQ) < 9 && !rc.senseFlooding(check) && rc.canDropUnit(g)){
@@ -1192,7 +1202,7 @@ public strictfp class RobotPlayer {
                 }
                 moveToCrunch(EnemyHQ);
             }
-            if(rc.isCurrentlyHoldingUnit() && carryingteammate == false){
+            if(rc.isCurrentlyHoldingUnit() && !carryingteammate){
                     for(Direction g : directions){
                         MapLocation check= loc.add(g);
                         if(rc.onTheMap(check) && rc.senseFlooding(check)&& rc.canDropUnit(g)){
@@ -1215,7 +1225,7 @@ public strictfp class RobotPlayer {
             }
             MapLocation at = rc.getLocation();
             scan(at);
-            if(rc.getRoundNum() > 250){
+            if(rc.getRoundNum() > 200){
                 if(rc.isCurrentlyHoldingUnit() && heldUnit.getType() == RobotType.MINER){
                     if(at.distanceSquaredTo(HQ) > 64 || souploc == null){
                         souploc = getClosestSoup(at);
@@ -1452,6 +1462,15 @@ public strictfp class RobotPlayer {
                 soup.add(m);
                 news.get(2).add(m);
             }
+            if(rc.canSenseLocation(m)) {
+                totS += rc.senseSoup(m);
+            }
+        }
+        if(totS > 200 && souploc == null){
+            MapLocation h = getClosestSoup(at);
+            if(h.distanceSquaredTo(HQ) > 144 && !rc.senseFlooding(h)) {
+                souploc = h;
+            }
         }
         int x = 0;
         int y = 0;
@@ -1481,36 +1500,24 @@ public strictfp class RobotPlayer {
     }
 
     static void scout(MapLocation at) throws GameActionException {
-        if(scoutDest == null){
-            scoutDest = new MapLocation(rc.getMapWidth()/6, rc.getMapHeight()/6);
-        }
+            if (scoutDest == null) {
+                scoutDest = pos1;
+                scouted.add(pos1);
+            }
+            if (at.isWithinDistanceSquared(pos1, 25)) {
+                scoutDest = pos3;
+                scouted.add(pos3);
+            }
+            if (at.isWithinDistanceSquared(pos3, 25) && scouted.contains(pos1)) {
+                scoutDest = mapCenter;
+                initialRun = true;
+                scouted.add(scoutDest);
+            }
             int xAdd = rc.getMapWidth() / 6;
             int yAdd = rc.getMapHeight() / 6;
             if (at.distanceSquaredTo(scoutDest) < 16) {
                 int q = quadrantIn(scoutDest);
                 if (q == 1) {
-                    MapLocation newDest = new MapLocation(at.x, rc.getMapHeight() - at.y);
-                    if (!scouted.contains(newDest)) {
-                        scoutDest = new MapLocation(at.x, rc.getMapHeight() - at.y + yAdd);
-                        if (rc.onTheMap(scoutDest)) {
-                            scouted.add(scoutDest);
-                        } else {
-                            scoutDest = mapCenter;
-                            scouted = new ArrayList<>();
-                        }
-                    }
-                } else if (q == 2) {
-                    MapLocation newDest = new MapLocation(rc.getMapWidth() - at.x, at.y);
-                    if (!scouted.contains(newDest)) {
-                        scoutDest = new MapLocation(rc.getMapWidth() - at.x - xAdd, at.y);
-                        if (rc.onTheMap(scoutDest)) {
-                            scouted.add(scoutDest);
-                        } else {
-                            scoutDest = mapCenter;
-                            scouted = new ArrayList<>();
-                        }
-                    }
-                } else if (q == 3) {
                     MapLocation newDest = new MapLocation(at.x, rc.getMapHeight() - at.y);
                     if (!scouted.contains(newDest)) {
                         scoutDest = new MapLocation(at.x, rc.getMapHeight() - at.y - yAdd);
@@ -1521,7 +1528,7 @@ public strictfp class RobotPlayer {
                             scouted = new ArrayList<>();
                         }
                     }
-                } else if (q == 4) {
+                } else if (q == 2) {
                     MapLocation newDest = new MapLocation(rc.getMapWidth() - at.x, at.y);
                     if (!scouted.contains(newDest)) {
                         scoutDest = new MapLocation(rc.getMapWidth() - at.x + xAdd, at.y);
@@ -1532,10 +1539,30 @@ public strictfp class RobotPlayer {
                             scouted = new ArrayList<>();
                         }
                     }
+                } else if (q == 3) {
+                    MapLocation newDest = new MapLocation(at.x, rc.getMapHeight() - at.y);
+                    if (!scouted.contains(newDest)) {
+                        scoutDest = new MapLocation(at.x, rc.getMapHeight() - at.y + yAdd);
+                        if (rc.onTheMap(scoutDest)) {
+                            scouted.add(scoutDest);
+                        } else {
+                            scoutDest = mapCenter;
+                            scouted = new ArrayList<>();
+                        }
+                    }
+                } else if (q == 4) {
+                    MapLocation newDest = new MapLocation(rc.getMapWidth() - at.x, at.y);
+                    if (!scouted.contains(newDest)) {
+                        scoutDest = new MapLocation(rc.getMapWidth() - at.x - xAdd, at.y);
+                        if (rc.onTheMap(scoutDest)) {
+                            scouted.add(scoutDest);
+                        } else {
+                            scoutDest = mapCenter;
+                            scouted = new ArrayList<>();
+                        }
+                    }
                 }
             }
-
-
         moveToDrone(scoutDest);
     }
     //__________________________________________________________________________________________________________________
