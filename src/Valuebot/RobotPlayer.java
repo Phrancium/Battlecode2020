@@ -80,6 +80,8 @@ public strictfp class RobotPlayer {
     static int initialRound;
     static ArrayList<MapLocation> walls = new ArrayList<>();
 
+    static final int STATUSFREQ=50;
+    static final int SUPERSECRET=274321;
     //__________________________________________________________________________________________________________________
     //RUN CODE BELOW
     /**
@@ -137,7 +139,7 @@ public strictfp class RobotPlayer {
                 task = "killEnemy";
             }
         }
-        if(rc.getRoundNum() > 10){
+        if(rc.getRoundNum() > 20){
             if(HQ.x < 7){
                 baseX1 = -1;
                 baseX2 = 11;
@@ -267,9 +269,60 @@ public strictfp class RobotPlayer {
     }
     //__________________________________________________________________________________________________________________
     //HQ CODE BELOW
+    static Direction[] hqdirections;
     static void runHQ() throws GameActionException {
     	MapLocation base = rc.getLocation();
-        if(rc.getRoundNum() == 1) {
+    	HQ=base;
+
+        if (rc.getRoundNum() == 1){
+            MapLocation[] s=rc.senseNearbySoup(8);
+            if (s.length!=0){
+                Direction d=base.directionTo(s[0]);
+                hqdirections= new Direction[]{
+                        d, d.rotateLeft(), d.rotateRight(), d.rotateLeft().rotateLeft(), d.rotateRight().rotateRight(), d.rotateLeft().rotateLeft().rotateLeft(), d.rotateRight().rotateRight().rotateRight(), d.opposite()
+                };
+            }
+            else {
+                s=rc.senseNearbySoup(18);
+                if (s.length!=0){
+                    Direction d=base.directionTo(s[0]);
+                    hqdirections= new Direction[]{
+                            d, d.rotateLeft(), d.rotateRight(), d.rotateLeft().rotateLeft(), d.rotateRight().rotateRight(), d.rotateLeft().rotateLeft().rotateLeft(), d.rotateRight().rotateRight().rotateRight(), d.opposite()
+                    };
+                }
+                else {
+                    s=rc.senseNearbySoup(32);
+                    if (s.length!=0){
+                        Direction d=base.directionTo(s[0]);
+                        hqdirections= new Direction[]{
+                                d, d.rotateLeft(), d.rotateRight(), d.rotateLeft().rotateLeft(), d.rotateRight().rotateRight(), d.rotateLeft().rotateLeft().rotateLeft(), d.rotateRight().rotateRight().rotateRight(), d.opposite()
+                        };
+                    }
+                    else {
+                        s=rc.senseNearbySoup();
+                        if (s.length!=0){
+                            Direction d=base.directionTo(s[0]);
+                            hqdirections= new Direction[]{
+                                    d, d.rotateLeft(), d.rotateRight(), d.rotateLeft().rotateLeft(), d.rotateRight().rotateRight(), d.rotateLeft().rotateLeft().rotateLeft(), d.rotateRight().rotateRight().rotateRight(), d.opposite()
+                            };
+                        }
+                        else {
+                            hqdirections=randomDirections();
+                        }
+                    }
+                }
+            }
+        }
+
+        if (rc.getRoundNum() < 20) {
+            for (Direction dir : hqdirections) {
+                if(tryBuild(RobotType.MINER, dir)) {
+                    robotsBuilt++;
+                }
+            }
+        }
+
+        if(rc.getRoundNum() == 11) {
     		postLocation(1, base.x, base.y, 1);
     	}
     	RobotInfo[] r = rc.senseNearbyRobots();
@@ -278,13 +331,7 @@ public strictfp class RobotPlayer {
     	        rc.shootUnit(s.getID());
             }
         }
-    	if (rc.getRoundNum() < 20) {
-            for (Direction dir : randomDirections()) {
-                if(tryBuild(RobotType.MINER, dir)) {
-                    robotsBuilt++;
-                }
-            }
-        }
+
     	if(robotsBuilt < 6 && rc.getRoundNum() > 100 && rc.getTeamSoup()>204){
             for (Direction dir : randomDirections()) {
                 if(tryBuild(RobotType.MINER, dir)) {
@@ -292,9 +339,13 @@ public strictfp class RobotPlayer {
                 }
             }
         }
-    	//TODO: add some way to rebroadcast important info like enemyHQ
+    	if (rc.getRoundNum() % STATUSFREQ==0){
+            tryBroadcast(1);
+        }
+    	//
     	//updateEnemyHQLocation();
         //}
+
     }
 
     static boolean defenseUp(MapLocation m) throws GameActionException{
@@ -312,14 +363,16 @@ public strictfp class RobotPlayer {
     //__________________________________________________________________________________________________________________
     //MINER CODE BELOW
     static void runMiner() throws GameActionException {
-        if(rc.getRoundNum() > 10) {
+        if(rc.getRoundNum() > 20) {
             receiveBroadcast(rc.getRoundNum() - 1);
         }
         MapLocation curr = rc.getLocation();
         if(HQ == null){
             HQ = getHQLocation();
         }
+
         boolean stay = openEyes(curr);
+
         if(rc.getTeamSoup() > 200 && curr.isAdjacentTo(HQ)){
             moveTo(curr.add(curr.directionTo(HQ).opposite()));
         }
@@ -626,29 +679,29 @@ public strictfp class RobotPlayer {
     }
     //Builds Drones
     static void runFulfillmentCenter() throws GameActionException {
-//        if(!closeEnemyNetGun()) {
-//            if (robotsBuilt < 1 && rc.getRoundNum() < 150) {
-//                for (Direction dir : randomDirections())
-//                    if (rc.canBuildRobot(RobotType.DELIVERY_DRONE, dir)) {
-//                        robotsBuilt++;
-//                        rc.buildRobot(RobotType.DELIVERY_DRONE, dir);
-//                    }
-//            } else if (rc.getRoundNum() < 650 && rc.getRoundNum() > 149 && robotsBuilt < 5 && rc.getTeamSoup() > 505) {
-//                for (Direction dir : randomDirections()) {
-//                    if (rc.canBuildRobot(RobotType.DELIVERY_DRONE, dir)) {
-//                        robotsBuilt++;
-//                        rc.buildRobot(RobotType.DELIVERY_DRONE, dir);
-//                    }
-//                }
-//            } else if (rc.getRoundNum() > 650 && rc.getTeamSoup() > 210) {
-//                for (Direction dir : randomDirections()) {
-//                    if (rc.canBuildRobot(RobotType.DELIVERY_DRONE, dir)) {
-//                        robotsBuilt++;
-//                        rc.buildRobot(RobotType.DELIVERY_DRONE, dir);
-//                    }
-//                }
-//            }
-//        }
+        if(!closeEnemyNetGun()) {
+            if (robotsBuilt < 1 && rc.getRoundNum() < 150) {
+                for (Direction dir : randomDirections())
+                    if (rc.canBuildRobot(RobotType.DELIVERY_DRONE, dir)) {
+                        robotsBuilt++;
+                        rc.buildRobot(RobotType.DELIVERY_DRONE, dir);
+                    }
+            } else if (rc.getRoundNum() < 650 && rc.getRoundNum() > 149 && robotsBuilt < 5 && rc.getTeamSoup() > 505) {
+                for (Direction dir : randomDirections()) {
+                    if (rc.canBuildRobot(RobotType.DELIVERY_DRONE, dir)) {
+                        robotsBuilt++;
+                        rc.buildRobot(RobotType.DELIVERY_DRONE, dir);
+                    }
+                }
+            } else if (rc.getRoundNum() > 650 && rc.getTeamSoup() > 210) {
+                for (Direction dir : randomDirections()) {
+                    if (rc.canBuildRobot(RobotType.DELIVERY_DRONE, dir)) {
+                        robotsBuilt++;
+                        rc.buildRobot(RobotType.DELIVERY_DRONE, dir);
+                    }
+                }
+            }
+        }
     }
 
     static boolean closeEnemyNetGun(){
@@ -1099,16 +1152,7 @@ public strictfp class RobotPlayer {
         if(task.equals(("crunch"))){
             MapLocation loc = rc.getLocation();
             scan(loc);
-            if(loc.distanceSquaredTo(HQ) < 46 && loc.distanceSquaredTo(HQ) > 8 && loc.distanceSquaredTo(EnemyHQ) > 24){
-                RobotInfo[] R2D2 = rc.senseNearbyRobots(rc.getCurrentSensorRadiusSquared(), rc.getTeam());
-                for(RobotInfo x : R2D2){
-                    if(rc.canPickUpUnit(x.getID()) && x.getType().name() == "LANDSCAPER"){
-                        rc.pickUpUnit(x.getID());
-                        carryingteammate = true;
-                    }
-                }
-                moveToCrunch(EnemyHQ);
-            }
+
             if(rc.isCurrentlyHoldingUnit() && carryingteammate == true){
                 for(Direction g : directions){
                     MapLocation check= loc.add(g);
@@ -1193,7 +1237,18 @@ public strictfp class RobotPlayer {
             if(checkHQ){
                 moveToDrone(HQ);
             }
-            if (!rc.isCurrentlyHoldingUnit()) {
+            if(at.distanceSquaredTo(HQ) > 16  && rc.getRoundNum() > 1000 && !rc.isCurrentlyHoldingUnit()){
+                RobotInfo[] R2D2 = rc.senseNearbyRobots(rc.getCurrentSensorRadiusSquared(), rc.getTeam());
+                for(RobotInfo x : R2D2){
+                    if(rc.canPickUpUnit(x.getID()) && x.getType().name() == "LANDSCAPER"){
+                        rc.pickUpUnit(x.getID());
+                        carryingteammate = true;
+                        checkHQ = false;
+                        break;
+                    }
+                }
+            }
+            if (!rc.isCurrentlyHoldingUnit() || carryingteammate) {
                 findUnit(at);
                 if(EnemyHQ != null){
                     moveToDrone(EnemyHQ);
@@ -1201,7 +1256,7 @@ public strictfp class RobotPlayer {
                     findEnemyHQ(at);
                 }
             }
-            else {
+            else{
                 dropHeldUnit(at);
                 scout(at);
             }
@@ -1774,7 +1829,7 @@ public strictfp class RobotPlayer {
          * 3 : Enemy HQ
          */
         int[] message = new int[7];
-        message[1] = 998997;
+        message[1] = SUPERSECRET;
         message[2] = code;
         message[3] = x;
         message[4] = y;
@@ -1784,20 +1839,22 @@ public strictfp class RobotPlayer {
 
     static MapLocation getHQLocation() throws GameActionException {
         //returns the location of HQ
-        MapLocation location = null;
-        for(int k = 1; k < rc.getRoundNum()-1; k++) {
-            Transaction[] block = rc.getBlock(k);
-            if(block.length != 0) {
-                for(int i = 0; i < block.length; i++) {
+        if (rc.getRoundNum()>11) {
+            MapLocation location = null;
+            Transaction[] block = rc.getBlock(11);
+            if (block.length != 0) {
+                for (int i = 0; i < block.length; i++) {
                     int[] message = block[i].getMessage();
-                    if(message[1] == 998997 && message[2] == 1) {
+                    if (message[1] == SUPERSECRET && message[2] == 1) {
                         location = new MapLocation(message[3], message[4]);
                         return location;
                     }
                 }
             }
+
+            return null;
         }
-        return location;
+        return null;
     }
 
     static MapLocation getSoupLocation() throws GameActionException {
@@ -1809,7 +1866,7 @@ public strictfp class RobotPlayer {
                 if(block.length != 0) {
                     for(int i = 0; i < block.length; i++) {
                         int[] message = block[i].getMessage();
-                        if(message[1] == 998997 && message[2] == 2) {
+                        if(message[1] == SUPERSECRET && message[2] == 2) {
                             location = new MapLocation(message[3], message[4]);
 //                            System.out.println(location);
                             return location;
@@ -1831,7 +1888,7 @@ public strictfp class RobotPlayer {
                 if(block.length != 0) {
                     for(int i = 0; i < block.length; i++) {
                         int[] message = block[i].getMessage();
-                        if(message[1] == 998997 && message[2] == 3) {
+                        if(message[1] == SUPERSECRET && message[2] == 3) {
                             location = new MapLocation(message[3], message[4]);
 //                            System.out.println(location);
                             return location;
@@ -1881,7 +1938,7 @@ public strictfp class RobotPlayer {
     }
 
     static boolean tryBroadcast(int cost) throws GameActionException {
-        if (rc.getTeamSoup()>=cost && !broadcastQueue.isEmpty()) {
+        if (rc.getTeamSoup()>=cost && !broadcastQueue.isEmpty() && rc.getRoundNum()>50) {
             int[] message = new int[7];
             BitSet bitSet=new BitSet(224);
             int infocount=0;
@@ -1921,7 +1978,7 @@ public strictfp class RobotPlayer {
             bitSet.set(6 * 16, true);
             //bitSet.set(7*16,true);
             //bitSet.set(8*16,true);
-            //bitSet.set(9 * 16, true);
+            bitSet.set(9 * 16, true);
 
             for (int i = 0; i < 4; i++) {
                 bitSet.set((16*(i+10)), infocount % 2 != 0);
@@ -1975,7 +2032,7 @@ public strictfp class RobotPlayer {
                     bitSet.get(6 * 16) &&
                     !bitSet.get(7*16) &&
                     !bitSet.get(8*16) &&
-                    !bitSet.get(9 * 16)
+                    bitSet.get(9 * 16)
 
 
             ) {
@@ -1988,6 +2045,7 @@ public strictfp class RobotPlayer {
 
     static void receiveBroadcast(int round) throws  GameActionException{
         Transaction[] transactions=rc.getBlock(round);
+        if(transactions.length==0) return;
         ArrayList<BitSet> ourlist=findTransaction(transactions);
         for (BitSet ours :
                 ourlist) {
@@ -2011,10 +2069,14 @@ public strictfp class RobotPlayer {
                 for (int j = 9; j < 15; j++) {
                     if (ours.get(i*16+j+1)) y+=1L<<(j-9);
                 }
+                if(rc.getType()==RobotType.HQ){
+                    broadcastQueue.add(new Information(type,x,y));
+                }
+
                 MapLocation next= new MapLocation(x,y);
                 switch (type){
                     case 0:
-                        if(x==0 && y==0 && rc.getType()==RobotType.DELIVERY_DRONE) {
+                        if(x==0 && y==0 && rc.getType()==RobotType.DELIVERY_DRONE) { //never use this
                             task="crunch";
                         }
                         else if (round-initialRound <= 10 &&  x==1 && y==1 && rc.getType()==RobotType.DELIVERY_DRONE) {
@@ -2094,8 +2156,19 @@ public strictfp class RobotPlayer {
         broadcastQueue.add(i);
         tryBroadcast(1);
     }
-    static void reBroadcast() throws GameActionException{
-
+    static void checkStatus(int round) throws GameActionException{
+        int check=(round/STATUSFREQ)*STATUSFREQ;
+        if (check==0){
+            if (rc.getType()==RobotType.MINER){
+                task = "castle";
+            }
+            else if (rc.getType()==RobotType.DELIVERY_DRONE){
+                task= "scout";
+            }
+        }
+        else{
+            receiveBroadcast(check);
+        }
     }
     //__________________________________________________________________________________________________________________
 }
