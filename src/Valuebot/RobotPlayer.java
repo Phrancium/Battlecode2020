@@ -2036,6 +2036,7 @@ public strictfp class RobotPlayer {
 
     static void receiveBroadcast(int round) throws  GameActionException{
         Transaction[] transactions=rc.getBlock(round);
+        if(transactions.length==0) return;
         ArrayList<BitSet> ourlist=findTransaction(transactions);
         for (BitSet ours :
                 ourlist) {
