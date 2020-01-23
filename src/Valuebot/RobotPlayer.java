@@ -1890,7 +1890,7 @@ public strictfp class RobotPlayer {
             bitSet.set(4 * 16, true);
             //bitSet.set(5*16,true);
             bitSet.set(6 * 16, true);
-            bitSet.set(7*16,true);
+            //bitSet.set(7*16,true);
             //bitSet.set(8*16,true);
             //bitSet.set(9 * 16, true);
 
@@ -1944,9 +1944,11 @@ public strictfp class RobotPlayer {
                     bitSet.get(4 * 16) &&
                     !bitSet.get(5*16) &&
                     bitSet.get(6 * 16) &&
-                    bitSet.get(7*16) &&
+                    !bitSet.get(7*16) &&
                     !bitSet.get(8*16) &&
                     !bitSet.get(9 * 16)
+
+
             ) {
                 out.add(bitSet);
             }
