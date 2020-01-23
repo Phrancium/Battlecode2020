@@ -22,6 +22,17 @@ public strictfp class RobotPlayer {
         Direction.WEST,
         Direction.NORTHWEST
     };
+    static Direction[] directionsc = {
+            Direction.NORTH,
+            Direction.NORTHEAST,
+            Direction.EAST,
+            Direction.SOUTHEAST,
+            Direction.SOUTH,
+            Direction.SOUTHWEST,
+            Direction.WEST,
+            Direction.NORTHWEST,
+            Direction.CENTER,
+    };
     static RobotType[] spawnedByMiner = {RobotType.REFINERY, RobotType.VAPORATOR, RobotType.DESIGN_SCHOOL,
             RobotType.FULFILLMENT_CENTER, RobotType.NET_GUN};
 
@@ -553,7 +564,7 @@ public strictfp class RobotPlayer {
     }
 
     static void mineSoup(MapLocation at) throws GameActionException{
-        for (Direction l : directions) {
+        for (Direction l : directionsc) {
             if (rc.canMineSoup(l)) {
                 rc.mineSoup(l);
             }
