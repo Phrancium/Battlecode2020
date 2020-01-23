@@ -110,11 +110,11 @@ public strictfp class RobotPlayer {
 
         //landscaper task determiner
         if(rc.getType() == RobotType.LANDSCAPER){
-            if(rc.getRoundNum() < 150) {
-                task = "castle";
-            }else{
+//            if(rc.getRoundNum() < 150) {
+//                task = "castle";
+//            }else{
                 task = "terraform";
-            }
+//            }
         }
         if(rc.getType() == RobotType.MINER){
             if (rc.getRoundNum()<=150){
@@ -134,7 +134,7 @@ public strictfp class RobotPlayer {
                 task = "killEnemy";
             }
         }
-        if(rc.getRoundNum() > 1){
+        if(rc.getRoundNum() > 10){
             if(HQ.x < 7){
                 baseX1 = 0;
                 baseX2 = 12;
@@ -615,29 +615,29 @@ public strictfp class RobotPlayer {
     }
     //Builds Drones
     static void runFulfillmentCenter() throws GameActionException {
-        if(!closeEnemyNetGun()) {
-            if (robotsBuilt < 1 && rc.getRoundNum() < 150) {
-                for (Direction dir : randomDirections())
-                    if (rc.canBuildRobot(RobotType.DELIVERY_DRONE, dir)) {
-                        robotsBuilt++;
-                        rc.buildRobot(RobotType.DELIVERY_DRONE, dir);
-                    }
-            } else if (rc.getRoundNum() < 650 && rc.getRoundNum() > 149 && robotsBuilt < 5 && rc.getTeamSoup() > 505) {
-                for (Direction dir : randomDirections()) {
-                    if (rc.canBuildRobot(RobotType.DELIVERY_DRONE, dir)) {
-                        robotsBuilt++;
-                        rc.buildRobot(RobotType.DELIVERY_DRONE, dir);
-                    }
-                }
-            } else if (rc.getRoundNum() > 650 && rc.getTeamSoup() > 210) {
-                for (Direction dir : randomDirections()) {
-                    if (rc.canBuildRobot(RobotType.DELIVERY_DRONE, dir)) {
-                        robotsBuilt++;
-                        rc.buildRobot(RobotType.DELIVERY_DRONE, dir);
-                    }
-                }
-            }
-        }
+//        if(!closeEnemyNetGun()) {
+//            if (robotsBuilt < 1 && rc.getRoundNum() < 150) {
+//                for (Direction dir : randomDirections())
+//                    if (rc.canBuildRobot(RobotType.DELIVERY_DRONE, dir)) {
+//                        robotsBuilt++;
+//                        rc.buildRobot(RobotType.DELIVERY_DRONE, dir);
+//                    }
+//            } else if (rc.getRoundNum() < 650 && rc.getRoundNum() > 149 && robotsBuilt < 5 && rc.getTeamSoup() > 505) {
+//                for (Direction dir : randomDirections()) {
+//                    if (rc.canBuildRobot(RobotType.DELIVERY_DRONE, dir)) {
+//                        robotsBuilt++;
+//                        rc.buildRobot(RobotType.DELIVERY_DRONE, dir);
+//                    }
+//                }
+//            } else if (rc.getRoundNum() > 650 && rc.getTeamSoup() > 210) {
+//                for (Direction dir : randomDirections()) {
+//                    if (rc.canBuildRobot(RobotType.DELIVERY_DRONE, dir)) {
+//                        robotsBuilt++;
+//                        rc.buildRobot(RobotType.DELIVERY_DRONE, dir);
+//                    }
+//                }
+//            }
+//        }
     }
 
     static boolean closeEnemyNetGun(){
@@ -705,7 +705,29 @@ public strictfp class RobotPlayer {
         if(!nextToWall(at)){
             moveToWall(at);
         }else{
-
+            for(Direction d : directions){
+                MapLocation n = at.add(d);
+                if(onTheWall(n) && rc.senseElevation(n) < 8){
+                    rc.depositDirt(d);
+                }
+            }
+            if(at.x == baseX1 + 1){
+                if(at.y == baseY2 - 1){
+                    moveTo(new MapLocation(baseX2-1, baseY2-1));
+                }
+                moveTo(new MapLocation(baseX1+1, baseY2-1));
+            }else if(at.x == baseX2 - 1){
+                if(at.y == baseY1 + 1){
+                    moveTo(new MapLocation(baseX1+1, baseY1+1));
+                }
+                moveTo(new MapLocation(baseX2-1, baseY1+1));
+            }
+            else if(at.y == baseY1 + 1){
+                moveTo(new MapLocation(baseX1+1, baseY1+1));
+            }
+            else if(at.y == baseY2 - 1){
+                moveTo(new MapLocation(baseX2-1, baseY2-1));
+            }
         }
 
 //        if(at.distanceSquaredTo(home) <= 8) {
@@ -911,13 +933,13 @@ public strictfp class RobotPlayer {
 
         if(at.distanceSquaredTo(home) > 16){
             zergRush(home);
-        }else if(rc.onTheMap(hLeft) && rc.canSenseLocation(hLeft) && !rc.isLocationOccupied(hLeft) && (!at.equals(hRight) || !at.equals(hTop) || !at.equals(hBottom))){
+        }else if(rc.onTheMap(hLeft) && rc.canSenseLocation(hLeft) && !rc.isLocationOccupied(hLeft) && !at.equals(hRight) && !at.equals(hTop) && !at.equals(hBottom)){
             moveTo(hLeft);
-        } else if(rc.onTheMap(hRight) && rc.canSenseLocation(hRight) && !rc.isLocationOccupied(hRight) && (!at.equals(hLeft) || !at.equals(hTop) || !at.equals(hBottom))){
+        } else if(rc.onTheMap(hRight) && rc.canSenseLocation(hRight) && !rc.isLocationOccupied(hRight) && !at.equals(hLeft) && !at.equals(hTop) && !at.equals(hBottom)){
             moveTo(hRight);
-        }else if(rc.onTheMap(hTop) && rc.canSenseLocation(hTop) && !rc.isLocationOccupied(hTop) && (!at.equals(hRight) || !at.equals(hLeft) || !at.equals(hBottom))){
+        }else if(rc.onTheMap(hTop) && rc.canSenseLocation(hTop) && !rc.isLocationOccupied(hTop) && !at.equals(hRight) && !at.equals(hLeft) && !at.equals(hBottom)){
             moveTo(hTop);
-        } else if(rc.onTheMap(hBottom) && rc.canSenseLocation(hBottom) && !rc.isLocationOccupied(hBottom) && (!at.equals(hRight) || !at.equals(hTop) || !at.equals(hLeft))){
+        } else if(rc.onTheMap(hBottom) && rc.canSenseLocation(hBottom) && !rc.isLocationOccupied(hBottom) && !at.equals(hRight) && !at.equals(hTop) && !at.equals(hLeft)){
             moveTo(hBottom);
         }
 //        else if (at.distanceSquaredTo(home) > 2){
