@@ -1452,46 +1452,13 @@ public strictfp class RobotPlayer {
 
     static void scout(MapLocation at) throws GameActionException {
         if(scoutDest == null){
-            scoutDest = pos1;
-            scouted.add(pos1);
+            scoutDest = new MapLocation(rc.getMapWidth()/6, rc.getMapHeight()/6);
         }
-        if(at.isWithinDistanceSquared(pos1, 25)){
-            scoutDest = pos3;
-            scouted.add(pos3);
-        }
-        if(at.isWithinDistanceSquared(pos3, 25) && scouted.contains(pos1)){
-            scoutDest = mapCenter;
-            initialRun = true;
-            scouted.add(scoutDest);
-        }
-        if(initialRun) {
             int xAdd = rc.getMapWidth() / 6;
             int yAdd = rc.getMapHeight() / 6;
             if (at.distanceSquaredTo(scoutDest) < 16) {
                 int q = quadrantIn(scoutDest);
                 if (q == 1) {
-                    MapLocation newDest = new MapLocation(at.x, rc.getMapHeight() - at.y);
-                    if (!scouted.contains(newDest)) {
-                        scoutDest = new MapLocation(at.x, rc.getMapHeight() - at.y - yAdd);
-                        if (rc.onTheMap(scoutDest)) {
-                            scouted.add(scoutDest);
-                        } else {
-                            scoutDest = mapCenter;
-                            scouted = new ArrayList<>();
-                        }
-                    }
-                } else if (q == 2) {
-                    MapLocation newDest = new MapLocation(rc.getMapWidth() - at.x, at.y);
-                    if (!scouted.contains(newDest)) {
-                        scoutDest = new MapLocation(rc.getMapWidth() - at.x + xAdd, at.y);
-                        if (rc.onTheMap(scoutDest)) {
-                            scouted.add(scoutDest);
-                        } else {
-                            scoutDest = mapCenter;
-                            scouted = new ArrayList<>();
-                        }
-                    }
-                } else if (q == 3) {
                     MapLocation newDest = new MapLocation(at.x, rc.getMapHeight() - at.y);
                     if (!scouted.contains(newDest)) {
                         scoutDest = new MapLocation(at.x, rc.getMapHeight() - at.y + yAdd);
@@ -1502,7 +1469,7 @@ public strictfp class RobotPlayer {
                             scouted = new ArrayList<>();
                         }
                     }
-                } else if (q == 4) {
+                } else if (q == 2) {
                     MapLocation newDest = new MapLocation(rc.getMapWidth() - at.x, at.y);
                     if (!scouted.contains(newDest)) {
                         scoutDest = new MapLocation(rc.getMapWidth() - at.x - xAdd, at.y);
@@ -1513,9 +1480,30 @@ public strictfp class RobotPlayer {
                             scouted = new ArrayList<>();
                         }
                     }
+                } else if (q == 3) {
+                    MapLocation newDest = new MapLocation(at.x, rc.getMapHeight() - at.y);
+                    if (!scouted.contains(newDest)) {
+                        scoutDest = new MapLocation(at.x, rc.getMapHeight() - at.y - yAdd);
+                        if (rc.onTheMap(scoutDest)) {
+                            scouted.add(scoutDest);
+                        } else {
+                            scoutDest = mapCenter;
+                            scouted = new ArrayList<>();
+                        }
+                    }
+                } else if (q == 4) {
+                    MapLocation newDest = new MapLocation(rc.getMapWidth() - at.x, at.y);
+                    if (!scouted.contains(newDest)) {
+                        scoutDest = new MapLocation(rc.getMapWidth() - at.x + xAdd, at.y);
+                        if (rc.onTheMap(scoutDest)) {
+                            scouted.add(scoutDest);
+                        } else {
+                            scoutDest = mapCenter;
+                            scouted = new ArrayList<>();
+                        }
+                    }
                 }
             }
-        }
 
 
         moveToDrone(scoutDest);
