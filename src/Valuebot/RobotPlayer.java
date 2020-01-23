@@ -1074,25 +1074,25 @@ public strictfp class RobotPlayer {
             MapLocation loc = rc.getLocation();
             updateBroadcast(scan(loc));
 
-//            if(initialRun && souploc != null && !rc.isCurrentlyHoldingUnit()){
-//                pickUpMiner(loc);
-//                moveTo(HQ);
-//            }
-//            if(rc.isCurrentlyHoldingUnit()){
-//                if(loc.isAdjacentTo(souploc)){
-//                    if(rc.canDropUnit(loc.directionTo(souploc)) && !rc.senseFlooding(souploc)){
-//                        rc.dropUnit(loc.directionTo(souploc));
-//                        souploc = null;
-//                    }else if(rc.canSenseLocation(loc.add(loc.directionTo(souploc).rotateLeft())) && rc.canDropUnit(loc.directionTo(souploc).rotateLeft()) && !rc.senseFlooding(loc.add(loc.directionTo(souploc).rotateLeft()))){
-//                        rc.dropUnit(loc.directionTo(souploc).rotateLeft());
-//                        souploc = null;
-//                    }else if(rc.canSenseLocation(loc.add(loc.directionTo(souploc).rotateRight())) && rc.canDropUnit(loc.directionTo(souploc).rotateRight()) && !rc.senseFlooding(loc.add(loc.directionTo(souploc).rotateRight()))){
-//                        rc.dropUnit(loc.directionTo(souploc).rotateRight());
-//                        souploc = null;
-//                    }
-//                }
-//                moveTo(souploc);
-//            }
+            if(initialRun && souploc != null && !rc.isCurrentlyHoldingUnit()){
+                pickUpMiner(loc);
+                moveTo(HQ);
+            }
+            if(rc.isCurrentlyHoldingUnit()){
+                if(loc.isAdjacentTo(souploc)){
+                    if(rc.canDropUnit(loc.directionTo(souploc)) && !rc.senseFlooding(souploc)){
+                        rc.dropUnit(loc.directionTo(souploc));
+                        souploc = null;
+                    }else if(rc.canSenseLocation(loc.add(loc.directionTo(souploc).rotateLeft())) && rc.canDropUnit(loc.directionTo(souploc).rotateLeft()) && !rc.senseFlooding(loc.add(loc.directionTo(souploc).rotateLeft()))){
+                        rc.dropUnit(loc.directionTo(souploc).rotateLeft());
+                        souploc = null;
+                    }else if(rc.canSenseLocation(loc.add(loc.directionTo(souploc).rotateRight())) && rc.canDropUnit(loc.directionTo(souploc).rotateRight()) && !rc.senseFlooding(loc.add(loc.directionTo(souploc).rotateRight()))){
+                        rc.dropUnit(loc.directionTo(souploc).rotateRight());
+                        souploc = null;
+                    }
+                }
+                moveTo(souploc);
+            }
             scout(loc);
 
         }
@@ -1149,35 +1149,35 @@ public strictfp class RobotPlayer {
             }
             MapLocation at = rc.getLocation();
             scan(at);
-//            if(rc.getRoundNum() > 150){
-//                if(rc.isCurrentlyHoldingUnit() && heldUnit.getType() == RobotType.MINER){
-//                    if(at.distanceSquaredTo(HQ) > 64 || souploc == null){
-//                        souploc = getClosestSoup(at);
-//                    }
-//                    if(at.isWithinDistanceSquared(souploc, 8)){
-//                        Direction tos = at.directionTo(souploc);
-//                        if(rc.canDropUnit(tos) && rc.canSenseLocation(at.add(tos)) && at.add(tos).isAdjacentTo(souploc) && !rc.senseFlooding(at.add(tos)) && (rc.senseElevation(at.add(tos)) - rc.senseElevation(souploc) > 3 || rc.senseElevation(at.add(tos)) - rc.senseElevation(souploc) < 3)) {
-//                            rc.dropUnit(tos);
-//                        }else if(rc.canDropUnit(tos.rotateRight()) && rc.canSenseLocation(at.add(tos.rotateRight())) && at.add(tos).isAdjacentTo(souploc) && !rc.senseFlooding(at.add(tos.rotateLeft())) && (rc.senseElevation(at.add(tos.rotateRight())) - rc.senseElevation(souploc) > 3 || rc.senseElevation(at.add(tos.rotateRight())) - rc.senseElevation(souploc) < 3)){
-//                            rc.dropUnit(tos.rotateRight());
-//                        }else if (rc.canDropUnit(tos.rotateLeft()) && rc.canSenseLocation(at.add(tos.rotateLeft())) && at.add(tos).isAdjacentTo(souploc) && !rc.senseFlooding(at.add(tos.rotateRight())) && (rc.senseElevation(at.add(tos.rotateLeft())) - rc.senseElevation(souploc) > 3 || rc.senseElevation(at.add(tos.rotateLeft())) - rc.senseElevation(souploc) < 3)){
-//                            rc.dropUnit(tos.rotateLeft());
-//                        }
-//                    }
-//                    moveToDrone(souploc);
-//                }else {
-//                    if (at.distanceSquaredTo(HQ) > 36){
-//                        moveToDroneHover(HQ);
-//                    }else {
-//                        for (MapLocation m : soup) {
-//                            if (m.distanceSquaredTo(HQ) > 121) {
-//                                souploc = m;
-//                                pickUpMiner(at);
-//                            }
-//                        }
-//                    }
-//                }
-//            }
+            if(rc.getRoundNum() > 150){
+                if(rc.isCurrentlyHoldingUnit() && heldUnit.getType() == RobotType.MINER){
+                    if(at.distanceSquaredTo(HQ) > 64 || souploc == null){
+                        souploc = getClosestSoup(at);
+                    }
+                    if(at.isWithinDistanceSquared(souploc, 8)){
+                        Direction tos = at.directionTo(souploc);
+                        if(rc.canDropUnit(tos) && rc.canSenseLocation(at.add(tos)) && at.add(tos).isAdjacentTo(souploc) && !rc.senseFlooding(at.add(tos)) && (rc.senseElevation(at.add(tos)) - rc.senseElevation(souploc) > 3 || rc.senseElevation(at.add(tos)) - rc.senseElevation(souploc) < 3)) {
+                            rc.dropUnit(tos);
+                        }else if(rc.canDropUnit(tos.rotateRight()) && rc.canSenseLocation(at.add(tos.rotateRight())) && at.add(tos).isAdjacentTo(souploc) && !rc.senseFlooding(at.add(tos.rotateLeft())) && (rc.senseElevation(at.add(tos.rotateRight())) - rc.senseElevation(souploc) > 3 || rc.senseElevation(at.add(tos.rotateRight())) - rc.senseElevation(souploc) < 3)){
+                            rc.dropUnit(tos.rotateRight());
+                        }else if (rc.canDropUnit(tos.rotateLeft()) && rc.canSenseLocation(at.add(tos.rotateLeft())) && at.add(tos).isAdjacentTo(souploc) && !rc.senseFlooding(at.add(tos.rotateRight())) && (rc.senseElevation(at.add(tos.rotateLeft())) - rc.senseElevation(souploc) > 3 || rc.senseElevation(at.add(tos.rotateLeft())) - rc.senseElevation(souploc) < 3)){
+                            rc.dropUnit(tos.rotateLeft());
+                        }
+                    }
+                    moveToDrone(souploc);
+                }else {
+                    if (at.distanceSquaredTo(HQ) > 36){
+                        moveToDroneHover(HQ);
+                    }else {
+                        for (MapLocation m : soup) {
+                            if (m.distanceSquaredTo(HQ) > 121) {
+                                souploc = m;
+                                pickUpMiner(at);
+                            }
+                        }
+                    }
+                }
+            }
             if(rc.isCurrentlyHoldingUnit()) {
                 dropHeldUnit(at);
                 scout(at);
@@ -1317,10 +1317,12 @@ public strictfp class RobotPlayer {
 
         for(RobotInfo i : friend){
             if(i.getType() == RobotType.MINER) {
-                minors.add(i);
-                if (rc.canPickUpUnit(i.getID()) && !nextToSoup(i.getLocation()) && i.getSoupCarrying() < 90) {
-                    heldUnit = i;
-                    rc.pickUpUnit(i.getID());
+                if(!nextToSoup(i.getLocation()) && i.getSoupCarrying() < 90) {
+                    minors.add(i);
+                    if (rc.canPickUpUnit(i.getID())) {
+                        heldUnit = i;
+                        rc.pickUpUnit(i.getID());
+                    }
                 }
             }
         }
