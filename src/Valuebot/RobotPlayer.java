@@ -1203,7 +1203,7 @@ public strictfp class RobotPlayer {
                     findEnemyHQ(at);
                 }
             }
-            else if (!carryingteammate){
+            else{
                 dropHeldUnit(at);
                 scout(at);
             }
