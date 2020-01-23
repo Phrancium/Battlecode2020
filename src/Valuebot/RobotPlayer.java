@@ -360,10 +360,9 @@ public strictfp class RobotPlayer {
         if(HQ == null){
             HQ = getHQLocation();
         }
-        boolean stay=false;
-        if(rc.getRoundNum() > 10) {
-            stay = openEyes(curr);
-        }
+
+           boolean stay = openEyes(curr);
+
         if(rc.getTeamSoup() > 200 && curr.isAdjacentTo(HQ)){
             moveTo(curr.add(curr.directionTo(HQ).opposite()));
         }
@@ -1930,7 +1929,7 @@ public strictfp class RobotPlayer {
     }
 
     static boolean tryBroadcast(int cost) throws GameActionException {
-        if (rc.getTeamSoup()>=cost && !broadcastQueue.isEmpty()) {
+        if (rc.getTeamSoup()>=cost && !broadcastQueue.isEmpty() && rc.getRoundNum()>50) {
             int[] message = new int[7];
             BitSet bitSet=new BitSet(224);
             int infocount=0;
