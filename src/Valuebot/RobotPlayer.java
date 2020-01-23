@@ -245,9 +245,9 @@ public strictfp class RobotPlayer {
         randomInitialDirection=randomDirection();
 
         //fill up dirHash 1:Direction.NORTH, etc
-        for (int i = 0; i < directions.length; i++){
-            dirHash.put(i+1, directions[i]);
-        }
+//        for (int i = 0; i < directions.length; i++){
+//            dirHash.put(i+1, directions[i]);
+//        }
 
         if(rc.getRoundNum() > 20) {
             receiveBroadcast(rc.getRoundNum() - 1);
@@ -348,7 +348,7 @@ public strictfp class RobotPlayer {
         }
 
     	if(robotsBuilt < 6 && rc.getRoundNum() > 100 && rc.getTeamSoup()>204){
-            for (Direction dir : randomDirections()) {
+            for (Direction dir : hqdirections) {
                 if(tryBuild(RobotType.MINER, dir)) {
                     robotsBuilt++;
                 }
@@ -1356,7 +1356,7 @@ public strictfp class RobotPlayer {
     static void dropHeldUnit(MapLocation at) throws GameActionException{
         if(heldUnit.getType() == RobotType.MINER && heldUnit.getTeam() == rc.getTeam()) {
             for (Direction g : directions) {
-                if (rc.canDropUnit(g) && at.add(g).distanceSquaredTo(HQ) > 8) {
+                if (rc.canDropUnit(g) && rc.onTheMap(at.add(g))&& at.add(g).distanceSquaredTo(HQ) > 8) {
                     rc.dropUnit(g);
                 }
             }
@@ -1370,7 +1370,7 @@ public strictfp class RobotPlayer {
                 }
             }
             for (Direction g : directions) {
-                if (rc.canDropUnit(g) && at.add(g).isAdjacentTo(HQ)) {
+                if (rc.canDropUnit(g) && rc.onTheMap(at.add(g))&& at.add(g).isAdjacentTo(HQ)) {
                     rc.dropUnit(g);
                 }
             }
@@ -1645,10 +1645,16 @@ public strictfp class RobotPlayer {
     }
     static MapLocation prevdest=null;
     static HashSet<MapLocation> prevLocations = new HashSet<>();
+    static int inting=0;
     static void moveTo(MapLocation dest) throws GameActionException{
+
+        if (!rc.onTheMap(dest)){
+            return;
+        }
         if (!dest.equals(prevdest)){
             prevdest=dest;
             prevLocations.clear();
+            inting=0;
         }
 
         //Find general direction of destination
@@ -1684,8 +1690,11 @@ public strictfp class RobotPlayer {
             path = moveDirection;
             tryMove(moveDirection.opposite());
         } else{
-            prevLocations.remove(loc.add(path));
+            if(inting<5) {
+                prevLocations.remove(loc.add(path));
+            }
             tryMove(path);
+            inting++;
 
         }
     }
