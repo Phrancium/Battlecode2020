@@ -54,6 +54,7 @@ public strictfp class RobotPlayer {
     static int baseX2;
     static int baseY1;
     static int baseY2;
+    static Direction moveDir;
     static ArrayList<MapLocation> scouted = new ArrayList<>();
 
     static int robotsBuilt;
@@ -77,6 +78,7 @@ public strictfp class RobotPlayer {
     static ArrayList<MapLocation> irSoup = new ArrayList<>();
     static boolean checkHQ = true;
     static int initialRound;
+    static ArrayList<MapLocation> walls = new ArrayList<>();
 
     //__________________________________________________________________________________________________________________
     //RUN CODE BELOW
@@ -137,18 +139,18 @@ public strictfp class RobotPlayer {
         }
         if(rc.getRoundNum() > 10){
             if(HQ.x < 7){
-                baseX1 = 0;
-                baseX2 = 12;
+                baseX1 = -1;
+                baseX2 = 11;
                 if(HQ.y < 7) {
-                    baseY1 = 0;
-                    baseY2 = 12;
+                    baseY1 = -1;
+                    baseY2 = 11;
                     well1 = null;
                     well2 = new MapLocation(HQ.x, HQ.y + 2);
                     well3 = null;
                     well4 = new MapLocation(HQ.x + 2, HQ.y);
                 }else if(rc.getMapHeight() - HQ.y < 7) {
                     baseY1 = rc.getMapHeight() - 12;
-                    baseX2 = rc.getMapHeight();
+                    baseY2 = rc.getMapHeight();
                     well1 = null;
                     well2 = new MapLocation(HQ.x, HQ.y + 2);
                     well3 = new MapLocation(HQ.x - 2, HQ.y);
@@ -166,15 +168,15 @@ public strictfp class RobotPlayer {
                 baseX1 = rc.getMapWidth() - 12;
                 baseX2 = rc.getMapWidth();
                 if(HQ.y < 7) {
-                    baseY1 = 0;
-                    baseY2 = 12;
+                    baseY1 = -1;
+                    baseY2 = 11;
                     well1 = new MapLocation(HQ.x, HQ.y - 2);
                     well2 = null;
                     well3 = new MapLocation(HQ.x - 2, HQ.y);
                     well4 = null;
                 }else if(rc.getMapHeight() - HQ.y < 7) {
                     baseY1 = rc.getMapHeight() - 12;
-                    baseX2 = rc.getMapHeight();
+                    baseY2 = rc.getMapHeight();
                     well1 = new MapLocation(HQ.x, HQ.y - 2);
                     well2 = null;
                     well3 = null;
@@ -188,8 +190,8 @@ public strictfp class RobotPlayer {
                     well4 = new MapLocation(HQ.x + 2, HQ.y);
                 }
             }else if(HQ.y < 7){
-                baseY1 = 0;
-                baseY2 = 12;
+                baseY1 = -1;
+                baseY2 = 11;
                 baseX1 = HQ.x - 6;
                 baseX2 = HQ.x + 6;
                 well1 = new MapLocation(HQ.x, HQ.y - 2);
@@ -198,7 +200,7 @@ public strictfp class RobotPlayer {
                 well4 = new MapLocation(HQ.x + 2, HQ.y);
             }else if(rc.getMapHeight() - HQ.y < 7){
                 baseY1 = rc.getMapHeight() - 12;
-                baseX2 = rc.getMapHeight();
+                baseY2 = rc.getMapHeight();
                 baseX1 = HQ.x - 6;
                 baseX2 = HQ.x + 6;
                 well1 = new MapLocation(HQ.x, HQ.y - 2);
@@ -215,6 +217,14 @@ public strictfp class RobotPlayer {
                 well3 = new MapLocation(HQ.x - 2, HQ.y);
                 well4 = new MapLocation(HQ.x + 2, HQ.y);
             }
+        }
+        for(int i = baseX1; i <= baseX2; i++){
+            walls.add(new MapLocation(i, baseY1));
+            walls.add(new MapLocation(i, baseY2));
+        }
+        for(int i = baseY1; i <= baseY2; i++){
+            walls.add(new MapLocation(baseX1, i));
+            walls.add(new MapLocation(baseX2, i));
         }
 
         initialLoc = rc.getLocation();
@@ -698,7 +708,7 @@ public strictfp class RobotPlayer {
         if((rc.getDirtCarrying() < 25 && !nextToWall(at)) || rc.getDirtCarrying() == 0){
             for(Direction d : directions){
                 MapLocation m = at.add(d);
-                if((rc.senseElevation(m) > 3 && rc.senseElevation(m) < 101 && !onTheWall(m) && !rc.isLocationOccupied(m)) || isWell(m)){
+                if(rc.canSenseLocation(m) && (rc.senseElevation(m) > 3 && rc.senseElevation(m) < 101 && !onTheWall(m) && !rc.isLocationOccupied(m)) || isWell(m)){
                     rc.digDirt(d);
                 }
             }
@@ -706,7 +716,7 @@ public strictfp class RobotPlayer {
         }
         for(Direction d : directions){
             MapLocation m = at.add(d);
-            if(rc.senseElevation(m) < 3 && rc.senseElevation(m) > -50 && !rc.isLocationOccupied(m)){
+            if(rc.canSenseLocation(m) && rc.senseElevation(m) < 3 && rc.senseElevation(m) > -50 && !rc.isLocationOccupied(m)){
                 rc.depositDirt(d);
             }
         }
@@ -715,7 +725,7 @@ public strictfp class RobotPlayer {
         }else{
             for(Direction d : directions){
                 MapLocation n = at.add(d);
-                if(onTheWall(n) && rc.senseElevation(n) < 8){
+                if(rc.canSenseLocation(n) && onTheWall(n) && rc.senseElevation(n) < 8){
                     rc.depositDirt(d);
                 }
             }
@@ -864,7 +874,7 @@ public strictfp class RobotPlayer {
     }
 
     static boolean onTheWall(MapLocation m){
-        if(m.x == baseX1 || m.x ==baseX2 || m.y == baseY1 || m.y == baseY2){
+        if((m.x == baseX1 || m.x ==baseX2 || m.y == baseY1 || m.y == baseY2) && m.x != 0 && m.x != rc.getMapWidth()-1 && m.y != 0 && m.y != rc.getMapHeight()-1){
             return true;
         }
         return false;
@@ -877,7 +887,6 @@ public strictfp class RobotPlayer {
         return false;
     }
     static void findPile(MapLocation at) throws GameActionException{
-
         for(int i = 0; i < 7; i++){
             for(int l = 0; l < 7; l++){
                 MapLocation dirt = new MapLocation(i, l);
@@ -990,10 +999,10 @@ public strictfp class RobotPlayer {
                     lowest = m;
                 }
             }
-            if(rc.getDirtCarrying() > 8 || rc.getRoundNum() > 1000)
+            if(rc.getDirtCarrying() > 8 || (rc.getRoundNum() > 1000 && rc.getDirtCarrying() > 0))
                 rc.depositDirt(at.directionTo(lowest));
             else if(rc.canDigDirt(dir.opposite().rotateLeft().rotateLeft()))
-                    rc.digDirt(dir.opposite().rotateLeft().rotateLeft());
+                rc.digDirt(dir.opposite().rotateLeft().rotateLeft());
             else if(rc.canDigDirt(dir.opposite().rotateRight().rotateRight()))
                 rc.digDirt(dir.opposite().rotateRight().rotateRight());
             else if(rc.canDigDirt(dir.opposite().rotateLeft()))
@@ -1012,7 +1021,7 @@ public strictfp class RobotPlayer {
         	        lowest = m;
                 }
             }
-            if(rc.getDirtCarrying() > 8 || rc.getRoundNum() > 1000)
+            if(rc.getDirtCarrying() > 8 || (rc.getRoundNum() > 1000 && rc.getDirtCarrying() > 0))
                 rc.depositDirt(at.directionTo(lowest));
             else if(rc.canDigDirt(dir.opposite()) && !HQ.isAdjacentTo(at.add(dir.opposite())))
                 rc.digDirt(dir.opposite());
