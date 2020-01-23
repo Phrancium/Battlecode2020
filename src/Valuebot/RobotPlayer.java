@@ -314,7 +314,9 @@ public strictfp class RobotPlayer {
         if(HQ == null){
             HQ = getHQLocation();
         }
-        boolean stay = openEyes(curr);
+        if(rc.getRoundNum() > 10) {
+            boolean stay = openEyes(curr);
+        }
         if(rc.getTeamSoup() > 200 && curr.isAdjacentTo(HQ)){
             moveTo(curr.add(curr.directionTo(HQ).opposite()));
         }
