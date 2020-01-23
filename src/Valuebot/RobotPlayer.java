@@ -673,7 +673,7 @@ public strictfp class RobotPlayer {
 //                    addAndBroadcast(new Information(0,2,0));
                     robotsBuilt++;
                 }
-        }else if(robotsBuilt < 6 && rc.getRoundNum() >= 125 && rc.getTeamSoup() > 210){
+        }else if(robotsBuilt < 6 && rc.getRoundNum() >= 125 && rc.getTeamSoup() > 505){
             for (Direction dir : directions)
                 if (tryBuild(RobotType.LANDSCAPER, dir)) {
                     robotsBuilt++;
@@ -685,7 +685,7 @@ public strictfp class RobotPlayer {
 //                    }
 
                 }
-        }else if(rc.getRoundNum() > 699 && rc.getTeamSoup() > 210){
+        }else if(rc.getRoundNum() > 699 && rc.getTeamSoup() > 505){
             for (Direction dir : directions)
                 if (tryBuild(RobotType.LANDSCAPER, dir)) {
                     robotsBuilt++;
@@ -702,7 +702,7 @@ public strictfp class RobotPlayer {
 //                        addAndBroadcast(new Information(0,1,0));//scout
                         rc.buildRobot(RobotType.DELIVERY_DRONE, dir);
                     }
-            } else if (rc.getRoundNum() < 650 && rc.getRoundNum() > 149 && robotsBuilt < 3 && rc.getTeamSoup() > 210 /*&& rc.senseNearbyRobots(rc.getCurrentSensorRadiusSquared(), rc.getTeam().opponent()).length > 0*/) {
+            } else if (rc.getRoundNum() < 650 && rc.getRoundNum() > 149 && robotsBuilt < 3 && rc.getTeamSoup() > 505 /*&& rc.senseNearbyRobots(rc.getCurrentSensorRadiusSquared(), rc.getTeam().opponent()).length > 0*/) {
                 for (Direction dir : randomDirections()) {
                     if (rc.canBuildRobot(RobotType.DELIVERY_DRONE, dir)) {
                         robotsBuilt++;
@@ -1066,25 +1066,25 @@ public strictfp class RobotPlayer {
             MapLocation loc = rc.getLocation();
             updateBroadcast(scan(loc));
 
-            if(initialRun && souploc != null && !rc.isCurrentlyHoldingUnit()){
-                pickUpMiner(loc);
-                moveTo(HQ);
-            }
-            if(rc.isCurrentlyHoldingUnit()){
-                if(loc.isAdjacentTo(souploc)){
-                    if(rc.canDropUnit(loc.directionTo(souploc)) && !rc.senseFlooding(souploc)){
-                        rc.dropUnit(loc.directionTo(souploc));
-                        souploc = null;
-                    }else if(rc.canSenseLocation(loc.add(loc.directionTo(souploc).rotateLeft())) && rc.canDropUnit(loc.directionTo(souploc).rotateLeft()) && !rc.senseFlooding(loc.add(loc.directionTo(souploc).rotateLeft()))){
-                        rc.dropUnit(loc.directionTo(souploc).rotateLeft());
-                        souploc = null;
-                    }else if(rc.canSenseLocation(loc.add(loc.directionTo(souploc).rotateRight())) && rc.canDropUnit(loc.directionTo(souploc).rotateRight()) && !rc.senseFlooding(loc.add(loc.directionTo(souploc).rotateRight()))){
-                        rc.dropUnit(loc.directionTo(souploc).rotateRight());
-                        souploc = null;
-                    }
-                }
-                moveTo(souploc);
-            }
+//            if(initialRun && souploc != null && !rc.isCurrentlyHoldingUnit()){
+//                pickUpMiner(loc);
+//                moveTo(HQ);
+//            }
+//            if(rc.isCurrentlyHoldingUnit()){
+//                if(loc.isAdjacentTo(souploc)){
+//                    if(rc.canDropUnit(loc.directionTo(souploc)) && !rc.senseFlooding(souploc)){
+//                        rc.dropUnit(loc.directionTo(souploc));
+//                        souploc = null;
+//                    }else if(rc.canSenseLocation(loc.add(loc.directionTo(souploc).rotateLeft())) && rc.canDropUnit(loc.directionTo(souploc).rotateLeft()) && !rc.senseFlooding(loc.add(loc.directionTo(souploc).rotateLeft()))){
+//                        rc.dropUnit(loc.directionTo(souploc).rotateLeft());
+//                        souploc = null;
+//                    }else if(rc.canSenseLocation(loc.add(loc.directionTo(souploc).rotateRight())) && rc.canDropUnit(loc.directionTo(souploc).rotateRight()) && !rc.senseFlooding(loc.add(loc.directionTo(souploc).rotateRight()))){
+//                        rc.dropUnit(loc.directionTo(souploc).rotateRight());
+//                        souploc = null;
+//                    }
+//                }
+//                moveTo(souploc);
+//            }
             scout(loc);
 
         }
@@ -1141,35 +1141,35 @@ public strictfp class RobotPlayer {
             }
             MapLocation at = rc.getLocation();
             scan(at);
-            if(rc.getRoundNum() > 150){
-                if(rc.isCurrentlyHoldingUnit() && heldUnit.getType() == RobotType.MINER){
-                    if(at.distanceSquaredTo(HQ) > 64 || souploc == null){
-                        souploc = getClosestSoup(at);
-                    }
-                    if(at.isWithinDistanceSquared(souploc, 8)){
-                        Direction tos = at.directionTo(souploc);
-                        if(rc.canDropUnit(tos) && rc.canSenseLocation(at.add(tos)) && at.add(tos).isAdjacentTo(souploc) && !rc.senseFlooding(at.add(tos)) && (rc.senseElevation(at.add(tos)) - rc.senseElevation(souploc) > 3 || rc.senseElevation(at.add(tos)) - rc.senseElevation(souploc) < 3)) {
-                            rc.dropUnit(tos);
-                        }else if(rc.canDropUnit(tos.rotateRight()) && rc.canSenseLocation(at.add(tos.rotateRight())) && at.add(tos).isAdjacentTo(souploc) && !rc.senseFlooding(at.add(tos.rotateLeft())) && (rc.senseElevation(at.add(tos.rotateRight())) - rc.senseElevation(souploc) > 3 || rc.senseElevation(at.add(tos.rotateRight())) - rc.senseElevation(souploc) < 3)){
-                            rc.dropUnit(tos.rotateRight());
-                        }else if (rc.canDropUnit(tos.rotateLeft()) && rc.canSenseLocation(at.add(tos.rotateLeft())) && at.add(tos).isAdjacentTo(souploc) && !rc.senseFlooding(at.add(tos.rotateRight())) && (rc.senseElevation(at.add(tos.rotateLeft())) - rc.senseElevation(souploc) > 3 || rc.senseElevation(at.add(tos.rotateLeft())) - rc.senseElevation(souploc) < 3)){
-                            rc.dropUnit(tos.rotateLeft());
-                        }
-                    }
-                    moveToDrone(souploc);
-                }else {
-                    if (at.distanceSquaredTo(HQ) > 36){
-                        moveToDroneHover(HQ);
-                    }else {
-                        for (MapLocation m : soup) {
-                            if (m.distanceSquaredTo(HQ) > 121) {
-                                souploc = m;
-                                pickUpMiner(at);
-                            }
-                        }
-                    }
-                }
-            }
+//            if(rc.getRoundNum() > 150){
+//                if(rc.isCurrentlyHoldingUnit() && heldUnit.getType() == RobotType.MINER){
+//                    if(at.distanceSquaredTo(HQ) > 64 || souploc == null){
+//                        souploc = getClosestSoup(at);
+//                    }
+//                    if(at.isWithinDistanceSquared(souploc, 8)){
+//                        Direction tos = at.directionTo(souploc);
+//                        if(rc.canDropUnit(tos) && rc.canSenseLocation(at.add(tos)) && at.add(tos).isAdjacentTo(souploc) && !rc.senseFlooding(at.add(tos)) && (rc.senseElevation(at.add(tos)) - rc.senseElevation(souploc) > 3 || rc.senseElevation(at.add(tos)) - rc.senseElevation(souploc) < 3)) {
+//                            rc.dropUnit(tos);
+//                        }else if(rc.canDropUnit(tos.rotateRight()) && rc.canSenseLocation(at.add(tos.rotateRight())) && at.add(tos).isAdjacentTo(souploc) && !rc.senseFlooding(at.add(tos.rotateLeft())) && (rc.senseElevation(at.add(tos.rotateRight())) - rc.senseElevation(souploc) > 3 || rc.senseElevation(at.add(tos.rotateRight())) - rc.senseElevation(souploc) < 3)){
+//                            rc.dropUnit(tos.rotateRight());
+//                        }else if (rc.canDropUnit(tos.rotateLeft()) && rc.canSenseLocation(at.add(tos.rotateLeft())) && at.add(tos).isAdjacentTo(souploc) && !rc.senseFlooding(at.add(tos.rotateRight())) && (rc.senseElevation(at.add(tos.rotateLeft())) - rc.senseElevation(souploc) > 3 || rc.senseElevation(at.add(tos.rotateLeft())) - rc.senseElevation(souploc) < 3)){
+//                            rc.dropUnit(tos.rotateLeft());
+//                        }
+//                    }
+//                    moveToDrone(souploc);
+//                }else {
+//                    if (at.distanceSquaredTo(HQ) > 36){
+//                        moveToDroneHover(HQ);
+//                    }else {
+//                        for (MapLocation m : soup) {
+//                            if (m.distanceSquaredTo(HQ) > 121) {
+//                                souploc = m;
+//                                pickUpMiner(at);
+//                            }
+//                        }
+//                    }
+//                }
+//            }
             if(rc.isCurrentlyHoldingUnit()) {
                 dropHeldUnit(at);
                 scout(at);
