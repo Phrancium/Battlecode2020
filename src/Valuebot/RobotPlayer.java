@@ -31,7 +31,7 @@ public strictfp class RobotPlayer {
     static MapLocation initialLoc;
     static MapLocation souploc;
     static Direction path;
-    static String task;
+    static String task="";
     static int numBuilt;
     static int mapQuadrant;
     static int schoolsBuilt;
@@ -236,6 +236,10 @@ public strictfp class RobotPlayer {
         //fill up dirHash 1:Direction.NORTH, etc
         for (int i = 0; i < directions.length; i++){
             dirHash.put(i+1, directions[i]);
+        }
+
+        if(rc.getRoundNum() > 20) {
+            receiveBroadcast(rc.getRoundNum() - 1);
         }
 
 
@@ -2067,8 +2071,19 @@ public strictfp class RobotPlayer {
                         if(x==0 && y==0 && rc.getType()==RobotType.DELIVERY_DRONE) { //never use this
                             task="crunch";
                         }
-                        else if (round-initialRound <= 10 &&  x==1 && y==1 && rc.getType()==RobotType.DELIVERY_DRONE) {
-                            task="scout";
+                        else if ( x==1 && rc.getType()==RobotType.DELIVERY_DRONE && task=="") {
+                            if (y==0) {
+                                task = "scout";
+                            }
+                            else if (y==1){
+                                task="hover";
+                            }
+                            else if (y==2){
+                                task="killEnemy";
+                            }
+                            else if (y==3){
+                                task="defend";
+                            }
                         }
                         else if (x==3 && y==3 && rc.getType()==RobotType.MINER) {
                             schoolsBuilt++;
@@ -2076,6 +2091,7 @@ public strictfp class RobotPlayer {
                         else if (x==4 && y==4 && rc.getType()==RobotType.MINER) {
                             factoriesBuilt++;
                         }
+
                             break;
 
                     case 1:
