@@ -1903,9 +1903,21 @@ public strictfp class RobotPlayer {
             message[1]= ((int)(longs[0]>>>32));
             message[2]= ((int)longs[1]);
             message[3]= ((int)(longs[1]>>>32));
-            message[4]= ((int)longs[2]);
-            message[5]= ((int)(longs[2]>>>32));
-            message[6]= ((int)longs[3]);
+            if (longs.length>2) {
+                message[4]= ((int)longs[2]);
+                message[5]= ((int)(longs[2]>>>32));
+            }
+            else {
+                message[4]= 0;
+                message[5]= 0;
+            }
+
+            if (longs.length==3) {
+                message[6] = ((int) longs[3]);
+            }
+            else{
+                message[6]=0;
+            }
 
             rc.submitTransaction(message, cost);
             return true;
