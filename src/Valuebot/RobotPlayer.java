@@ -395,7 +395,7 @@ public strictfp class RobotPlayer {
         }
 
         boolean stay = openEyes(curr);
-        if (schoolsBuilt < 1 && (task.equals("first3") || task.equals("first"))) {
+        if (rc.getTeamSoup() >= 150 && schoolsBuilt < 1 && (task.equals("first3") || task.equals("first"))) {
         	for(Direction d : directions) {
                 if (rc.canBuildRobot(RobotType.DESIGN_SCHOOL, d) && curr.add(d).distanceSquaredTo(HQ) > 8 && curr.add(d).distanceSquaredTo(HQ) < 16) {
                     schoolsBuilt++;
@@ -405,7 +405,7 @@ public strictfp class RobotPlayer {
             }
         }
 
-        if (factoriesBuilt < 1 && (task.equals("first3") || task.equals("first"))) {
+        if (rc.getTeamSoup() >= 150 && factoriesBuilt < 1 && (task.equals("first3") || task.equals("first"))) {
             for(Direction d : directions) {
                 if (rc.canBuildRobot(RobotType.FULFILLMENT_CENTER, d) && curr.add(d).distanceSquaredTo(HQ) > 8 && curr.add(d).distanceSquaredTo(HQ) < 25) {
                     factoriesBuilt++;
@@ -431,15 +431,15 @@ public strictfp class RobotPlayer {
                     rc.depositSoup(dir, rc.getSoupCarrying());
                 }
             }
-            if(!stay || curr.distanceSquaredTo(HQ) < 225 || rc.getRoundNum() < 300) {
+            if(!stay || curr.distanceSquaredTo(HQ) < 225 || rc.getRoundNum() < 300 && rc.isReady()) {
                 moveTo(getClosestRefine(curr));
             }
         }
         if(rc.getTeamSoup() > 200 && curr.isAdjacentTo(HQ)){
             moveTo(curr.add(curr.directionTo(HQ).opposite()));
-        }if (!soup.isEmpty() && rc.getSoupCarrying() < 96){
+        }if (!soup.isEmpty() && rc.getSoupCarrying() < 96 && rc.isReady()){
             mineSoup(curr);
-        } else {
+        } else if(rc.isReady()){
             if (soup.isEmpty()){
                 //scout in an expanding circle starting at HQ
                 scoutMiner(curr);
@@ -465,9 +465,10 @@ public strictfp class RobotPlayer {
                     if (soup.size()==1){
                         addAndBroadcast(new Information(2,m.x,m.y));
                     }
-                    if(limit >= 6){
-                        break;
-                    }
+                    break;
+//                    if(limit >= 6){
+//                        break;
+//                    }
             }
             if(rc.canSenseLocation(m)) {
                 totS += rc.senseSoup(m);
@@ -475,7 +476,7 @@ public strictfp class RobotPlayer {
         }
         RobotInfo[] r2d2 = rc.senseNearbyRobots(rc.getCurrentSensorRadiusSquared(), rc.getTeam());
         for(RobotInfo i : r2d2){
-            if(i.getType() == RobotType.REFINERY){
+            if(i.getType() == RobotType.REFINERY && !refineries.contains(i.getLocation())){
                 refineries.add(i.getLocation());
             }else if(i.getType() == RobotType.DESIGN_SCHOOL){
                 schoolsBuilt++;
@@ -486,7 +487,7 @@ public strictfp class RobotPlayer {
                 vaps.add(i.getLocation());
             }
         }
-        if ((refineries.isEmpty() && totS > 1 && rc.getRoundNum() > 300)) {
+        if ((rc.getTeamSoup() > 200 && refineries.isEmpty() && totS > 1 && rc.getRoundNum() > 300)) {
             for (Direction d : directions) {
                 if (rc.canBuildRobot(RobotType.REFINERY, d) && loc.add(d).distanceSquaredTo(HQ) > 8) {
                     refineries.add(loc.add(d));
@@ -495,7 +496,7 @@ public strictfp class RobotPlayer {
                 }
             }
             return true;
-        }else if((totS > 200 && (refineries.isEmpty() || loc.distanceSquaredTo(getClosestRefine(loc)) >= 144))){
+        }else if((rc.getTeamSoup() > 200 && totS > 200 && (refineries.isEmpty() || loc.distanceSquaredTo(getClosestRefine(loc)) >= 144))){
             for (Direction d : directions) {
                 if (rc.canBuildRobot(RobotType.REFINERY, d) && loc.add(d).distanceSquaredTo(HQ) > 8) {
                     refineries.add(loc.add(d));
@@ -595,7 +596,9 @@ public strictfp class RobotPlayer {
                 diss = at.distanceSquaredTo(k);
             }
         }
-        moveTo(ns);
+        if(rc.isReady()) {
+            moveTo(ns);
+        }
     }
 
     static void scoutMiner(MapLocation at) throws GameActionException {
