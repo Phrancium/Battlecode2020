@@ -1903,7 +1903,7 @@ public strictfp class RobotPlayer {
             message[1]= ((int)(longs[0]>>>32));
             message[2]= ((int)longs[1]);
             message[3]= ((int)(longs[1]>>>32));
-            if (longs.length>=2) {
+            if (longs.length>=3) {
                 message[4]= ((int)longs[2]);
                 message[5]= ((int)(longs[2]>>>32));
             }
@@ -1912,7 +1912,7 @@ public strictfp class RobotPlayer {
                 message[5]= 0;
             }
 
-            if (longs.length==3) {
+            if (longs.length==4) {
                 message[6] = ((int) longs[3]);
             }
             else{
