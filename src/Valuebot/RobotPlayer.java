@@ -110,11 +110,11 @@ public strictfp class RobotPlayer {
 
         //landscaper task determiner
         if(rc.getType() == RobotType.LANDSCAPER){
-//            if(rc.getRoundNum() < 150) {
-//                task = "castle";
-//            }else{
+            if(rc.getRoundNum() < 150) {
+                task = "castle";
+            }else{
                 task = "terraform";
-//            }
+            }
         }
         if(rc.getType() == RobotType.MINER){
             if (rc.getRoundNum()<=150){
@@ -696,7 +696,7 @@ public strictfp class RobotPlayer {
         enRush(at);
         if((rc.getDirtCarrying() < 25 && !nextToWall(at)) || rc.getDirtCarrying() == 0){
             for(Direction d : directions){
-                if(rc.senseElevation(at.add(d)) > 3 && !onTheWall(at.add(d))){
+                if((rc.senseElevation(at.add(d)) > 3 && !onTheWall(at.add(d))) || isWell(at.add(d))){
                     rc.digDirt(d);
                 }
             }
@@ -803,6 +803,22 @@ public strictfp class RobotPlayer {
 //        }
     }
 
+    static boolean isWell(MapLocation m){
+        if(m.equals(well1)){
+            return true;
+        }
+        if(m.equals(well2)){
+            return true;
+        }
+        if(m.equals(well3)){
+            return true;
+        }
+        if(m.equals(well4)){
+            return true;
+        }
+        return false;
+    }
+
     static void enRush(MapLocation at) throws  GameActionException{
         for(RobotInfo r : rc.senseNearbyRobots(rc.getCurrentSensorRadiusSquared(), rc.getTeam().opponent())){
             if(withinWalls(r.getLocation()) && (r.getType() == RobotType.NET_GUN || r.getType() == RobotType.DESIGN_SCHOOL)){
@@ -853,6 +869,7 @@ public strictfp class RobotPlayer {
         return false;
     }
     static void findPile(MapLocation at) throws GameActionException{
+
         for(int i = 0; i < 7; i++){
             for(int l = 0; l < 7; l++){
                 MapLocation dirt = new MapLocation(i, l);
