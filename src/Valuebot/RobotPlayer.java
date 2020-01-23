@@ -616,29 +616,29 @@ public strictfp class RobotPlayer {
     }
     //Builds Drones
     static void runFulfillmentCenter() throws GameActionException {
-//        if(!closeEnemyNetGun()) {
-//            if (robotsBuilt < 1 && rc.getRoundNum() < 150) {
-//                for (Direction dir : randomDirections())
-//                    if (rc.canBuildRobot(RobotType.DELIVERY_DRONE, dir)) {
-//                        robotsBuilt++;
-//                        rc.buildRobot(RobotType.DELIVERY_DRONE, dir);
-//                    }
-//            } else if (rc.getRoundNum() < 650 && rc.getRoundNum() > 149 && robotsBuilt < 5 && rc.getTeamSoup() > 505) {
-//                for (Direction dir : randomDirections()) {
-//                    if (rc.canBuildRobot(RobotType.DELIVERY_DRONE, dir)) {
-//                        robotsBuilt++;
-//                        rc.buildRobot(RobotType.DELIVERY_DRONE, dir);
-//                    }
-//                }
-//            } else if (rc.getRoundNum() > 650 && rc.getTeamSoup() > 210) {
-//                for (Direction dir : randomDirections()) {
-//                    if (rc.canBuildRobot(RobotType.DELIVERY_DRONE, dir)) {
-//                        robotsBuilt++;
-//                        rc.buildRobot(RobotType.DELIVERY_DRONE, dir);
-//                    }
-//                }
-//            }
-//        }
+        if(!closeEnemyNetGun()) {
+            if (robotsBuilt < 1 && rc.getRoundNum() < 150) {
+                for (Direction dir : randomDirections())
+                    if (rc.canBuildRobot(RobotType.DELIVERY_DRONE, dir)) {
+                        robotsBuilt++;
+                        rc.buildRobot(RobotType.DELIVERY_DRONE, dir);
+                    }
+            } else if (rc.getRoundNum() < 650 && rc.getRoundNum() > 149 && robotsBuilt < 5 && rc.getTeamSoup() > 505) {
+                for (Direction dir : randomDirections()) {
+                    if (rc.canBuildRobot(RobotType.DELIVERY_DRONE, dir)) {
+                        robotsBuilt++;
+                        rc.buildRobot(RobotType.DELIVERY_DRONE, dir);
+                    }
+                }
+            } else if (rc.getRoundNum() > 650 && rc.getTeamSoup() > 210) {
+                for (Direction dir : randomDirections()) {
+                    if (rc.canBuildRobot(RobotType.DELIVERY_DRONE, dir)) {
+                        robotsBuilt++;
+                        rc.buildRobot(RobotType.DELIVERY_DRONE, dir);
+                    }
+                }
+            }
+        }
     }
 
     static boolean closeEnemyNetGun(){
@@ -1090,16 +1090,7 @@ public strictfp class RobotPlayer {
         if(task.equals(("crunch"))){
             MapLocation loc = rc.getLocation();
             scan(loc);
-            if(loc.distanceSquaredTo(HQ) < 46 && loc.distanceSquaredTo(HQ) > 8 && loc.distanceSquaredTo(EnemyHQ) > 24){
-                RobotInfo[] R2D2 = rc.senseNearbyRobots(rc.getCurrentSensorRadiusSquared(), rc.getTeam());
-                for(RobotInfo x : R2D2){
-                    if(rc.canPickUpUnit(x.getID()) && x.getType().name() == "LANDSCAPER"){
-                        rc.pickUpUnit(x.getID());
-                        carryingteammate = true;
-                    }
-                }
-                moveToCrunch(EnemyHQ);
-            }
+
             if(rc.isCurrentlyHoldingUnit() && carryingteammate == true){
                 for(Direction g : directions){
                     MapLocation check= loc.add(g);
@@ -1184,7 +1175,18 @@ public strictfp class RobotPlayer {
             if(checkHQ){
                 moveToDrone(HQ);
             }
-            if (!rc.isCurrentlyHoldingUnit()) {
+            if(at.distanceSquaredTo(HQ) > 16  && rc.getRoundNum() > 1000 && !rc.isCurrentlyHoldingUnit()){
+                RobotInfo[] R2D2 = rc.senseNearbyRobots(rc.getCurrentSensorRadiusSquared(), rc.getTeam());
+                for(RobotInfo x : R2D2){
+                    if(rc.canPickUpUnit(x.getID()) && x.getType().name() == "LANDSCAPER"){
+                        rc.pickUpUnit(x.getID());
+                        carryingteammate = true;
+                        checkHQ = false;
+                        break;
+                    }
+                }
+            }
+            if (!rc.isCurrentlyHoldingUnit() || carryingteammate) {
                 findUnit(at);
                 if(EnemyHQ != null){
                     moveToDrone(EnemyHQ);
@@ -1192,7 +1194,7 @@ public strictfp class RobotPlayer {
                     findEnemyHQ(at);
                 }
             }
-            else {
+            else if (!carryingteammate){
                 dropHeldUnit(at);
                 scout(at);
             }
