@@ -78,6 +78,7 @@ public strictfp class RobotPlayer {
     static boolean checkHQ = true;
     static int initialRound;
 
+    static final int STATUSFREQ=50;
     //__________________________________________________________________________________________________________________
     //RUN CODE BELOW
     /**
@@ -282,9 +283,13 @@ public strictfp class RobotPlayer {
                 }
             }
         }
-    	//TODO: add some way to rebroadcast important info like enemyHQ
+    	if (rc.getRoundNum() % STATUSFREQ==0){
+            tryBroadcast(1);
+        }
+    	//
     	//updateEnemyHQLocation();
         //}
+
     }
 
     static boolean defenseUp(MapLocation m) throws GameActionException{
@@ -1912,7 +1917,7 @@ public strictfp class RobotPlayer {
             bitSet.set(6 * 16, true);
             //bitSet.set(7*16,true);
             //bitSet.set(8*16,true);
-            //bitSet.set(9 * 16, true);
+            bitSet.set(9 * 16, true);
 
             for (int i = 0; i < 4; i++) {
                 bitSet.set((16*(i+10)), infocount % 2 != 0);
@@ -1966,7 +1971,7 @@ public strictfp class RobotPlayer {
                     bitSet.get(6 * 16) &&
                     !bitSet.get(7*16) &&
                     !bitSet.get(8*16) &&
-                    !bitSet.get(9 * 16)
+                    bitSet.get(9 * 16)
 
 
             ) {
@@ -2002,10 +2007,14 @@ public strictfp class RobotPlayer {
                 for (int j = 9; j < 15; j++) {
                     if (ours.get(i*16+j+1)) y+=1L<<(j-9);
                 }
+                if(rc.getType()==RobotType.HQ){
+                    broadcastQueue.add(new Information(type,x,y));
+                }
+
                 MapLocation next= new MapLocation(x,y);
                 switch (type){
                     case 0:
-                        if(x==0 && y==0 && rc.getType()==RobotType.DELIVERY_DRONE) {
+                        if(x==0 && y==0 && rc.getType()==RobotType.DELIVERY_DRONE) { //never use this
                             task="crunch";
                         }
                         else if (round-initialRound <= 10 &&  x==1 && y==1 && rc.getType()==RobotType.DELIVERY_DRONE) {
@@ -2085,8 +2094,19 @@ public strictfp class RobotPlayer {
         broadcastQueue.add(i);
         tryBroadcast(1);
     }
-    static void reBroadcast() throws GameActionException{
-
+    static void checkStatus(int round) throws GameActionException{
+        int check=(round/STATUSFREQ)*STATUSFREQ;
+        if (check==0){
+            if (rc.getType()==RobotType.MINER){
+                task = "castle";
+            }
+            else if (rc.getType()==RobotType.DELIVERY_DRONE){
+                task= "scout";
+            }
+        }
+        else{
+            receiveBroadcast(check);
+        }
     }
     //__________________________________________________________________________________________________________________
 }
