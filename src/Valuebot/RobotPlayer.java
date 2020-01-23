@@ -67,6 +67,8 @@ public strictfp class RobotPlayer {
     static int baseY2;
     static int baseLevel;
     static Direction moveDir;
+    static int closest;
+    static MapLocation toGo;
     static ArrayList<MapLocation> scouted = new ArrayList<>();
 
     static int robotsBuilt;
@@ -110,6 +112,8 @@ public strictfp class RobotPlayer {
         robotsBuilt = 0;
         schoolsBuilt = 0;
         factoriesBuilt = 0;
+        closest = 1000000;
+        toGo = null;
         souploc = null;
         enHQDest = null;
         initialRun = false;
@@ -595,7 +599,11 @@ public strictfp class RobotPlayer {
     }
 
     static void scoutMiner(MapLocation at) throws GameActionException {
-        moveTo(at.add(randomInitialDirection));
+        if(canMoveTo(at, randomInitialDirection)) {
+            moveTo(at.add(randomInitialDirection));
+        }else{
+            moveTo(HQ);
+        }
     }
 
     static boolean isPath(MapLocation at, MapLocation to) throws  GameActionException{
@@ -721,7 +729,7 @@ public strictfp class RobotPlayer {
                         rc.buildRobot(RobotType.DELIVERY_DRONE, dir);
                     }
                 }
-            } else if (rc.getRoundNum() > 650 && rc.getTeamSoup() > 210) {
+            } else if (rc.getRoundNum() > 800 && rc.getTeamSoup() > 210) {
                 for (Direction dir : randomDirections()) {
                     if (rc.canBuildRobot(RobotType.DELIVERY_DRONE, dir)) {
                         robotsBuilt++;
@@ -927,7 +935,7 @@ public strictfp class RobotPlayer {
 
     static void bury(MapLocation target, MapLocation at) throws GameActionException{
     	if(at.distanceSquaredTo(target) > 2) {
-    		moveTo(target);
+            moveTo(target);
     	}
     	else {
     		if(rc.getDirtCarrying() > 0)
@@ -967,7 +975,7 @@ public strictfp class RobotPlayer {
         if(at.distanceSquaredTo(home) > 16){
             zergRush(home);
         }else if(rc.onTheMap(hLeft) && rc.canSenseLocation(hLeft) && !rc.isLocationOccupied(hLeft) && !at.equals(hRight)){
-            moveTo(hLeft);
+             moveTo(hLeft);
         } else if(rc.onTheMap(hRight) && rc.canSenseLocation(hRight) && !rc.isLocationOccupied(hRight) && !at.equals(hLeft)){
             moveTo(hRight);
         }else if(rc.onTheMap(hTop) && rc.canSenseLocation(hTop) && !rc.isLocationOccupied(hTop) && !at.equals(hRight) && !at.equals(hLeft) && !at.equals(hBottom)){
@@ -1641,8 +1649,67 @@ public strictfp class RobotPlayer {
         }
     }
 
+
+
+    static void bugMove(MapLocation dest) throws GameActionException{
+        MapLocation at = rc.getLocation();
+        Direction moveDirection = at.directionTo(dest);
+        rc.setIndicatorLine(at, dest, 0,0,0);
+        if(toGo == null){
+            toGo = dest;
+        }
+        if(!dest.equals(toGo)){
+            toGo = dest;
+            closest = 1000000;
+        }
+
+        if(at.distanceSquaredTo(dest) < closest){
+            closest = at.distanceSquaredTo(dest);
+        }
+        if(canMoveCloser(dest)){
+            findClosestMove(dest);
+        }else {
+            Direction[] moves = {moveDirection.rotateRight().rotateRight(), moveDirection.rotateRight().rotateRight().rotateRight(), moveDirection.rotateRight().rotateRight().rotateRight().rotateRight(), moveDirection.rotateRight().rotateRight().rotateRight().rotateRight().rotateRight(), moveDirection.rotateRight().rotateRight().rotateRight().rotateRight().rotateRight().rotateRight()};
+            for (Direction d : moves) {
+                if (canMoveTo(at, d)) {
+                    tryMove(d);
+                }
+            }
+        }
+
+
+    }
+
+    static boolean canMoveCloser(MapLocation dest) throws GameActionException{
+        MapLocation at = rc.getLocation();
+        int closer = closest;
+        for(Direction d : directions){
+            if(canMoveTo(at, d) && at.add(d).distanceSquaredTo(dest) < closest && canStepOut(at.add(d)) && wetfloor(at.add(d))){
+                return true;
+            }
+        }
+        return false;
+    }
+
+    static void findClosestMove(MapLocation dest) throws GameActionException{
+        MapLocation at = rc.getLocation();
+        int closer = closest;
+        Direction ret = Direction.CENTER;
+        for(Direction d : directions){
+            int n = at.add(d).distanceSquaredTo(dest);
+            if(canMoveTo(at, d) && n < closer && canStepOut(at.add(d)) && wetfloor(at.add(d))){
+                closer = n;
+                ret = d;
+            }
+        }
+        tryMove(ret);
+    }
+
+
+
+
     static boolean canStepOut(MapLocation m){
-        if(task.equals("first") && m.distanceSquaredTo(HQ) > 36){
+        if(task.equals("first") && m.distanceSquaredTo(HQ) > 30){
             return false;
         }
         return true;
