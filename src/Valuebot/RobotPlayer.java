@@ -137,7 +137,7 @@ public strictfp class RobotPlayer {
                 task = "killEnemy";
             }
         }
-        if(rc.getRoundNum() > 10){
+        if(rc.getRoundNum() > 20){
             if(HQ.x < 7){
                 baseX1 = 0;
                 baseX2 = 12;
