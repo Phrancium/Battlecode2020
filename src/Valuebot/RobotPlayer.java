@@ -78,6 +78,8 @@ public strictfp class RobotPlayer {
     static boolean checkHQ = true;
     static int initialRound;
 
+    static final int STATUSFREQ=50;
+    static final int SUPERSECRET=274321;
     //__________________________________________________________________________________________________________________
     //RUN CODE BELOW
     /**
@@ -259,7 +261,7 @@ public strictfp class RobotPlayer {
     //HQ CODE BELOW
     static void runHQ() throws GameActionException {
     	MapLocation base = rc.getLocation();
-        if(rc.getRoundNum() == 1) {
+        if(rc.getRoundNum() == 11) {
     		postLocation(1, base.x, base.y, 1);
     	}
     	RobotInfo[] r = rc.senseNearbyRobots();
@@ -282,9 +284,13 @@ public strictfp class RobotPlayer {
                 }
             }
         }
-    	//TODO: add some way to rebroadcast important info like enemyHQ
+    	if (rc.getRoundNum() % STATUSFREQ==0){
+            tryBroadcast(1);
+        }
+    	//
     	//updateEnemyHQLocation();
         //}
+
     }
 
     static boolean defenseUp(MapLocation m) throws GameActionException{
@@ -309,7 +315,10 @@ public strictfp class RobotPlayer {
         if(HQ == null){
             HQ = getHQLocation();
         }
-        boolean stay = openEyes(curr);
+        boolean stay=false;
+        if(rc.getRoundNum() > 10) {
+            stay = openEyes(curr);
+        }
         if(rc.getTeamSoup() > 200 && curr.isAdjacentTo(HQ)){
             moveTo(curr.add(curr.directionTo(HQ).opposite()));
         }
@@ -1767,7 +1776,7 @@ public strictfp class RobotPlayer {
          * 3 : Enemy HQ
          */
         int[] message = new int[7];
-        message[1] = 998997;
+        message[1] = SUPERSECRET;
         message[2] = code;
         message[3] = x;
         message[4] = y;
@@ -1777,20 +1786,22 @@ public strictfp class RobotPlayer {
 
     static MapLocation getHQLocation() throws GameActionException {
         //returns the location of HQ
-        MapLocation location = null;
-        for(int k = 1; k < rc.getRoundNum()-1; k++) {
-            Transaction[] block = rc.getBlock(k);
-            if(block.length != 0) {
-                for(int i = 0; i < block.length; i++) {
+        if (rc.getRoundNum()>11) {
+            MapLocation location = null;
+            Transaction[] block = rc.getBlock(11);
+            if (block.length != 0) {
+                for (int i = 0; i < block.length; i++) {
                     int[] message = block[i].getMessage();
-                    if(message[1] == 998997 && message[2] == 1) {
+                    if (message[1] == SUPERSECRET && message[2] == 1) {
                         location = new MapLocation(message[3], message[4]);
                         return location;
                     }
                 }
             }
+
+            return null;
         }
-        return location;
+        return null;
     }
 
     static MapLocation getSoupLocation() throws GameActionException {
@@ -1802,7 +1813,7 @@ public strictfp class RobotPlayer {
                 if(block.length != 0) {
                     for(int i = 0; i < block.length; i++) {
                         int[] message = block[i].getMessage();
-                        if(message[1] == 998997 && message[2] == 2) {
+                        if(message[1] == SUPERSECRET && message[2] == 2) {
                             location = new MapLocation(message[3], message[4]);
 //                            System.out.println(location);
                             return location;
@@ -1824,7 +1835,7 @@ public strictfp class RobotPlayer {
                 if(block.length != 0) {
                     for(int i = 0; i < block.length; i++) {
                         int[] message = block[i].getMessage();
-                        if(message[1] == 998997 && message[2] == 3) {
+                        if(message[1] == SUPERSECRET && message[2] == 3) {
                             location = new MapLocation(message[3], message[4]);
 //                            System.out.println(location);
                             return location;
@@ -1914,7 +1925,7 @@ public strictfp class RobotPlayer {
             bitSet.set(6 * 16, true);
             //bitSet.set(7*16,true);
             //bitSet.set(8*16,true);
-            //bitSet.set(9 * 16, true);
+            bitSet.set(9 * 16, true);
 
             for (int i = 0; i < 4; i++) {
                 bitSet.set((16*(i+10)), infocount % 2 != 0);
@@ -1968,7 +1979,7 @@ public strictfp class RobotPlayer {
                     bitSet.get(6 * 16) &&
                     !bitSet.get(7*16) &&
                     !bitSet.get(8*16) &&
-                    !bitSet.get(9 * 16)
+                    bitSet.get(9 * 16)
 
 
             ) {
@@ -2004,10 +2015,14 @@ public strictfp class RobotPlayer {
                 for (int j = 9; j < 15; j++) {
                     if (ours.get(i*16+j+1)) y+=1L<<(j-9);
                 }
+                if(rc.getType()==RobotType.HQ){
+                    broadcastQueue.add(new Information(type,x,y));
+                }
+
                 MapLocation next= new MapLocation(x,y);
                 switch (type){
                     case 0:
-                        if(x==0 && y==0 && rc.getType()==RobotType.DELIVERY_DRONE) {
+                        if(x==0 && y==0 && rc.getType()==RobotType.DELIVERY_DRONE) { //never use this
                             task="crunch";
                         }
                         else if (round-initialRound <= 10 &&  x==1 && y==1 && rc.getType()==RobotType.DELIVERY_DRONE) {
@@ -2087,8 +2102,19 @@ public strictfp class RobotPlayer {
         broadcastQueue.add(i);
         tryBroadcast(1);
     }
-    static void reBroadcast() throws GameActionException{
-
+    static void checkStatus(int round) throws GameActionException{
+        int check=(round/STATUSFREQ)*STATUSFREQ;
+        if (check==0){
+            if (rc.getType()==RobotType.MINER){
+                task = "castle";
+            }
+            else if (rc.getType()==RobotType.DELIVERY_DRONE){
+                task= "scout";
+            }
+        }
+        else{
+            receiveBroadcast(check);
+        }
     }
     //__________________________________________________________________________________________________________________
 }
