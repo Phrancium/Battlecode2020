@@ -169,12 +169,12 @@ public strictfp class RobotPlayer {
         }
         //drone task determiner // we got new one based on broadcast
         if(rc.getType() == RobotType.DELIVERY_DRONE){
-            if(rc.getRoundNum() < 150){
+            if(rc.getRoundNum() < 125){
                 task = "scout";
-            }else if(rc.getRoundNum() < 800 && rc.getRoundNum() > 149) {
+            }else if(rc.getRoundNum() < 900 && rc.getRoundNum() > 125) {
                 task = "hover";
             }
-            else if(rc.getRoundNum() > 799){
+            else if(rc.getRoundNum() > 899){
                 task = "killEnemy";
             }
         }
@@ -404,7 +404,7 @@ public strictfp class RobotPlayer {
         }
 
         boolean stay = openEyes(curr);
-        if (rc.getTeamSoup() >= 150 && schoolsBuilt < 1 && (task.equals("first3") || task.equals("first"))) {
+        if ((rc.getTeamSoup() >= 150 && schoolsBuilt < 1 && (task.equals("first3") || task.equals("first"))) || rc.getRoundNum() > 1000) {
         	for(Direction d : directions) {
                 if (rc.canBuildRobot(RobotType.DESIGN_SCHOOL, d) && curr.add(d).distanceSquaredTo(HQ) > 8 && curr.add(d).distanceSquaredTo(HQ) < 16) {
                     schoolsBuilt++;
@@ -716,7 +716,12 @@ public strictfp class RobotPlayer {
 //                    }
 
                 }
-        }else if(rc.getRoundNum() > 699 && rc.getTeamSoup() > 505){
+        }else if(rc.getRoundNum() > 600 && robotsBuilt < 8){
+            for (Direction dir : directions)
+                if (tryBuild(RobotType.LANDSCAPER, dir)) {
+                    robotsBuilt++;
+                }
+        }else if(rc.getRoundNum() > 1000){
             for (Direction dir : directions)
                 if (tryBuild(RobotType.LANDSCAPER, dir)) {
                     robotsBuilt++;
@@ -733,7 +738,7 @@ public strictfp class RobotPlayer {
 //                        addAndBroadcast(new Information(0,1,0));//scout
                         rc.buildRobot(RobotType.DELIVERY_DRONE, dir);
                     }
-            } else if (rc.getRoundNum() < 650 && rc.getRoundNum() > 149 && robotsBuilt < 3 && rc.getTeamSoup() > 505 /*&& rc.senseNearbyRobots(rc.getCurrentSensorRadiusSquared(), rc.getTeam().opponent()).length > 0*/) {
+            } else if (rc.getRoundNum() < 300 && rc.getRoundNum() > 149 && robotsBuilt < 3 && rc.getTeamSoup() > 205 /*&& rc.senseNearbyRobots(rc.getCurrentSensorRadiusSquared(), rc.getTeam().opponent()).length > 0*/) {
                 for (Direction dir : randomDirections()) {
                     if (rc.canBuildRobot(RobotType.DELIVERY_DRONE, dir)) {
                         robotsBuilt++;
@@ -752,7 +757,7 @@ public strictfp class RobotPlayer {
                         rc.buildRobot(RobotType.DELIVERY_DRONE, dir);
                     }
                 }
-            } else if (rc.getRoundNum() > 800 && rc.getTeamSoup() > 210) {
+            } else if (rc.getRoundNum() > 900 && rc.getTeamSoup() > 210) {
                 for (Direction dir : randomDirections()) {
                     if (rc.canBuildRobot(RobotType.DELIVERY_DRONE, dir)) {
                         robotsBuilt++;
@@ -1787,7 +1792,7 @@ public strictfp class RobotPlayer {
 //        for( Direction d : nonoDirections){
 //            ew.add(d);
 //        }
-//        prevLocations.add(loc);
+        prevLocations.add(loc);
         //See if general direction is valid
         if(rc.canMove(moveDirection) && !avoidEnHQ(loc.add(moveDirection)) && !netGunInRange(loc.add(moveDirection))&& !prevLocations.contains(loc.add(moveDirection))){
             path = moveDirection.opposite();
